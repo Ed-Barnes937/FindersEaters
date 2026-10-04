@@ -1,0 +1,1003 @@
+{
+  "_about": "Golden set for the Jev spike. Expected values are editorial judgements, dated 2026-09-25. Field values are a verbatim span of the line, null (no such part), or a list of acceptable spans. 'source' is the domain the line came from; it only feeds the unit-system probe. 'kind' follows the README test: would you buy it or get it out? Revised 2026-10-04: resolve to the most specific entry the text supports (L08 -> butter); extraction is not scored for not_ingredient lines; a recipe's expected 'optional' lists tags that may appear but are not required; CORE_FIELDS (quantity, unit, size, ingredient) is the headline extraction score because prep and note are display only. 'one_pot' stays unaccepted for R03 until tag definitions exist.",
+  "lines": [
+    {
+      "id": "L01",
+      "line": "200g basmati rice",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "200",
+        "unit": "g",
+        "size": null,
+        "ingredient": "basmati rice",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "rice_basmati": "basmati rice",
+          "rice_long_grain": "long-grain white rice",
+          "rice_jasmine": "jasmine rice",
+          "rice_brown": "brown rice"
+        },
+        "expected": "rice_basmati"
+      }
+    },
+    {
+      "id": "L02",
+      "line": "1 x 400g tin chopped tomatoes, drained",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "tin",
+        "size": "400g",
+        "ingredient": "chopped tomatoes",
+        "prep": "drained",
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "tomato_tinned_chopped": "tinned chopped tomatoes",
+          "tomato_fresh": "fresh tomatoes",
+          "tomato_passata": "passata",
+          "tomato_tinned_plum": "tinned plum tomatoes"
+        },
+        "expected": "tomato_tinned_chopped"
+      }
+    },
+    {
+      "id": "L03",
+      "line": "2 red onions, finely chopped",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": null,
+        "size": null,
+        "ingredient": "red onions",
+        "prep": "finely chopped",
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "onion_brown": "brown onion",
+          "onion_red": "red onion",
+          "shallot": "shallot",
+          "onion_spring": "spring onion"
+        },
+        "expected": "onion_red"
+      }
+    },
+    {
+      "id": "L04",
+      "line": "1 large onion, finely chopped (about 200g)",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": "large",
+        "ingredient": "onion",
+        "prep": "finely chopped",
+        "note": [
+          "about 200g",
+          "(about 200g)"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "onion_brown": "brown onion",
+          "onion_red": "red onion",
+          "shallot": "shallot",
+          "onion_spring": "spring onion"
+        },
+        "expected": "onion_brown"
+      }
+    },
+    {
+      "id": "L05",
+      "line": "Salt and pepper",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "compound",
+      "split": [
+        "salt",
+        "pepper"
+      ],
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": null,
+        "prep": null,
+        "note": null
+      }
+    },
+    {
+      "id": "L06",
+      "line": "salt, to taste",
+      "source": "allrecipes.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": "salt",
+        "prep": null,
+        "note": "to taste"
+      }
+    },
+    {
+      "id": "L07",
+      "line": "a splash of water",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "not_ingredient",
+      "fields": {
+        "quantity": "a",
+        "unit": "splash",
+        "size": null,
+        "ingredient": "water",
+        "prep": null,
+        "note": null
+      }
+    },
+    {
+      "id": "L08",
+      "line": "A knob of butter",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "A",
+        "unit": "knob",
+        "size": null,
+        "ingredient": "butter",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "butter": "butter",
+          "butter_unsalted": "unsalted butter",
+          "butter_salted": "salted butter",
+          "margarine": "margarine",
+          "ghee": "ghee"
+        },
+        "expected": "butter"
+      }
+    },
+    {
+      "id": "L09",
+      "line": "1½ tsp ground cumin",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1½",
+        "unit": "tsp",
+        "size": null,
+        "ingredient": [
+          "ground cumin",
+          "cumin"
+        ],
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "cumin_ground": "ground cumin",
+          "cumin_seed": "cumin seeds",
+          "coriander_ground": "ground coriander",
+          "caraway_seed": "caraway seeds"
+        },
+        "expected": "cumin_ground"
+      }
+    },
+    {
+      "id": "L10",
+      "line": "½ tsp chilli flakes",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "½",
+        "unit": "tsp",
+        "size": null,
+        "ingredient": "chilli flakes",
+        "prep": null,
+        "note": null
+      }
+    },
+    {
+      "id": "L11",
+      "line": "2-3 fat garlic cloves, crushed",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2-3",
+        "unit": [
+          "cloves",
+          null
+        ],
+        "size": "fat",
+        "ingredient": [
+          "garlic",
+          "garlic cloves"
+        ],
+        "prep": "crushed",
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "garlic": "garlic",
+          "garlic_wild": "wild garlic",
+          "garlic_granules": "garlic granules",
+          "garlic_paste": "garlic paste"
+        },
+        "expected": "garlic"
+      }
+    },
+    {
+      "id": "L12",
+      "line": "100g plain flour, plus extra for dusting",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "100",
+        "unit": "g",
+        "size": null,
+        "ingredient": "plain flour",
+        "prep": null,
+        "note": "plus extra for dusting"
+      },
+      "resolve": {
+        "candidates": {
+          "flour_plain": "plain flour",
+          "flour_self_raising": "self-raising flour",
+          "flour_strong_white": "strong white bread flour",
+          "cornflour": "cornflour"
+        },
+        "expected": "flour_plain"
+      }
+    },
+    {
+      "id": "L13",
+      "line": "1 cup (240ml) whole milk",
+      "source": "allrecipes.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "us_customary",
+      "fields": {
+        "quantity": "1",
+        "unit": "cup",
+        "size": null,
+        "ingredient": "whole milk",
+        "prep": null,
+        "note": [
+          "240ml",
+          "(240ml)"
+        ]
+      }
+    },
+    {
+      "id": "L14",
+      "line": "2 cups all-purpose flour",
+      "source": "allrecipes.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "us_customary",
+      "fields": {
+        "quantity": "2",
+        "unit": "cups",
+        "size": null,
+        "ingredient": "all-purpose flour",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "flour_plain": "plain flour",
+          "flour_self_raising": "self-raising flour",
+          "flour_strong_white": "strong white bread flour",
+          "cornflour": "cornflour"
+        },
+        "expected": "flour_plain"
+      }
+    },
+    {
+      "id": "L15",
+      "line": "1 pint chicken stock",
+      "source": "deliaonline.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "uk_imperial",
+      "fields": {
+        "quantity": "1",
+        "unit": "pint",
+        "size": null,
+        "ingredient": "chicken stock",
+        "prep": null,
+        "note": null
+      }
+    },
+    {
+      "id": "L16",
+      "line": "1 pint heavy cream",
+      "source": "seriouseats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "us_customary",
+      "fields": {
+        "quantity": "1",
+        "unit": "pint",
+        "size": null,
+        "ingredient": "heavy cream",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "cream_double": "double cream",
+          "cream_single": "single cream",
+          "cream_whipping": "whipping cream",
+          "cream_soured": "soured cream"
+        },
+        "expected": [
+          "cream_double",
+          "cream_whipping"
+        ]
+      }
+    },
+    {
+      "id": "L17",
+      "line": "1 cup frozen peas",
+      "source": "taste.com.au",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "metric_cup",
+      "fields": {
+        "quantity": "1",
+        "unit": "cup",
+        "size": null,
+        "ingredient": [
+          "frozen peas",
+          "peas"
+        ],
+        "prep": null,
+        "note": null
+      }
+    },
+    {
+      "id": "L18",
+      "line": "300ml double cream",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "300",
+        "unit": "ml",
+        "size": null,
+        "ingredient": "double cream",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "cream_double": "double cream",
+          "cream_single": "single cream",
+          "cream_whipping": "whipping cream",
+          "cream_soured": "soured cream"
+        },
+        "expected": "cream_double"
+      }
+    },
+    {
+      "id": "L19",
+      "line": "1 tbsp olive oil, plus extra for drizzling",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "olive oil",
+        "prep": null,
+        "note": "plus extra for drizzling"
+      }
+    },
+    {
+      "id": "L20",
+      "line": "Olive oil, for frying",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": "Olive oil",
+        "prep": null,
+        "note": "for frying"
+      }
+    },
+    {
+      "id": "L21",
+      "line": "For the sauce:",
+      "source": "bbcgoodfood.com",
+      "role": "header"
+    },
+    {
+      "id": "L22",
+      "line": "FOR THE TOPPING",
+      "source": "bbcgoodfood.com",
+      "role": "header"
+    },
+    {
+      "id": "L23",
+      "line": "Marinade",
+      "source": "bbcgoodfood.com",
+      "role": "header"
+    },
+    {
+      "id": "L24",
+      "line": "Tip: you can use frozen peas instead of fresh.",
+      "source": "bbcgoodfood.com",
+      "role": "note"
+    },
+    {
+      "id": "L25",
+      "line": "Serves 4",
+      "source": "bbcgoodfood.com",
+      "role": "note"
+    },
+    {
+      "id": "L26",
+      "line": "1 x 25g pack coriander, leaves picked",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "pack",
+        "size": "25g",
+        "ingredient": [
+          "coriander",
+          "coriander leaves"
+        ],
+        "prep": [
+          "leaves picked",
+          "picked"
+        ],
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "coriander_fresh": "fresh coriander",
+          "coriander_ground": "ground coriander",
+          "coriander_seed": "coriander seeds",
+          "parsley_flat": "flat-leaf parsley"
+        },
+        "expected": "coriander_fresh"
+      }
+    },
+    {
+      "id": "L27",
+      "line": "250g/9oz spaghetti",
+      "source": "bbc.co.uk/food",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "250",
+        "unit": "g",
+        "size": null,
+        "ingredient": "spaghetti",
+        "prep": null,
+        "note": [
+          "9oz",
+          null
+        ]
+      }
+    },
+    {
+      "id": "L28",
+      "line": "1kg floury potatoes, such as Maris Piper, peeled and cut into chunks",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "kg",
+        "size": null,
+        "ingredient": [
+          "floury potatoes",
+          "potatoes"
+        ],
+        "prep": "peeled and cut into chunks",
+        "note": "such as Maris Piper"
+      },
+      "resolve": {
+        "candidates": {
+          "potato_floury": "floury potatoes",
+          "potato_waxy": "waxy potatoes",
+          "potato_new": "new potatoes",
+          "sweet_potato": "sweet potatoes"
+        },
+        "expected": "potato_floury"
+      }
+    },
+    {
+      "id": "L29",
+      "line": "2 x 400g cans chickpeas, drained and rinsed",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": "cans",
+        "size": "400g",
+        "ingredient": "chickpeas",
+        "prep": "drained and rinsed",
+        "note": null
+      }
+    },
+    {
+      "id": "L30",
+      "line": "Juice of 1 lemon",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": null,
+        "ingredient": "lemon",
+        "prep": [
+          "Juice of",
+          "Juice"
+        ],
+        "note": null
+      }
+    },
+    {
+      "id": "L31",
+      "line": "zest and juice of 1 unwaxed lemon",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": null,
+        "ingredient": [
+          "unwaxed lemon",
+          "lemon"
+        ],
+        "prep": [
+          "zest and juice of",
+          "zest and juice"
+        ],
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "lemon": "lemon",
+          "lime": "lime",
+          "lemon_juice_bottled": "bottled lemon juice",
+          "orange": "orange"
+        },
+        "expected": "lemon"
+      }
+    },
+    {
+      "id": "L32",
+      "line": "100g salt and vinegar crisps, crushed",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "100",
+        "unit": "g",
+        "size": null,
+        "ingredient": "salt and vinegar crisps",
+        "prep": "crushed",
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "crisps_ready_salted": "ready salted crisps",
+          "vinegar_malt": "malt vinegar",
+          "salt_table": "table salt",
+          "tortilla_chips": "tortilla chips"
+        },
+        "expected": "none"
+      }
+    },
+    {
+      "id": "L33",
+      "line": "butter or margarine, for greasing",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "alternatives",
+      "split": [
+        "butter",
+        "margarine"
+      ],
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": [
+          "butter or margarine",
+          "butter"
+        ],
+        "prep": null,
+        "note": "for greasing"
+      }
+    },
+    {
+      "id": "L34",
+      "line": "a pinch of saffron",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "a",
+        "unit": "pinch",
+        "size": null,
+        "ingredient": "saffron",
+        "prep": null,
+        "note": null
+      }
+    },
+    {
+      "id": "L35",
+      "line": "a handful of basil leaves, torn",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "a",
+        "unit": "handful",
+        "size": null,
+        "ingredient": [
+          "basil leaves",
+          "basil"
+        ],
+        "prep": "torn",
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "basil_fresh": "fresh basil",
+          "basil_dried": "dried basil",
+          "basil_thai": "Thai basil",
+          "mint_fresh": "fresh mint"
+        },
+        "expected": "basil_fresh"
+      }
+    },
+    {
+      "id": "L36",
+      "line": "6 large free-range eggs",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "6",
+        "unit": null,
+        "size": "large",
+        "ingredient": [
+          "free-range eggs",
+          "eggs"
+        ],
+        "prep": null,
+        "note": null
+      }
+    },
+    {
+      "id": "L37",
+      "line": "1 heaped tbsp tomato purée",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": [
+          "heaped tbsp",
+          "tbsp"
+        ],
+        "size": null,
+        "ingredient": "tomato purée",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "tomato_puree": "tomato purée (paste)",
+          "tomato_passata": "passata",
+          "tomato_ketchup": "tomato ketchup",
+          "tomato_sundried_paste": "sun-dried tomato paste"
+        },
+        "expected": "tomato_puree"
+      }
+    },
+    {
+      "id": "L38",
+      "line": "1 cup (2 sticks) unsalted butter, softened",
+      "source": "allrecipes.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "us_customary",
+      "fields": {
+        "quantity": "1",
+        "unit": "cup",
+        "size": null,
+        "ingredient": "unsalted butter",
+        "prep": "softened",
+        "note": [
+          "2 sticks",
+          "(2 sticks)"
+        ]
+      }
+    },
+    {
+      "id": "L39",
+      "line": "3/4 cup granulated sugar",
+      "source": "allrecipes.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "us_customary",
+      "fields": {
+        "quantity": "3/4",
+        "unit": "cup",
+        "size": null,
+        "ingredient": "granulated sugar",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "sugar_caster": "caster sugar",
+          "sugar_granulated": "granulated sugar",
+          "sugar_icing": "icing sugar",
+          "sugar_light_brown": "light brown soft sugar"
+        },
+        "expected": "sugar_granulated"
+      }
+    },
+    {
+      "id": "L40",
+      "line": "1 vegetable stock cube, crumbled into 500ml boiling water",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": null,
+        "ingredient": [
+          "vegetable stock cube",
+          "stock cube"
+        ],
+        "prep": "crumbled",
+        "note": [
+          "into 500ml boiling water",
+          "500ml boiling water"
+        ]
+      }
+    },
+    {
+      "id": "L41",
+      "line": "freshly ground black pepper",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": "black pepper",
+        "prep": "freshly ground",
+        "note": null
+      }
+    },
+    {
+      "id": "L42",
+      "line": "1-1.5kg beef brisket",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1-1.5",
+        "unit": "kg",
+        "size": null,
+        "ingredient": "beef brisket",
+        "prep": null,
+        "note": null
+      }
+    },
+    {
+      "id": "L43",
+      "line": "2 tbsp Greek yoghurt, to serve",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "Greek yoghurt",
+        "prep": null,
+        "note": "to serve"
+      }
+    },
+    {
+      "id": "L44",
+      "line": "enough cold water to cover",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "not_ingredient",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": [
+          "cold water",
+          "water"
+        ],
+        "prep": null,
+        "note": [
+          "enough to cover",
+          "to cover"
+        ]
+      }
+    }
+  ],
+  "recipes": [
+    {
+      "id": "R01",
+      "title": "Chicken tikka masala",
+      "ingredients": [
+        "500g boneless chicken thighs",
+        "150g natural yoghurt",
+        "2 tbsp tikka paste",
+        "1 onion, chopped",
+        "1 x 400g tin chopped tomatoes",
+        "100ml double cream",
+        "Basmati rice, to serve"
+      ],
+      "method_summary": "Marinate the chicken, grill until charred, then simmer in the spiced tomato sauce for 20 minutes.",
+      "expected": {
+        "cuisine": "indian",
+        "meal_type": "dinner",
+        "protein": [
+          "chicken"
+        ],
+        "carb_base": [
+          "rice"
+        ],
+        "method": [
+          "grill",
+          "simmer"
+        ],
+        "effort": "medium"
+      }
+    },
+    {
+      "id": "R02",
+      "title": "Shakshuka",
+      "ingredients": [
+        "2 tbsp olive oil",
+        "1 red pepper, sliced",
+        "1 tsp cumin seeds",
+        "2 x 400g tins chopped tomatoes",
+        "4 eggs",
+        "crusty bread, to serve"
+      ],
+      "method_summary": "Soften the pepper and spices in one pan, add tomatoes and simmer, then crack in the eggs and cook covered until just set.",
+      "expected": {
+        "cuisine": [
+          "middle_eastern",
+          "north_african"
+        ],
+        "meal_type": [
+          "breakfast",
+          "lunch"
+        ],
+        "protein": [
+          "egg"
+        ],
+        "carb_base": [
+          "bread"
+        ],
+        "method": [
+          "simmer",
+          "one_pot"
+        ],
+        "effort": "easy"
+      }
+    },
+    {
+      "id": "R03",
+      "title": "Slow-cooker beef and ale stew",
+      "ingredients": [
+        "1kg stewing beef, diced",
+        "2 tbsp plain flour",
+        "500ml ale",
+        "3 carrots, chunked",
+        "2 onions, sliced",
+        "600g floury potatoes, for mash"
+      ],
+      "method_summary": "Brown the floured beef, add everything to the slow cooker and cook on low for 8 hours. Serve with mash.",
+      "expected": {
+        "cuisine": "british",
+        "meal_type": "dinner",
+        "protein": [
+          "beef"
+        ],
+        "carb_base": [
+          "potato"
+        ],
+        "method": [
+          "slow_cook"
+        ],
+        "effort": "easy",
+        "optional": {
+          "method": [
+            "fry"
+          ]
+        }
+      }
+    }
+  ]
+}
