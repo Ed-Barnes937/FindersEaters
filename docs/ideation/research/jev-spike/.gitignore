@@ -1,0 +1,5 @@
+# Local secrets. JEV_API_KEY lives here, never commit it.
+.env
+.env.*
+__pycache__/
+results/
