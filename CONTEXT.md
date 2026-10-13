@@ -40,6 +40,10 @@ _Avoid_: User data, metadata
 Where a recipe came from: a book and page, a URL, or the household's own.
 _Avoid_: Source
 
+**Library**:
+All the recipes a household has imported. Search narrows the library; an empty query is the whole library.
+_Avoid_: Collection (a named saved query), cookbook, recipe box
+
 ### The engine
 
 **Engine**:
@@ -59,8 +63,28 @@ The amount an ingredient is sold in, such as a 400g tin or a 30g pack of coriand
 _Avoid_: Can weight, tin size
 
 **Food knowledge base**:
-Shared reference facts about food: the ingredient hierarchy, synonyms, dietary properties and conversions. It is not owned by any household.
+Shared reference facts about food: the ingredient hierarchy, synonyms, dietary properties, conversions, typical pack sizes and aisles. It is curated by us and is not owned or edited by any household.
 _Avoid_: Ingredient database, KB (in prose)
+
+**Ingredient**:
+An entry in the food knowledge base that ingredient lines resolve to. It has names, a place in the ingredient hierarchy, dietary properties and a canonical measure.
+_Avoid_: Food, item, product
+
+**Ingredient hierarchy**:
+The "is a" tree of ingredients (cheddar is a cheese). Ingredient searches follow it. An ingredient may also be *made from* another (chicken stock from chicken). Dietary properties follow both relations, but the hierarchy follows "is a" only.
+_Avoid_: Taxonomy, category tree
+
+**Open data layer**:
+The facts in the food knowledge base that come from Open Food Facts. They are kept separable so they can be shared under that licence.
+_Avoid_: OFF layer, base layer
+
+**Own layer**:
+The facts in the food knowledge base that we author ourselves: UK names, fixes, measures, dietary properties the open sources lack, pack sizes and aisles. It wins over every other source.
+_Avoid_: Custom layer, overrides
+
+**Resolution**:
+Matching an ingredient line to an ingredient. A line resolves exactly, to a parent (a broader ingredient that clearly applies), or not at all (an unresolved line).
+_Avoid_: Matching, linking
 
 **Golden set**:
 Hand-labelled recipe lines and recipes with the answer the engine should give for each stage. It is the engine's regression suite.
