@@ -27,14 +27,14 @@ tagging questions.
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import os
 import re
 import statistics
 import sys
 import time
-import urllib.error
-import urllib.request
+import urllib.parse
 from datetime import datetime
 from pathlib import Path
 
@@ -247,28 +247,59 @@ def unwrap(data: dict) -> dict:
     return data
 
 
+_CONN: list = []  # one kept-alive connection, reused across requests (engine client behaviour)
+
+
+def _conn(fresh: bool = False):
+    u = urllib.parse.urlsplit(API_URL)
+    if fresh or not _CONN:
+        for c in _CONN:
+            c.close()
+        _CONN.clear()
+        cls = http.client.HTTPSConnection if u.scheme == "https" else http.client.HTTPConnection
+        _CONN.append(cls(u.hostname, u.port, timeout=HTTP_TIMEOUT))
+    path = u.path + (f"?{u.query}" if u.query else "")
+    return _CONN[0], path
+
+
 def call(payload: dict, key: str | None, model: str, max_retries: int = 5) -> tuple[dict, float]:
+    """POST over one kept-alive connection; reconnects once if the server closed it."""
     body = json.dumps({**payload, "model": BODY_MODEL or model}).encode()
+    headers = {"Content-Type": "application/json", "Connection": "keep-alive"}
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
     for attempt in range(max_retries + 1):
-        headers = {"Content-Type": "application/json"}
-        if key:
-            headers["Authorization"] = f"Bearer {key}"
-        req = urllib.request.Request(API_URL, data=body, method="POST", headers=headers)
         t0 = time.perf_counter()
         try:
-            with urllib.request.urlopen(req, timeout=HTTP_TIMEOUT) as r:
-                data = json.loads(r.read())
-            return unwrap(data), time.perf_counter() - t0
-        except urllib.error.HTTPError as e:
-            detail = redact(e.read().decode(errors="replace")[:500])
-            if e.code in (429, 529) and attempt < max_retries:
-                wait = float(e.headers.get("retry-after") or 2 ** attempt)
-                print(f"  {e.code}, retrying in {wait:.1f}s", file=sys.stderr)
-                time.sleep(wait)
+            conn, path = _conn()
+            try:
+                conn.request("POST", path, body=body, headers=headers)
+                r = conn.getresponse()
+            except (http.client.RemoteDisconnected, BrokenPipeError, ConnectionResetError, http.client.CannotSendRequest):
+                conn, path = _conn(fresh=True)
+                t0 = time.perf_counter()
+                conn.request("POST", path, body=body, headers=headers)
+                r = conn.getresponse()
+            raw = r.read()
+        except (TimeoutError, OSError, http.client.HTTPException) as e:
+            _conn(fresh=True)
+            if attempt < max_retries:
+                print(f"  {type(e).__name__}, retrying", file=sys.stderr)
+                time.sleep(2 ** attempt)
                 continue
-            if e.code in (401, 403):
-                sys.exit(f"HTTP {e.code}: credentials were rejected (values not shown).")
-            raise RuntimeError(f"HTTP {e.code}: {detail}") from None
+            raise RuntimeError(f"transport error: {type(e).__name__}") from None
+        dt = time.perf_counter() - t0
+        if r.status == 200:
+            return unwrap(json.loads(raw)), dt
+        detail = redact(raw.decode(errors="replace")[:500])
+        if r.status in (429, 500, 502, 503, 504, 529) and attempt < max_retries:
+            wait = float(r.getheader("retry-after") or 2 ** attempt)
+            print(f"  {r.status}, retrying in {wait:.1f}s", file=sys.stderr)
+            time.sleep(wait)
+            continue
+        if r.status in (401, 403):
+            sys.exit(f"HTTP {r.status}: credentials were rejected (values not shown).")
+        raise RuntimeError(f"HTTP {r.status}: {detail}")
     raise RuntimeError("retries exhausted")
 
 
@@ -521,6 +552,9 @@ def main() -> None:
     ap.add_argument("--confidence", choices=("jev", "top", "gini", "provider"), default="jev",
                     help="how gates read confidence: jev = (p_max-1/n)/(1-1/n) from probabilities (default, "
                          "comparable across providers); top = p_max; gini = Workers AI's; provider = as returned")
+    ap.add_argument("--sanctioned-heldout-run", action="store_true",
+                    help="lift the dev-only guard for a non-Jev endpoint. Only for the one owner-sanctioned held-out "
+                         "run (issue 'Run hosted Clef 27B on the held-out golden lines', labels signed off 2026-10-13)")
     ap.add_argument("--repeat", type=int, default=0, help="after the run, re-send the first N line requests and compare answers")
     args = ap.parse_args()
     global FRAMING, TAG_SCHEME, API_URL, HTTP_TIMEOUT, BODY_MODEL, CONF_DEF
@@ -529,7 +563,7 @@ def main() -> None:
     if args.workers_ai:
         if args.api_url:
             sys.exit("--workers-ai and --api-url are exclusive.")
-        if args.set != "dev":
+        if args.set != "dev" and not args.sanctioned_heldout_run:
             sys.exit("--workers-ai requires --set dev (held-out is off limits for this spike).")
         if not args.dry_run and not args.rescore:
             args.api_url = workers_ai_setup(args.model)
@@ -537,7 +571,7 @@ def main() -> None:
     if args.api_url:
         # Spike guard: a non-Jev model may only ever see the dev set. The held-out labels await
         # the owner's blind check, and seeing another model's results first would spoil it.
-        if args.set != "dev":
+        if args.set != "dev" and not args.sanctioned_heldout_run:
             sys.exit("--api-url requires --set dev (held-out is off limits for this spike).")
         API_URL = args.api_url
     FRAMING = args.framing
@@ -547,7 +581,7 @@ def main() -> None:
     if args.set != "all":
         for k in ("lines", "recipes"):
             golden[k] = [it for it in golden[k] if it.get("set", "dev") == args.set]
-    if args.api_url:
+    if args.api_url and not args.sanctioned_heldout_run:
         assert all(it.get("set", "dev") == "dev" for k in ("lines", "recipes") for it in golden[k])
     lines = golden["lines"][: args.limit] if args.limit else golden["lines"]
     recipes = golden["recipes"] if (args.recipes or not args.limit) else []
