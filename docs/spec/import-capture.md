@@ -21,10 +21,10 @@ Devices capture, the server extracts. Every capture route hands the one **import
 - **Android `/share`** is an SPA route. Chrome often puts the page URL in `text` rather than `url`, so the page takes the first `http(s)` URL found in `url`, then `text`, then `title`. No URL: "That share didn't include a link" with a Type it in button. Signed out: sign in, then resume with the same parameters. Offline: "You're offline" and the link is kept in the Paste a link sheet; imports are not queued.
 - **The Shortcut** (one shared iCloud link, token from its import question, per `docs/spec/auth.md` section 7):
   1. Receives URLs and Safari web pages from the share sheet.
-  2. If the input is a Safari web page: Run JavaScript on Webpage returns `{ url: location.href, html: document.documentElement.outerHTML }`. Otherwise it uses the input URL and no HTML.
+  2. If the input is a Safari web page: Run JavaScript on Webpage runs the **capture script** in `docs/spec/ios-shortcut.md` and returns `{ url: location.href, html }`, where `html` is the page trimmed on the device (not raw `outerHTML`). Otherwise it uses the input URL and no HTML.
   3. Get Contents of URL: `POST /api/v1/import`, `Authorization: Bearer <token>`, JSON body `{ url, html?, client: "ios-shortcut/1" }`.
   4. Shows the response's `message` as a notification, whatever the status.
-  The setup how-to (Settings, Import from iPhone) adds one step to the three in the auth spec: turn on Settings > Apps > Shortcuts > Advanced > Allow Running Scripts.
+  The build sheet, setup how-to and degradation rules are in `docs/spec/ios-shortcut.md`. The how-to adds one step to the three in the auth spec: turn on Settings > Apps > Shortcuts > Advanced > Allow Running Scripts.
 - **The Shortcut's notification has no tap target.** A Shortcuts notification cannot open the installed web app (iOS gives link capture only to native apps, and a Safari tab has separate storage), so it confirms and tells the user where to look: `Saved "Chicken tikka masala". 4 lines to check in Finders Eaters.` The recipe tops the library under Recently added with its needs-review marker. This replaces "Saved - tap to review" in the design brief.
 - **Desktop** has Paste a link and Type it in. The bookmarklet (device capture on desktop) is later and will use the HTTP route with a token.
 
@@ -37,7 +37,7 @@ Auth, `401` and `429` are the auth spec's. This section owns the bodies.
 | Field | Type | Notes |
 |---|---|---|
 | `url` | string, required | `http` or `https`, at most 2048 characters. |
-| `html` | string, optional | The rendered page. Treated as untrusted input: parsed, never rendered or executed. |
+| `html` | string, optional | The rendered page. Treated as untrusted input: parsed, never rendered or executed. An empty string counts as absent. |
 | `client` | string, optional | `<name>/<version>`, e.g. `ios-shortcut/1`. |
 
 **Responses.** Every body has `status` or `error` plus a `message` written for the person (the Shortcut shows it verbatim).

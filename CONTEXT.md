@@ -52,6 +52,10 @@ _Avoid_: Scrape, raw import
 One of the ways a recipe enters the library: paste a link, share from an Android phone, the iPhone Shortcut, or type it in. Every route ends in the same import.
 _Avoid_: Import method, channel
 
+**Capture script**:
+The generic trim the iPhone Shortcut runs on a Safari page before sending it. It removes markup the extractor never reads and never looks for a recipe, so the Shortcut stays a dumb pipe.
+_Avoid_: Scraper, page extractor
+
 **Library**:
 All the recipes a household has imported and not deleted. Search narrows the library; an empty query is the whole library. A deleted recipe leaves the library but stays in the plans it was part of.
 _Avoid_: Collection (a named saved query), cookbook, recipe box

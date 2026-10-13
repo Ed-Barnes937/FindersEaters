@@ -186,7 +186,7 @@ Reached from the Recipes header. A plain list screen:
 
 - **Household**: default servings (a stepper, "Serves 2").
 - **Always have**: the household's always-have ingredients as a removable list, with an "Add" autocomplete over known ingredients. A short explanation: "These start ticked on every shopping list."
-- **Import from iPhone**: a list of devices that can add recipes, each with its label ("Ed's iPhone") and "Last used 3 Oct" or "Never used", and Revoke (with confirmation). "Add a device" asks for a label, then shows the device's import code **once**, with Copy, a "Get the Shortcut" link and a short how-to (including the one-time step: Settings > Apps > Shortcuts > Advanced > Allow Running Scripts); the code cannot be shown again, only revoked and replaced.
+- **Import from iPhone**: a list of devices that can add recipes, each with its label ("Ed's iPhone") and "Last used 3 Oct" or "Never used", and Revoke (with confirmation). "Add a device" asks for a label, then shows the device's import code **once**, with Copy, a "Get the Shortcut" link and a short how-to (per `docs/spec/ios-shortcut.md` section 5: the one-time step Settings > Apps > Shortcuts > Advanced > Allow Running Scripts, an optional Allow Sharing Large Amounts of Data step in the same place, and the first-run prompts: allow it to connect once, then once per new recipe site); the code cannot be shown again, only revoked and replaced.
 - **Account**: the signed-in person's email, Change password, Sign out and "Sign out of other devices".
 
 ### 6.9 Sign in
