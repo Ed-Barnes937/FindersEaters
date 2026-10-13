@@ -214,14 +214,19 @@ def load_key() -> str | None:
     return None
 
 
-def call(payload: dict, key: str, model: str, max_retries: int = 5) -> tuple[dict, float]:
+HTTP_TIMEOUT = 30
+
+
+def call(payload: dict, key: str | None, model: str, max_retries: int = 5) -> tuple[dict, float]:
     body = json.dumps({**payload, "model": model}).encode()
     for attempt in range(max_retries + 1):
-        req = urllib.request.Request(API_URL, data=body, method="POST", headers={
-            "Authorization": f"Bearer {key}", "Content-Type": "application/json"})
+        headers = {"Content-Type": "application/json"}
+        if key:
+            headers["Authorization"] = f"Bearer {key}"
+        req = urllib.request.Request(API_URL, data=body, method="POST", headers=headers)
         t0 = time.perf_counter()
         try:
-            with urllib.request.urlopen(req, timeout=30) as r:
+            with urllib.request.urlopen(req, timeout=HTTP_TIMEOUT) as r:
                 data = json.loads(r.read())
             return data, time.perf_counter() - t0
         except urllib.error.HTTPError as e:
@@ -459,8 +464,17 @@ def main() -> None:
                     help="recipe tagging vocabulary: phase2 = the spike's own; v01 = docs/spec/tag-taxonomy.md (expected_v01)")
     ap.add_argument("--set", choices=("all", "dev", "heldout"), default="all",
                     help="dev = L01-L44 and R01-R03 (v2 was tuned on these); heldout = lines added 2026-10-13")
+    ap.add_argument("--api-url", help="SystemOne-compatible endpoint other than Jev (e.g. a local Clef server); no key sent")
+    ap.add_argument("--timeout", type=float, default=30, help="HTTP timeout in seconds (local laptop inference is slow)")
     args = ap.parse_args()
-    global FRAMING, TAG_SCHEME
+    global FRAMING, TAG_SCHEME, API_URL, HTTP_TIMEOUT
+    HTTP_TIMEOUT = args.timeout
+    if args.api_url:
+        # Spike guard: a non-Jev model may only ever see the dev set. The held-out labels await
+        # the owner's blind check, and seeing another model's results first would spoil it.
+        if args.set != "dev":
+            sys.exit("--api-url requires --set dev (held-out is off limits for this spike).")
+        API_URL = args.api_url
     FRAMING = args.framing
     TAG_SCHEME = args.taxonomy
 
@@ -468,6 +482,8 @@ def main() -> None:
     if args.set != "all":
         for k in ("lines", "recipes"):
             golden[k] = [it for it in golden[k] if it.get("set", "dev") == args.set]
+    if args.api_url:
+        assert all(it.get("set", "dev") == "dev" for k in ("lines", "recipes") for it in golden[k])
     lines = golden["lines"][: args.limit] if args.limit else golden["lines"]
     recipes = golden["recipes"] if (args.recipes or not args.limit) else []
     line_reqs = [(item, *build_line_request(item)) for item in lines]
@@ -502,13 +518,14 @@ def main() -> None:
         print(f"JEV_API_KEY set: {load_key() is not None}")
         return
 
-    key = load_key()
-    if not key:
+    key = None if args.api_url else load_key()
+    if not key and not args.api_url:
         sys.exit("JEV_API_KEY is not set (env var or research/jev-spike/.env). Nothing was called.")
 
     out_dir = HERE / "results"
     out_dir.mkdir(exist_ok=True)
-    out_path = out_dir / f"run-{datetime.now():%Y%m%d-%H%M%S}-{FRAMING}-{TAG_SCHEME}.jsonl"
+    tag = re.sub(r"[^\w.-]", "_", args.model)
+    out_path = out_dir / f"run-{datetime.now():%Y%m%d-%H%M%S}-{tag}-{args.set}-{FRAMING}-{TAG_SCHEME}.jsonl"
     rows, latencies, tokens = [], [], 0
     with out_path.open("w") as out:
         for item, payload, meta in line_reqs:

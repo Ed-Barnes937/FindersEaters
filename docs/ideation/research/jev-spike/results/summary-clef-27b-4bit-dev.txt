@@ -1,0 +1,96 @@
+L01 27740ms ok  200g basmati rice
+L02 51312ms ok  1 x 400g tin chopped tomatoes, drained
+L03 33239ms ok  2 red onions, finely chopped
+L04 51655ms ok  1 large onion, finely chopped (about 200g)
+L05 28177ms ok  Salt and pepper
+L06 20311ms ok  salt, to taste
+L07 24710ms ok  a splash of water
+L08 26580ms ok  A knob of butter
+L09 39217ms ok  1½ tsp ground cumin
+L10 25196ms ok  ½ tsp chilli flakes
+L11 37608ms ok  2-3 fat garlic cloves, crushed
+L12 50089ms ok  100g plain flour, plus extra for dusting
+L13 38251ms ok  1 cup (240ml) whole milk
+L14 29318ms ok  2 cups all-purpose flour
+L15 27673ms ok  1 pint chicken stock
+L16 29334ms ok  1 pint heavy cream
+L17 28283ms ok  1 cup frozen peas
+L18 27571ms ok  300ml double cream
+L19 50286ms ok  1 tbsp olive oil, plus extra for drizzling
+L20 26140ms ok  Olive oil, for frying
+L21 21368ms ok  For the sauce:
+L22 21072ms ok  FOR THE TOPPING
+L23 10939ms ok  Marinade
+L24 54641ms ok  Tip: you can use frozen peas instead of fresh.
+L25 15704ms ok  Serves 4
+L26 57041ms ok  1 x 25g pack coriander, leaves picked
+L27 31711ms ok  250g/9oz spaghetti
+L28 90530ms ok  1kg floury potatoes, such as Maris Piper, peeled and cut into chunks
+L29 58622ms ok  2 x 400g cans chickpeas, drained and rinsed
+L30 32341ms ok  Juice of 1 lemon
+L31 45381ms ok  zest and juice of 1 unwaxed lemon
+L32 45393ms ERR 100g salt and vinegar crisps, crushed
+L33 31394ms ok  butter or margarine, for greasing
+L34 25905ms ok  a pinch of saffron
+L35 38713ms ok  a handful of basil leaves, torn
+L36 26866ms ERR 6 large free-range eggs
+L37 32469ms ok  1 heaped tbsp tomato purée
+L38 44731ms ok  1 cup (2 sticks) unsalted butter, softened
+L39 28812ms ok  3/4 cup granulated sugar
+L40 63093ms ERR 1 vegetable stock cube, crumbled into 500ml boiling water
+L41 26805ms ok  freshly ground black pepper
+L42 30935ms ok  1-1.5kg beef brisket
+L43 35722ms ok  2 tbsp Greek yoghurt, to serve
+L44 31183ms ok  enough cold water to cover
+R01 29395ms Chicken tikka masala
+R02 29320ms Shakshuka
+R03 29721ms Slow-cooker beef and ale stew
+
+model=clef framing=v2 taxonomy=phase2 raw results: /Users/edward.barnes@glean.co/Code/FindersEaters-spike-clef/docs/ideation/research/jev-spike/results/run-20261013-161558-clef-dev-v2-phase2.jsonl
+
+probe                                n    acc  acc@0.6 auto@0.6  acc@0.8 auto@0.8 near
+segment.role                        44   1.00     1.00     0.93     1.00     0.89     
+segment.compound                    39   1.00     1.00     0.97     1.00     0.77     
+classify.kind                       39   1.00     1.00     0.95     1.00     0.90     
+extract.tokens.quantity             35   1.00     1.00     0.89     1.00     0.40     
+extract.tokens.unit                 35   0.97     1.00     0.89     1.00     0.40     
+extract.tokens.size                 35   1.00     1.00     0.89     1.00     0.40     
+extract.tokens.ingredient           35   0.97     1.00     0.89     1.00     0.40     
+extract.tokens.prep                 35   0.97     1.00     0.89     1.00     0.40     
+extract.tokens.note                 35   0.97     1.00     0.89     1.00     0.40     
+extract.tokens.ALL_FIELDS           35   0.97     1.00     0.89     1.00     0.40     
+extract.tokens.CORE_FIELDS          35   0.97     1.00     0.89     1.00     0.40     
+extract.span.ingredient             35   0.97     1.00     0.80     1.00     0.60     
+resolve.ingredient                  18   0.94     0.94     0.94     1.00     0.89     
+resolve.unit_system                  7   1.00     1.00     1.00     1.00     1.00     
+tag.cuisine                          3   1.00     1.00     0.67     1.00     0.67     
+tag.meal_type                        3   1.00     1.00     1.00     1.00     0.67     
+tag.effort                           3   0.67     1.00     0.67     1.00     0.67     
+tag.protein(multi)                   3   1.00        -        -        -        -     
+tag.carb_base(multi)                 3   1.00        -        -        -        -     
+tag.method(multi)                    3   0.33        -        -        -        -     
+
+(acc@g = accuracy of answers with confidence >= g; auto@g = share auto-accepted at gate g; near = wrong answers that were a listed near miss)
+
+calibration (answers with a confidence, by stage):
+stage             [0,0.5)      [0.5,0.6)      [0.6,0.8)     [0.8,0.95)       [0.95,1]
+segment          1.00 n=1       1.00 n=3      1.00 n=10      1.00 n=34      1.00 n=35
+classify         1.00 n=1       1.00 n=1       1.00 n=2      1.00 n=11      1.00 n=24
+extract         0.46 n=13      1.00 n=26     1.00 n=143     1.00 n=127       1.00 n=6
+resolve          1.00 n=1              -       0.00 n=1      1.00 n=18       1.00 n=5
+tag              1.00 n=1       0.00 n=1       1.00 n=1       1.00 n=6              -
+requests=47 latency p50=30935ms p95=58622ms max=90530ms
+input_tokens=157862 est_cost=$0.00663
+
+failures:
+  L32  resolve.ingredient             got='crisps_ready_salted' expected='none' conf=0.7181
+  L36  extract.span.ingredient        got='large free-range eggs' expected=['free-range eggs', 'eggs'] conf=0.4651
+  L40  extract.tokens.unit            got='cube' expected=None conf=0.3984
+  L40  extract.tokens.ingredient      got='vegetable stock' expected=['vegetable stock cube', 'stock cube'] conf=0.3984
+  L40  extract.tokens.prep            got='crumbled boiling' expected='crumbled' conf=0.3984
+  L40  extract.tokens.note            got='500 ml water' expected=['into 500ml boiling water', '500ml boiling water'] conf=0.3984
+  L40  extract.tokens.ALL_FIELDS      got={'quantity': '1', 'unit': 'cube', 'size': None, 'ingredient': 'vegetable stock', 'prep': 'crumbled boiling', 'note': '500 ml water'} expected={'quantity': '1', 'unit': None, 'size': None, 'ingredient': ['vegetable stock cube', 'stock cube'], 'prep': 'crumbled', 'note': ['into 500ml boiling water', '500ml boiling water']} conf=0.3984
+  L40  extract.tokens.CORE_FIELDS     got={'quantity': '1', 'unit': 'cube', 'size': None, 'ingredient': 'vegetable stock'} expected={'quantity': '1', 'unit': None, 'size': None, 'ingredient': ['vegetable stock cube', 'stock cube']} conf=0.3984
+  R02  tag.effort                     got='medium' expected='easy' conf=0.5061
+  R02  tag.method(multi)              got=['fry', 'one_pot', 'simmer'] expected=['one_pot', 'simmer'] conf=None
+  R03  tag.method(multi)              got=['fry', 'one_pot', 'slow_cook'] expected=['slow_cook'] conf=None
