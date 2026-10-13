@@ -901,6 +901,3723 @@
           "to cover"
         ]
       }
+    },
+    {
+      "id": "L45",
+      "line": "1 large onion",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": "large",
+        "ingredient": "onion",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R04",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L46",
+      "line": "1 red pepper",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": null,
+        "ingredient": "red pepper",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "pepper_red": "red pepper (capsicum)",
+          "chilli_red": "red chilli",
+          "pepper_bell": "bell pepper (any colour)",
+          "pepper_black": "black pepper"
+        },
+        "expected": "pepper_red"
+      },
+      "set": "heldout",
+      "recipe": "R04",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L47",
+      "line": "2 garlic cloves",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": [
+          "cloves",
+          null
+        ],
+        "size": null,
+        "ingredient": [
+          "garlic",
+          "garlic cloves"
+        ],
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R04",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L48",
+      "line": "1 tbsp oil",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "oil",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "oil_generic": "cooking oil (any)",
+          "oil_olive": "olive oil",
+          "oil_olive_ev": "extra virgin olive oil",
+          "oil_vegetable": "vegetable oil"
+        },
+        "expected": "oil_generic"
+      },
+      "set": "heldout",
+      "recipe": "R04",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L49",
+      "line": "1 heaped tsp hot chilli powder (or 1 level tbsp if you only have mild)",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": [
+          "heaped tsp",
+          "tsp"
+        ],
+        "size": null,
+        "ingredient": [
+          "hot chilli powder",
+          "chilli powder"
+        ],
+        "prep": null,
+        "note": [
+          "(or 1 level tbsp if you only have mild)"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R04",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L50",
+      "line": "1 tsp paprika",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "tsp",
+        "size": null,
+        "ingredient": "paprika",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "paprika": "paprika",
+          "paprika_smoked": "smoked paprika",
+          "chilli_powder": "chilli powder",
+          "cayenne": "cayenne pepper"
+        },
+        "expected": "paprika"
+      },
+      "set": "heldout",
+      "recipe": "R04",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L51",
+      "line": "500g lean minced beef",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "500",
+        "unit": "g",
+        "size": null,
+        "ingredient": [
+          "lean minced beef",
+          "minced beef"
+        ],
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "beef_mince": "beef mince (any fat)",
+          "beef_mince_lean": "lean beef mince",
+          "beef_steak": "beef steak",
+          "lamb_mince": "lamb mince"
+        },
+        "expected": "beef_mince_lean"
+      },
+      "set": "heldout",
+      "recipe": "R04",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L52",
+      "line": "1 beef stock cube",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": null,
+        "ingredient": [
+          "beef stock cube",
+          "stock cube"
+        ],
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "stock_cube_beef": "beef stock cube",
+          "stock_cube_chicken": "chicken stock cube",
+          "stock_beef": "beef stock (liquid)",
+          "gravy_granules": "gravy granules"
+        },
+        "expected": "stock_cube_beef"
+      },
+      "set": "heldout",
+      "recipe": "R04",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L53",
+      "line": "400g can Mutti chopped tomatoes",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": "can",
+        "size": "400g",
+        "ingredient": [
+          "Mutti chopped tomatoes",
+          "chopped tomatoes"
+        ],
+        "prep": null,
+        "note": [
+          null,
+          "Mutti"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R04",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L54",
+      "line": "½ tsp dried marjoram",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "½",
+        "unit": "tsp",
+        "size": null,
+        "ingredient": "dried marjoram",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "marjoram_dried": "dried marjoram",
+          "marjoram_fresh": "fresh marjoram",
+          "oregano_dried": "dried oregano",
+          "mixed_herbs_dried": "dried mixed herbs"
+        },
+        "expected": "marjoram_dried"
+      },
+      "set": "heldout",
+      "recipe": "R04",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L55",
+      "line": "1 tsp sugar (or add a thumbnail-sized piece of dark chocolate along with the beans instead, see tip)",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "tsp",
+        "size": null,
+        "ingredient": "sugar",
+        "prep": null,
+        "note": [
+          "(or add a thumbnail-sized piece of dark chocolate along with the beans instead, see tip)"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R04",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L56",
+      "line": "410g can red kidney beans",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": "can",
+        "size": "410g",
+        "ingredient": [
+          "red kidney beans",
+          "kidney beans"
+        ],
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R04",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L57",
+      "line": "plain boiled long grain rice to serve",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": [
+          "long grain rice",
+          "plain long grain rice"
+        ],
+        "prep": [
+          "plain boiled",
+          "boiled"
+        ],
+        "note": "to serve"
+      },
+      "set": "heldout",
+      "recipe": "R04",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L58",
+      "line": "soured cream to serve",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": "soured cream",
+        "prep": null,
+        "note": "to serve"
+      },
+      "set": "heldout",
+      "recipe": "R04",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L59",
+      "line": "200g caster sugar",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "200",
+        "unit": "g",
+        "size": null,
+        "ingredient": "caster sugar",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "sugar_caster": "caster sugar",
+          "sugar_granulated": "granulated sugar",
+          "sugar_icing": "icing sugar",
+          "sugar_light_brown": "light brown soft sugar"
+        },
+        "expected": "sugar_caster"
+      },
+      "set": "heldout",
+      "recipe": "R05",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L60",
+      "line": "200g softened butter",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "200",
+        "unit": "g",
+        "size": null,
+        "ingredient": "butter",
+        "prep": "softened",
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "butter": "butter",
+          "butter_unsalted": "unsalted butter",
+          "butter_salted": "salted butter",
+          "margarine": "margarine"
+        },
+        "expected": "butter"
+      },
+      "set": "heldout",
+      "recipe": "R05",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L61",
+      "line": "4 eggs beaten",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "4",
+        "unit": null,
+        "size": null,
+        "ingredient": "eggs",
+        "prep": "beaten",
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "egg": "hen's egg",
+          "egg_yolk": "egg yolk",
+          "egg_white": "egg white",
+          "egg_duck": "duck egg"
+        },
+        "expected": "egg"
+      },
+      "set": "heldout",
+      "recipe": "R05",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L62",
+      "line": "200g self-raising flour",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "200",
+        "unit": "g",
+        "size": null,
+        "ingredient": "self-raising flour",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "flour_sr": "self-raising flour",
+          "flour_plain": "plain flour",
+          "flour_bread": "strong bread flour",
+          "flour_cake": "cake flour"
+        },
+        "expected": "flour_sr"
+      },
+      "set": "heldout",
+      "recipe": "R05",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L63",
+      "line": "1 tsp  baking powder",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "tsp",
+        "size": null,
+        "ingredient": "baking powder",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R05",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L64",
+      "line": "2 tbsp milk",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "milk",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "milk": "milk",
+          "milk_whole": "whole milk",
+          "milk_semi": "semi-skimmed milk",
+          "milk_oat": "oat milk"
+        },
+        "expected": "milk"
+      },
+      "set": "heldout",
+      "recipe": "R05",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L65",
+      "line": "100g butter softened",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "100",
+        "unit": "g",
+        "size": null,
+        "ingredient": "butter",
+        "prep": "softened",
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R05",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L66",
+      "line": "140g icing sugar sifted",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "140",
+        "unit": "g",
+        "size": null,
+        "ingredient": "icing sugar",
+        "prep": "sifted",
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R05",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L67",
+      "line": "drop vanilla extract (optional)",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": "drop",
+        "size": null,
+        "ingredient": "vanilla extract",
+        "prep": null,
+        "note": [
+          "(optional)"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R05",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L68",
+      "line": "half a 340g jar good-quality strawberry jam",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": [
+          "half",
+          "half a"
+        ],
+        "unit": "jar",
+        "size": "340g",
+        "ingredient": [
+          "strawberry jam",
+          "good-quality strawberry jam"
+        ],
+        "prep": null,
+        "note": [
+          "good-quality",
+          null
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R05",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L69",
+      "line": "icing sugar to decorate",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": "icing sugar",
+        "prep": null,
+        "note": "to decorate"
+      },
+      "set": "heldout",
+      "recipe": "R05",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L70",
+      "line": "2 cups minus 2 tablespoons cake flour (8 ½ ounces)",
+      "source": "cooking.nytimes.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "us_customary",
+      "fields": {
+        "quantity": "2",
+        "unit": "cups",
+        "size": null,
+        "ingredient": "cake flour",
+        "prep": null,
+        "note": [
+          "minus 2 tablespoons (8 ½ ounces)"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "flour_cake": "cake flour",
+          "flour_plain": "plain flour",
+          "flour_sr": "self-raising flour",
+          "flour_bread": "strong bread flour"
+        },
+        "expected": "flour_cake"
+      },
+      "set": "heldout",
+      "recipe": "R06",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L71",
+      "line": "1 ⅔ cups bread flour (8 ½ ounces)",
+      "source": "cooking.nytimes.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "us_customary",
+      "fields": {
+        "quantity": "1 ⅔",
+        "unit": "cups",
+        "size": null,
+        "ingredient": "bread flour",
+        "prep": null,
+        "note": [
+          "(8 ½ ounces)"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "flour_cake": "cake flour",
+          "flour_plain": "plain flour",
+          "flour_sr": "self-raising flour",
+          "flour_bread": "strong bread flour"
+        },
+        "expected": "flour_bread"
+      },
+      "set": "heldout",
+      "recipe": "R06",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L72",
+      "line": "1 ¼ teaspoons baking soda",
+      "source": "cooking.nytimes.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1 ¼",
+        "unit": "teaspoons",
+        "size": null,
+        "ingredient": "baking soda",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "bicarb": "bicarbonate of soda (baking soda)",
+          "baking_powder": "baking powder",
+          "soda_crystals": "soda crystals",
+          "cream_of_tartar": "cream of tartar"
+        },
+        "expected": "bicarb"
+      },
+      "set": "heldout",
+      "recipe": "R06",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L73",
+      "line": "1 ½ teaspoons coarse sea salt, plus more for sprinkling",
+      "source": "cooking.nytimes.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1 ½",
+        "unit": "teaspoons",
+        "size": null,
+        "ingredient": [
+          "coarse sea salt",
+          "sea salt"
+        ],
+        "prep": null,
+        "note": "plus more for sprinkling"
+      },
+      "set": "heldout",
+      "recipe": "R06",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L74",
+      "line": "1 ¼ cups unsalted butter (2 ½ sticks)",
+      "source": "cooking.nytimes.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "us_customary",
+      "fields": {
+        "quantity": "1 ¼",
+        "unit": "cups",
+        "size": null,
+        "ingredient": "unsalted butter",
+        "prep": null,
+        "note": [
+          "(2 ½ sticks)"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "butter": "butter",
+          "butter_unsalted": "unsalted butter",
+          "butter_salted": "salted butter",
+          "margarine": "margarine"
+        },
+        "expected": "butter_unsalted"
+      },
+      "set": "heldout",
+      "recipe": "R06",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L75",
+      "line": "1 ¼ cups light brown sugar (10 ounces)",
+      "source": "cooking.nytimes.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "us_customary",
+      "fields": {
+        "quantity": "1 ¼",
+        "unit": "cups",
+        "size": null,
+        "ingredient": "light brown sugar",
+        "prep": null,
+        "note": [
+          "(10 ounces)"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "sugar_light_brown": "light brown soft sugar",
+          "sugar_dark_brown": "dark brown soft sugar",
+          "sugar_demerara": "demerara sugar",
+          "sugar_caster": "caster sugar"
+        },
+        "expected": "sugar_light_brown"
+      },
+      "set": "heldout",
+      "recipe": "R06",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L76",
+      "line": "1 cup plus 2 tablespoons granulated sugar (8 ounces)",
+      "source": "cooking.nytimes.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "us_customary",
+      "fields": {
+        "quantity": "1",
+        "unit": "cup",
+        "size": null,
+        "ingredient": "granulated sugar",
+        "prep": null,
+        "note": [
+          "plus 2 tablespoons (8 ounces)"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R06",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L77",
+      "line": "2 large eggs",
+      "source": "cooking.nytimes.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": null,
+        "size": "large",
+        "ingredient": "eggs",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R06",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L78",
+      "line": "2 teaspoons natural vanilla extract",
+      "source": "cooking.nytimes.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": "teaspoons",
+        "size": null,
+        "ingredient": [
+          "natural vanilla extract",
+          "vanilla extract"
+        ],
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R06",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L79",
+      "line": "1 ¼ pounds bittersweet chocolate disks or fèves, at least 60 percent cacao content (see note)",
+      "source": "cooking.nytimes.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1 ¼",
+        "unit": "pounds",
+        "size": null,
+        "ingredient": [
+          "bittersweet chocolate disks or fèves",
+          "bittersweet chocolate",
+          "bittersweet chocolate disks"
+        ],
+        "prep": null,
+        "note": [
+          "at least 60 percent cacao content (see note)",
+          "or fèves, at least 60 percent cacao content (see note)"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "chocolate_dark": "dark chocolate",
+          "chocolate_milk": "milk chocolate",
+          "chocolate_chips_dark": "dark chocolate chips",
+          "cocoa_powder": "cocoa powder"
+        },
+        "expected": "chocolate_dark"
+      },
+      "set": "heldout",
+      "recipe": "R06",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L80",
+      "line": "180g (6oz )  chicken breast (, thinly sliced)",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "180",
+        "unit": "g",
+        "size": null,
+        "ingredient": "chicken breast",
+        "prep": "thinly sliced",
+        "note": [
+          "(6oz )"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "chicken_breast": "chicken breast",
+          "chicken_thigh": "chicken thigh",
+          "chicken_whole": "whole chicken",
+          "turkey_breast": "turkey breast"
+        },
+        "expected": "chicken_breast"
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L81",
+      "line": "1/2 tsp baking soda / bi-carb ((optional, Note 1))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1/2",
+        "unit": "tsp",
+        "size": null,
+        "ingredient": [
+          "baking soda / bi-carb",
+          "baking soda"
+        ],
+        "prep": null,
+        "note": [
+          "((optional, Note 1))",
+          "bi-carb ((optional, Note 1))"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "bicarb": "bicarbonate of soda (baking soda)",
+          "baking_powder": "baking powder",
+          "soda_crystals": "soda crystals",
+          "cream_of_tartar": "cream of tartar"
+        },
+        "expected": "bicarb"
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L82",
+      "line": "1 tbsp cornflour / corn starch",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": [
+          "cornflour / corn starch",
+          "cornflour"
+        ],
+        "prep": null,
+        "note": [
+          null,
+          "corn starch"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "cornflour": "cornflour (cornstarch)",
+          "cornmeal": "cornmeal (polenta)",
+          "flour_plain": "plain flour",
+          "arrowroot": "arrowroot"
+        },
+        "expected": "cornflour"
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L83",
+      "line": "1 1/2 tbsp light soy sauce (, or all purpose soy(Note 3))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1 1/2",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "light soy sauce",
+        "prep": null,
+        "note": [
+          "(, or all purpose soy(Note 3))"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "soy_light": "light soy sauce",
+          "soy_dark": "dark soy sauce",
+          "soy_generic": "soy sauce",
+          "tamari": "tamari"
+        },
+        "expected": "soy_light"
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L84",
+      "line": "1 tbsp Oyster Sauce ((Note 4))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "Oyster Sauce",
+        "prep": null,
+        "note": [
+          "((Note 4))"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L85",
+      "line": "1 tbsp Chinese Cooking Wine (OR Mirin (Note 5))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "Chinese Cooking Wine",
+        "prep": null,
+        "note": [
+          "(OR Mirin (Note 5))"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "shaoxing": "Shaoxing (Chinese cooking) wine",
+          "mirin": "mirin",
+          "rice_vinegar": "rice vinegar",
+          "sherry_dry": "dry sherry"
+        },
+        "expected": "shaoxing"
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L86",
+      "line": "1/2 tsp sesame oil ((optional))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1/2",
+        "unit": "tsp",
+        "size": null,
+        "ingredient": "sesame oil",
+        "prep": null,
+        "note": [
+          "((optional))"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "oil_sesame": "toasted sesame oil",
+          "oil_generic": "cooking oil (any)",
+          "oil_vegetable": "vegetable oil",
+          "tahini": "tahini"
+        },
+        "expected": "oil_sesame"
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L87",
+      "line": "Dash of white pepper ((or black))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": "Dash",
+        "size": null,
+        "ingredient": "white pepper",
+        "prep": null,
+        "note": [
+          "((or black))"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "pepper_white_ground": "ground white pepper",
+          "pepper_black_ground": "ground black pepper",
+          "pepper_red": "red pepper (capsicum)",
+          "chilli_flakes": "chilli flakes"
+        },
+        "expected": "pepper_white_ground"
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L88",
+      "line": "3/4 cup (185 ml)  water",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "not_ingredient",
+      "unit_system": "metric_cup",
+      "fields": {
+        "quantity": "3/4",
+        "unit": "cup",
+        "size": null,
+        "ingredient": "water",
+        "prep": null,
+        "note": [
+          "(185 ml)"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L89",
+      "line": "1 1/2 tbsp vegetable oil ((or other cooking oil))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1 1/2",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "vegetable oil",
+        "prep": null,
+        "note": [
+          "((or other cooking oil))"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L90",
+      "line": "2  garlic cloves (, finely chopped)",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": [
+          "cloves",
+          null
+        ],
+        "size": null,
+        "ingredient": [
+          "garlic",
+          "garlic cloves"
+        ],
+        "prep": "finely chopped",
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L91",
+      "line": "1/2  onion (, sliced (white, brown, yellow))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1/2",
+        "unit": null,
+        "size": null,
+        "ingredient": "onion",
+        "prep": [
+          "sliced",
+          "sliced (white, brown, yellow)"
+        ],
+        "note": [
+          "(white, brown, yellow)",
+          null
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L92",
+      "line": "5 - 6  stems choy sum ((or other Asian greens))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "5 - 6",
+        "unit": "stems",
+        "size": null,
+        "ingredient": "choy sum",
+        "prep": null,
+        "note": [
+          "((or other Asian greens))"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "choy_sum": "choy sum",
+          "pak_choi": "pak choi",
+          "broccoli_tenderstem": "tenderstem broccoli",
+          "spring_greens": "spring greens"
+        },
+        "expected": "choy_sum"
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L93",
+      "line": "1  medium carrot",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": "medium",
+        "ingredient": "carrot",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L94",
+      "line": "1/2 cup sliced mushrooms ((shiitake is authentic, but any will do))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "metric_cup",
+      "fields": {
+        "quantity": "1/2",
+        "unit": "cup",
+        "size": null,
+        "ingredient": "mushrooms",
+        "prep": "sliced",
+        "note": [
+          "((shiitake is authentic, but any will do))"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L95",
+      "line": "1 cup bean sprouts",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "metric_cup",
+      "fields": {
+        "quantity": "1",
+        "unit": "cup",
+        "size": null,
+        "ingredient": "bean sprouts",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R07",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L96",
+      "line": "600 g / 1.2 lb   scotch fillet steak / boneless rib eye ((Note 1))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "600",
+        "unit": "g",
+        "size": null,
+        "ingredient": [
+          "scotch fillet steak / boneless rib eye",
+          "scotch fillet steak"
+        ],
+        "prep": null,
+        "note": [
+          "/ 1.2 lb ((Note 1))",
+          "1.2 lb / boneless rib eye ((Note 1))"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "beef_ribeye": "ribeye steak",
+          "beef_sirloin": "sirloin steak",
+          "beef_fillet": "beef fillet (tenderloin)",
+          "beef_stewing": "stewing beef"
+        },
+        "expected": "beef_ribeye"
+      },
+      "set": "heldout",
+      "recipe": "R08",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L97",
+      "line": "1/2 tsp cooking salt / kosher salt ((halve for table salt, +50% for flakes))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1/2",
+        "unit": "tsp",
+        "size": null,
+        "ingredient": [
+          "cooking salt / kosher salt",
+          "cooking salt"
+        ],
+        "prep": null,
+        "note": [
+          "((halve for table salt, +50% for flakes))",
+          "kosher salt ((halve for table salt, +50% for flakes))"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R08",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L98",
+      "line": "2 tbsp vegetable oil (, divided)",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "vegetable oil",
+        "prep": null,
+        "note": [
+          "(, divided)"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R08",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L99",
+      "line": "1  large onion ((or 2 small onions), sliced)",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": "large",
+        "ingredient": "onion",
+        "prep": "sliced",
+        "note": [
+          "((or 2 small onions)"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R08",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L100",
+      "line": "300 g / 10 oz   mushrooms (, sliced (not too thin))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "300",
+        "unit": "g",
+        "size": null,
+        "ingredient": "mushrooms",
+        "prep": [
+          "sliced",
+          "sliced (not too thin)"
+        ],
+        "note": [
+          "/ 10 oz",
+          "/ 10 oz (not too thin)"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R08",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L101",
+      "line": "50 g / 3 tbsp   butter",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "50",
+        "unit": "g",
+        "size": null,
+        "ingredient": "butter",
+        "prep": null,
+        "note": [
+          "/ 3 tbsp"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R08",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L102",
+      "line": "2 tbsp flour ((Note 2))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "flour",
+        "prep": null,
+        "note": [
+          "((Note 2))"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "flour_generic": "flour (unspecified)",
+          "flour_plain": "plain flour",
+          "flour_sr": "self-raising flour",
+          "cornflour": "cornflour (cornstarch)"
+        },
+        "expected": [
+          "flour_generic",
+          "flour_plain"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R08",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L103",
+      "line": "2 cups beef broth (, preferably salt reduced)",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "metric_cup",
+      "fields": {
+        "quantity": "2",
+        "unit": "cups",
+        "size": null,
+        "ingredient": "beef broth",
+        "prep": null,
+        "note": [
+          "(, preferably salt reduced)"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "stock_cube_beef": "beef stock cube",
+          "stock_cube_chicken": "chicken stock cube",
+          "stock_beef": "beef stock (liquid)",
+          "gravy_granules": "gravy granules"
+        },
+        "expected": "stock_beef"
+      },
+      "set": "heldout",
+      "recipe": "R08",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L104",
+      "line": "1 tbsp Dijon mustard",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "Dijon mustard",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R08",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L105",
+      "line": "2/3 cup sour cream",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "unit_system": "metric_cup",
+      "fields": {
+        "quantity": "2/3",
+        "unit": "cup",
+        "size": null,
+        "ingredient": "sour cream",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "soured_cream": "soured cream",
+          "creme_fraiche": "crème fraîche",
+          "cream_double": "double cream",
+          "yoghurt_greek": "Greek yoghurt"
+        },
+        "expected": "soured_cream"
+      },
+      "set": "heldout",
+      "recipe": "R08",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L106",
+      "line": "Salt and pepper (, to taste)",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "compound",
+      "split": [
+        "salt",
+        "pepper"
+      ],
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": null,
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R08",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L107",
+      "line": "250 - 300 g / 8 - 10 oz   pasta or egg noodles of choice ((Note 3))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "alternatives",
+      "split": [
+        "pasta",
+        "egg noodles"
+      ],
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": null,
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R08",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L108",
+      "line": "Chopped chives (, for garnish (optional))",
+      "source": "recipetineats.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": "chives",
+        "prep": "Chopped",
+        "note": [
+          "(, for garnish (optional))"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R08",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L109",
+      "line": "450g potatoes peeled and cut into 1cm pieces  (try Golden Wonders or Kerr Pinks)",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "450",
+        "unit": "g",
+        "size": null,
+        "ingredient": "potatoes",
+        "prep": "peeled and cut into 1cm pieces",
+        "note": [
+          "(try Golden Wonders or Kerr Pinks)"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R09",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L110",
+      "line": "1 small onion cut the same size as the potatoes",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": "small",
+        "ingredient": "onion",
+        "prep": "cut the same size as the potatoes",
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R09",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L111",
+      "line": "450g white parts of leeks sliced  (save the green tops for another soup or stock)",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "450",
+        "unit": "g",
+        "size": null,
+        "ingredient": [
+          "leeks",
+          "white parts of leeks"
+        ],
+        "prep": [
+          "white parts of sliced",
+          "sliced"
+        ],
+        "note": [
+          "(save the green tops for another soup or stock)"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "leek": "leek",
+          "spring_onion": "spring onion",
+          "onion": "onion",
+          "fennel": "fennel"
+        },
+        "expected": "leek"
+      },
+      "set": "heldout",
+      "recipe": "R09",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L112",
+      "line": "850ml-1.2litres/1.5-2pts light chicken or vegetable stock",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "alternatives",
+      "split": [
+        "chicken stock",
+        "vegetable stock"
+      ],
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": null,
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R09",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L113",
+      "line": "142ml carton whipping cream",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": "carton",
+        "size": "142ml",
+        "ingredient": "whipping cream",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "cream_whipping": "whipping cream",
+          "cream_double": "double cream",
+          "cream_single": "single cream",
+          "creme_fraiche": "crème fraîche"
+        },
+        "expected": "cream_whipping"
+      },
+      "set": "heldout",
+      "recipe": "R09",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L114",
+      "line": "125ml full-fat milk",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "125",
+        "unit": "ml",
+        "size": null,
+        "ingredient": "full-fat milk",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "milk": "milk",
+          "milk_whole": "whole milk",
+          "milk_semi": "semi-skimmed milk",
+          "milk_skimmed": "skimmed milk"
+        },
+        "expected": "milk_whole"
+      },
+      "set": "heldout",
+      "recipe": "R09",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L115",
+      "line": "the white part of 1 leek",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": null,
+        "ingredient": "leek",
+        "prep": [
+          "the white part of",
+          "white part of"
+        ],
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R09",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L116",
+      "line": "a small knob of butter",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "a",
+        "unit": "knob",
+        "size": "small",
+        "ingredient": "butter",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "butter": "butter",
+          "butter_unsalted": "unsalted butter",
+          "butter_salted": "salted butter",
+          "margarine": "margarine"
+        },
+        "expected": "butter"
+      },
+      "set": "heldout",
+      "recipe": "R09",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L117",
+      "line": "finely chopped chives",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": "chives",
+        "prep": "finely chopped",
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R09",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L118",
+      "line": "For the sauce",
+      "source": "bbcgoodfood.com",
+      "role": "header",
+      "set": "heldout",
+      "recipe": "R10",
+      "capture": "html"
+    },
+    {
+      "id": "L119",
+      "line": "½ large onion roughly chopped",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "½",
+        "unit": null,
+        "size": "large",
+        "ingredient": "onion",
+        "prep": "roughly chopped",
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R10",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L120",
+      "line": "1 green chilli finely chopped",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": null,
+        "ingredient": "green chilli",
+        "prep": "finely chopped",
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "chilli_green": "green chilli (fresh)",
+          "chilli_red": "red chilli (fresh)",
+          "pepper_green": "green pepper (capsicum)",
+          "jalapeno": "jalapeño"
+        },
+        "expected": "chilli_green"
+      },
+      "set": "heldout",
+      "recipe": "R10",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L121",
+      "line": "vegetable oil for frying",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": "vegetable oil",
+        "prep": null,
+        "note": "for frying"
+      },
+      "set": "heldout",
+      "recipe": "R10",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L122",
+      "line": "400g can plum tomatoes",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": "can",
+        "size": "400g",
+        "ingredient": "plum tomatoes",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "tomato_tinned_chopped": "tinned chopped tomatoes",
+          "tomato_tinned_plum": "tinned plum tomatoes",
+          "tomato_fresh": "fresh tomatoes",
+          "tomato_passata": "passata"
+        },
+        "expected": "tomato_tinned_plum"
+      },
+      "set": "heldout",
+      "recipe": "R10",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L123",
+      "line": "1 tbsp ground coriander",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "ground coriander",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "coriander_fresh": "fresh coriander (leaves)",
+          "coriander_ground": "ground coriander",
+          "coriander_seed": "coriander seeds",
+          "parsley_flat": "flat-leaf parsley"
+        },
+        "expected": "coriander_ground"
+      },
+      "set": "heldout",
+      "recipe": "R10",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L124",
+      "line": "1 tsp turmeric",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "tsp",
+        "size": null,
+        "ingredient": "turmeric",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "turmeric_ground": "ground turmeric",
+          "turmeric_fresh": "fresh turmeric root",
+          "ginger_ground": "ground ginger",
+          "curry_powder": "curry powder"
+        },
+        "expected": "turmeric_ground"
+      },
+      "set": "heldout",
+      "recipe": "R10",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L125",
+      "line": "For the meat & veg",
+      "source": "bbcgoodfood.com",
+      "role": "header",
+      "set": "heldout",
+      "recipe": "R10",
+      "capture": "html"
+    },
+    {
+      "id": "L126",
+      "line": "2-3 chicken breasts diced",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2-3",
+        "unit": null,
+        "size": null,
+        "ingredient": "chicken breasts",
+        "prep": "diced",
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R10",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L127",
+      "line": "2 red chillies finely chopped (optional)",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": null,
+        "size": null,
+        "ingredient": "red chillies",
+        "prep": "finely chopped",
+        "note": [
+          "(optional)"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R10",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L128",
+      "line": "2 tsp garam masala",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": "tsp",
+        "size": null,
+        "ingredient": "garam masala",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R10",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L129",
+      "line": "handful of fresh, chopped coriander leaves",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": "handful",
+        "size": null,
+        "ingredient": [
+          "coriander leaves",
+          "fresh coriander leaves",
+          "coriander"
+        ],
+        "prep": [
+          "fresh, chopped",
+          "chopped"
+        ],
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "coriander_fresh": "fresh coriander (leaves)",
+          "coriander_ground": "ground coriander",
+          "coriander_seed": "coriander seeds",
+          "parsley_flat": "flat-leaf parsley"
+        },
+        "expected": "coriander_fresh"
+      },
+      "set": "heldout",
+      "recipe": "R10",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L130",
+      "line": "cooked basmati rice or naan bread to serve",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "alternatives",
+      "split": [
+        "basmati rice",
+        "naan bread"
+      ],
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": null,
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R10",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L131",
+      "line": "1 bay leaf",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": null,
+        "ingredient": [
+          "bay leaf",
+          "bay"
+        ],
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R11",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L132",
+      "line": "3 cardamom pods",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "3",
+        "unit": [
+          "pods",
+          null
+        ],
+        "size": null,
+        "ingredient": [
+          "cardamom",
+          "cardamom pods"
+        ],
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "cardamom_pods": "green cardamom pods",
+          "cardamom_ground": "ground cardamom",
+          "cardamom_black": "black cardamom",
+          "cumin_seed": "cumin seeds"
+        },
+        "expected": "cardamom_pods"
+      },
+      "set": "heldout",
+      "recipe": "R11",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L133",
+      "line": "small  cinnamon stick",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": [
+          "stick",
+          null
+        ],
+        "size": "small",
+        "ingredient": [
+          "cinnamon stick",
+          "cinnamon"
+        ],
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "cinnamon_stick": "cinnamon stick",
+          "cinnamon_ground": "ground cinnamon",
+          "cloves_whole": "whole cloves",
+          "star_anise": "star anise"
+        },
+        "expected": "cinnamon_stick"
+      },
+      "set": "heldout",
+      "recipe": "R11",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L134",
+      "line": "4 skinless chicken breasts cut into large chunks",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "4",
+        "unit": null,
+        "size": null,
+        "ingredient": [
+          "skinless chicken breasts",
+          "chicken breasts"
+        ],
+        "prep": [
+          "cut into large chunks",
+          "skinless cut into large chunks"
+        ],
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R11",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L135",
+      "line": "4 tbsp balti curry paste",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "4",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "balti curry paste",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R11",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L136",
+      "line": "85g raisins",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "85",
+        "unit": "g",
+        "size": null,
+        "ingredient": "raisins",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R11",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L137",
+      "line": "850ml chicken stock",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "850",
+        "unit": "ml",
+        "size": null,
+        "ingredient": "chicken stock",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "stock_chicken": "chicken stock (any form)",
+          "stock_chicken_fresh": "fresh chicken stock (chilled pot)",
+          "stock_cube_chicken": "chicken stock cube",
+          "stock_veg": "vegetable stock"
+        },
+        "expected": "stock_chicken"
+      },
+      "set": "heldout",
+      "recipe": "R11",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L138",
+      "line": "30g coriander ½ chopped, ½ leaves picked and 2 tbsp toasted flaked almonds, to serve",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "compound",
+      "split": [
+        "coriander",
+        "flaked almonds"
+      ],
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": null,
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R11",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L139",
+      "line": "150g dried orzo",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "150",
+        "unit": "g",
+        "size": null,
+        "ingredient": [
+          "orzo",
+          "dried orzo"
+        ],
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R12",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L140",
+      "line": "1 x 400g tin of plum tomatoes",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "tin",
+        "size": "400g",
+        "ingredient": "plum tomatoes",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R12",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L141",
+      "line": "2 cloves of garlic",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": "cloves",
+        "size": null,
+        "ingredient": "garlic",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R12",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L142",
+      "line": "1 fresh red chilli",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": null,
+        "ingredient": [
+          "red chilli",
+          "fresh red chilli"
+        ],
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "chilli_red": "red chilli (fresh)",
+          "pepper_red": "red pepper (capsicum)",
+          "chilli_flakes": "chilli flakes",
+          "chilli_powder": "chilli powder"
+        },
+        "expected": "chilli_red"
+      },
+      "set": "heldout",
+      "recipe": "R12",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L143",
+      "line": "½ a bunch of basil (15g)",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": [
+          "½",
+          "½ a"
+        ],
+        "unit": "bunch",
+        "size": null,
+        "ingredient": "basil",
+        "prep": null,
+        "note": [
+          "(15g)"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R12",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L144",
+      "line": "160g roasted red peppers",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "160",
+        "unit": "g",
+        "size": null,
+        "ingredient": "roasted red peppers",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "peppers_roasted_jar": "roasted red peppers (jarred)",
+          "pepper_red": "red pepper (capsicum)",
+          "chilli_red": "red chilli (fresh)",
+          "pimento": "pimento"
+        },
+        "expected": "peppers_roasted_jar"
+      },
+      "set": "heldout",
+      "recipe": "R12",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L145",
+      "line": "1 small courgette (160g)",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": "small",
+        "ingredient": "courgette",
+        "prep": null,
+        "note": [
+          "(160g)"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R12",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L146",
+      "line": "olive oil",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": "olive oil",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "oil_generic": "cooking oil (any)",
+          "oil_olive": "olive oil",
+          "oil_olive_ev": "extra virgin olive oil",
+          "oil_vegetable": "vegetable oil"
+        },
+        "expected": "oil_olive"
+      },
+      "set": "heldout",
+      "recipe": "R12",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L147",
+      "line": "2 x 130g chunky white fish fillets, skin on, scaled, pin-boned, from sustainable sources",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": null,
+        "size": [
+          "130g",
+          "130g chunky"
+        ],
+        "ingredient": [
+          "white fish fillets",
+          "chunky white fish fillets"
+        ],
+        "prep": [
+          "skin on, scaled, pin-boned",
+          "chunky skin on, scaled, pin-boned"
+        ],
+        "note": "from sustainable sources"
+      },
+      "resolve": {
+        "candidates": {
+          "fish_white": "white fish fillet (cod, haddock, hake, pollock)",
+          "cod": "cod",
+          "haddock": "haddock",
+          "salmon": "salmon"
+        },
+        "expected": "fish_white"
+      },
+      "set": "heldout",
+      "recipe": "R12",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L148",
+      "line": "15g Parmesan cheese",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "15",
+        "unit": "g",
+        "size": null,
+        "ingredient": [
+          "Parmesan cheese",
+          "Parmesan"
+        ],
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "parmesan": "Parmesan",
+          "hard_cheese_veg": "vegetarian Italian hard cheese",
+          "pecorino": "pecorino",
+          "cheddar": "cheddar"
+        },
+        "expected": "parmesan"
+      },
+      "set": "heldout",
+      "recipe": "R12",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L149",
+      "line": "1 clove of garlic",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "clove",
+        "size": null,
+        "ingredient": "garlic",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R13",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L150",
+      "line": "200g passata",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "200",
+        "unit": "g",
+        "size": null,
+        "ingredient": "passata",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R13",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L151",
+      "line": "½ x 400g tin of chickpeas",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "½",
+        "unit": "tin",
+        "size": "400g",
+        "ingredient": "chickpeas",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R13",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L152",
+      "line": "125g fresh lasagne sheets",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "125",
+        "unit": "g",
+        "size": null,
+        "ingredient": [
+          "fresh lasagne sheets",
+          "lasagne sheets"
+        ],
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R13",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L153",
+      "line": "30g rocket",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "30",
+        "unit": "g",
+        "size": null,
+        "ingredient": "rocket",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R13",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L154",
+      "line": "optional: extra virgin olive oil",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": "extra virgin olive oil",
+        "prep": null,
+        "note": [
+          "optional:"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "oil_generic": "cooking oil (any)",
+          "oil_olive": "olive oil",
+          "oil_olive_ev": "extra virgin olive oil",
+          "oil_vegetable": "vegetable oil"
+        },
+        "expected": "oil_olive_ev"
+      },
+      "set": "heldout",
+      "recipe": "R13",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L155",
+      "line": "1 x 1.6kg whole free-range chicken",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": "1.6kg",
+        "ingredient": [
+          "whole free-range chicken",
+          "whole chicken",
+          "free-range chicken"
+        ],
+        "prep": null,
+        "note": [
+          null,
+          "free-range"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "chicken_breast": "chicken breast",
+          "chicken_thigh": "chicken thigh",
+          "chicken_whole": "whole chicken",
+          "chicken_legs": "chicken legs"
+        },
+        "expected": "chicken_whole"
+      },
+      "set": "heldout",
+      "recipe": "R14",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L156",
+      "line": "2 medium onions",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": null,
+        "size": "medium",
+        "ingredient": "onions",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R14",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L157",
+      "line": "2 sticks of celery",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": "sticks",
+        "size": null,
+        "ingredient": "celery",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R14",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L158",
+      "line": "1 bulb of garlic",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "bulb",
+        "size": null,
+        "ingredient": "garlic",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "garlic": "garlic",
+          "garlic_puree": "garlic purée",
+          "garlic_granules": "garlic granules",
+          "garlic_wild": "wild garlic"
+        },
+        "expected": "garlic"
+      },
+      "set": "heldout",
+      "recipe": "R14",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L159",
+      "line": "1 bunch of mixed fresh herbs such as thyme, rosemary, bay",
+      "source": "jamieoliver.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "bunch",
+        "size": null,
+        "ingredient": [
+          "mixed fresh herbs",
+          "fresh herbs"
+        ],
+        "prep": null,
+        "note": "such as thyme, rosemary, bay"
+      },
+      "set": "heldout",
+      "recipe": "R14",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L160",
+      "line": "2 sweet potatoes peeled and cut into medium chunks",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": null,
+        "size": null,
+        "ingredient": "sweet potatoes",
+        "prep": "peeled and cut into medium chunks",
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "sweet_potato": "sweet potato",
+          "potato": "potato",
+          "butternut_squash": "butternut squash",
+          "yam": "yam"
+        },
+        "expected": "sweet_potato"
+      },
+      "set": "heldout",
+      "recipe": "R15",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L161",
+      "line": "2 tsp smoked paprika",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": "tsp",
+        "size": null,
+        "ingredient": "smoked paprika",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "paprika": "paprika",
+          "paprika_smoked": "smoked paprika",
+          "chilli_powder": "chilli powder",
+          "cayenne": "cayenne pepper"
+        },
+        "expected": "paprika_smoked"
+      },
+      "set": "heldout",
+      "recipe": "R15",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L162",
+      "line": "2 celery sticks chopped",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": [
+          "sticks",
+          null
+        ],
+        "size": null,
+        "ingredient": [
+          "celery",
+          "celery sticks"
+        ],
+        "prep": "chopped",
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R15",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L163",
+      "line": "1-2 tsp chilli powder (depending on how hot you like it)",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1-2",
+        "unit": "tsp",
+        "size": null,
+        "ingredient": "chilli powder",
+        "prep": null,
+        "note": [
+          "(depending on how hot you like it)"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R15",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L164",
+      "line": "1 tsp dried oregano",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "tsp",
+        "size": null,
+        "ingredient": "dried oregano",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R15",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L165",
+      "line": "400g can black beans drained",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": "can",
+        "size": "400g",
+        "ingredient": "black beans",
+        "prep": "drained",
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R15",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L166",
+      "line": "lime wedges guacamole, rice and coriander to serve",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "compound",
+      "split": [
+        "lime",
+        "guacamole",
+        "rice",
+        "coriander"
+      ],
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": null,
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R15",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L167",
+      "line": "4 large  vine tomatoes cut into irregular wedges",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "4",
+        "unit": null,
+        "size": "large",
+        "ingredient": "vine tomatoes",
+        "prep": "cut into irregular wedges",
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R16",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L168",
+      "line": "1 cucumber peeled, deseeded, then roughly chopped",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": null,
+        "ingredient": "cucumber",
+        "prep": "peeled, deseeded, then roughly chopped",
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R16",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L169",
+      "line": "½ a red onion thinly sliced",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": [
+          "½",
+          "½ a"
+        ],
+        "unit": null,
+        "size": null,
+        "ingredient": "red onion",
+        "prep": "thinly sliced",
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R16",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L170",
+      "line": "16 Kalamata olives",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "16",
+        "unit": null,
+        "size": null,
+        "ingredient": "Kalamata olives",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "olives_kalamata": "Kalamata olives",
+          "olives_black": "black olives",
+          "olives_green": "green olives",
+          "capers": "capers"
+        },
+        "expected": "olives_kalamata"
+      },
+      "set": "heldout",
+      "recipe": "R16",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L171",
+      "line": "85g feta cheese cut into chunks (barrel matured feta is the best)",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "85",
+        "unit": "g",
+        "size": null,
+        "ingredient": [
+          "feta cheese",
+          "feta"
+        ],
+        "prep": "cut into chunks",
+        "note": [
+          "(barrel matured feta is the best)"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "feta": "feta",
+          "halloumi": "halloumi",
+          "goats_cheese": "goat's cheese",
+          "salad_cheese": "Greek-style salad cheese"
+        },
+        "expected": "feta"
+      },
+      "set": "heldout",
+      "recipe": "R16",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L172",
+      "line": "4 tbsp Greek extra virgin olive oil",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "4",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": [
+          "Greek extra virgin olive oil",
+          "extra virgin olive oil"
+        ],
+        "prep": null,
+        "note": [
+          null,
+          "Greek"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "oil_generic": "cooking oil (any)",
+          "oil_olive": "olive oil",
+          "oil_olive_ev": "extra virgin olive oil",
+          "oil_vegetable": "vegetable oil"
+        },
+        "expected": "oil_olive_ev"
+      },
+      "set": "heldout",
+      "recipe": "R16",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L173",
+      "line": "300ml milk",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "300",
+        "unit": "ml",
+        "size": null,
+        "ingredient": "milk",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R17",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L174",
+      "line": "1 tbsp sunflower or vegetable oil plus a little extra for frying",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "alternatives",
+      "split": [
+        "sunflower oil",
+        "vegetable oil"
+      ],
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": null,
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R17",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L175",
+      "line": "lemon wedges to serve (optional)",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": [
+          "lemon wedges",
+          "lemon"
+        ],
+        "prep": [
+          null,
+          "wedges"
+        ],
+        "note": [
+          "to serve (optional)"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R17",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L176",
+      "line": "caster sugar to serve (optional)",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": "caster sugar",
+        "prep": null,
+        "note": [
+          "to serve (optional)"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R17",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L177",
+      "line": "250g long grain rice",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "250",
+        "unit": "g",
+        "size": null,
+        "ingredient": "long grain rice",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "rice_basmati": "basmati rice",
+          "rice_long_grain": "long-grain white rice",
+          "rice_jasmine": "jasmine rice",
+          "rice_brown": "brown rice"
+        },
+        "expected": "rice_long_grain"
+      },
+      "set": "heldout",
+      "recipe": "R18",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L178",
+      "line": "3 tbsp vegetable oil",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "3",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "vegetable oil",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "oil_generic": "cooking oil (any)",
+          "oil_olive": "olive oil",
+          "oil_olive_ev": "extra virgin olive oil",
+          "oil_vegetable": "vegetable oil"
+        },
+        "expected": "oil_vegetable"
+      },
+      "set": "heldout",
+      "recipe": "R18",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L179",
+      "line": "2 spring onions sliced, to serve",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": null,
+        "size": null,
+        "ingredient": "spring onions",
+        "prep": "sliced",
+        "note": "to serve"
+      },
+      "resolve": {
+        "candidates": {
+          "spring_onion": "spring onion",
+          "onion": "onion",
+          "leek": "leek",
+          "chives": "chives"
+        },
+        "expected": "spring_onion"
+      },
+      "set": "heldout",
+      "recipe": "R18",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L180",
+      "line": "½-1 tsp strongly-flavoured seeds such as nigella or cumin seeds (optional)",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "½-1",
+        "unit": "tsp",
+        "size": null,
+        "ingredient": [
+          "strongly-flavoured seeds",
+          "seeds"
+        ],
+        "prep": null,
+        "note": [
+          "such as nigella or cumin seeds (optional)"
+        ]
+      },
+      "resolve": {
+        "candidates": {
+          "nigella_seed": "nigella seeds",
+          "cumin_seed": "cumin seeds",
+          "fennel_seed": "fennel seeds",
+          "sesame_seed": "sesame seeds"
+        },
+        "expected": "none"
+      },
+      "set": "heldout",
+      "recipe": "R19",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L181",
+      "line": "2 tbsp  melted butter",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "2",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "butter",
+        "prep": "melted",
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R19",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L182",
+      "line": "8 tbsp  natural yogurt",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "8",
+        "unit": "tbsp",
+        "size": null,
+        "ingredient": "natural yogurt",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "yoghurt_natural": "natural yoghurt",
+          "yoghurt_greek": "Greek yoghurt",
+          "creme_fraiche": "crème fraîche",
+          "soured_cream": "soured cream"
+        },
+        "expected": "yoghurt_natural"
+      },
+      "set": "heldout",
+      "recipe": "R19",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L183",
+      "line": "oil for the bowl",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": "oil",
+        "prep": null,
+        "note": "for the bowl"
+      },
+      "set": "heldout",
+      "recipe": "R19",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L184",
+      "line": "small handful of coriander finely chopped, plus extra to serve",
+      "source": "bbcgoodfood.com",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": "handful",
+        "size": "small",
+        "ingredient": "coriander",
+        "prep": "finely chopped",
+        "note": "plus extra to serve"
+      },
+      "resolve": {
+        "candidates": {
+          "coriander_fresh": "fresh coriander (leaves)",
+          "coriander_ground": "ground coriander",
+          "coriander_seed": "coriander seeds",
+          "parsley_flat": "flat-leaf parsley"
+        },
+        "expected": "coriander_fresh"
+      },
+      "set": "heldout",
+      "recipe": "R19",
+      "capture": "json-ld"
+    },
+    {
+      "id": "L185",
+      "line": "mince 500g",
+      "source": "household",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "500",
+        "unit": "g",
+        "size": null,
+        "ingredient": "mince",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "mince_generic": "mince (meat unspecified)",
+          "beef_mince": "beef mince",
+          "lamb_mince": "lamb mince",
+          "pork_mince": "pork mince"
+        },
+        "expected": [
+          "mince_generic",
+          "lamb_mince"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R20",
+      "capture": "manual"
+    },
+    {
+      "id": "L186",
+      "line": "onion, carrot",
+      "source": "household",
+      "role": "ingredient",
+      "compound": "compound",
+      "split": [
+        "onion",
+        "carrot"
+      ],
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": null,
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R20",
+      "capture": "manual"
+    },
+    {
+      "id": "L187",
+      "line": "tom puree squeeze",
+      "source": "household",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": "squeeze",
+        "size": null,
+        "ingredient": "tom puree",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "tomato_puree": "tomato purée",
+          "tomato_passata": "passata",
+          "ketchup": "tomato ketchup",
+          "tomato_tinned_chopped": "tinned chopped tomatoes"
+        },
+        "expected": "tomato_puree"
+      },
+      "set": "heldout",
+      "recipe": "R20",
+      "capture": "manual"
+    },
+    {
+      "id": "L188",
+      "line": "worcester sauce glug",
+      "source": "household",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": null,
+        "unit": "glug",
+        "size": null,
+        "ingredient": "worcester sauce",
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R20",
+      "capture": "manual"
+    },
+    {
+      "id": "L189",
+      "line": "1 oxo",
+      "source": "household",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": null,
+        "size": null,
+        "ingredient": "oxo",
+        "prep": null,
+        "note": null
+      },
+      "resolve": {
+        "candidates": {
+          "stock_cube_beef": "beef stock cube",
+          "stock_cube_chicken": "chicken stock cube",
+          "stock_beef": "beef stock (liquid)",
+          "gravy_granules": "gravy granules"
+        },
+        "expected": "stock_cube_beef"
+      },
+      "set": "heldout",
+      "recipe": "R20",
+      "capture": "manual"
+    },
+    {
+      "id": "L190",
+      "line": "1kg spuds for mash",
+      "source": "household",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "quantified",
+      "fields": {
+        "quantity": "1",
+        "unit": "kg",
+        "size": null,
+        "ingredient": "spuds",
+        "prep": null,
+        "note": "for mash"
+      },
+      "resolve": {
+        "candidates": {
+          "potato": "potato",
+          "potato_floury": "floury potato (e.g. Maris Piper)",
+          "potato_waxy": "waxy potato",
+          "sweet_potato": "sweet potato"
+        },
+        "expected": [
+          "potato",
+          "potato_floury"
+        ]
+      },
+      "set": "heldout",
+      "recipe": "R20",
+      "capture": "manual"
+    },
+    {
+      "id": "L191",
+      "line": "butter + milk for mash",
+      "source": "household",
+      "role": "ingredient",
+      "compound": "compound",
+      "split": [
+        "butter",
+        "milk"
+      ],
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": null,
+        "prep": null,
+        "note": null
+      },
+      "set": "heldout",
+      "recipe": "R20",
+      "capture": "manual"
+    },
+    {
+      "id": "L192",
+      "line": "cheese on top if feeling it",
+      "source": "household",
+      "role": "ingredient",
+      "compound": "single",
+      "kind": "unquantified",
+      "fields": {
+        "quantity": null,
+        "unit": null,
+        "size": null,
+        "ingredient": "cheese",
+        "prep": null,
+        "note": "on top if feeling it"
+      },
+      "resolve": {
+        "candidates": {
+          "cheese_generic": "cheese (unspecified)",
+          "cheddar": "cheddar",
+          "parmesan": "Parmesan",
+          "mozzarella": "mozzarella"
+        },
+        "expected": "cheese_generic"
+      },
+      "set": "heldout",
+      "recipe": "R20",
+      "capture": "manual"
+    },
+    {
+      "id": "L193",
+      "line": "Gas 6, 30-40 mins",
+      "source": "household",
+      "role": "note",
+      "set": "heldout",
+      "recipe": "R20",
+      "capture": "manual"
+    },
+    {
+      "id": "L194",
+      "line": "Serves 4 + leftovers",
+      "source": "household",
+      "role": "note",
+      "set": "heldout",
+      "recipe": "R20",
+      "capture": "manual"
     }
   ],
   "recipes": [
@@ -998,6 +4715,696 @@
           ]
         }
       }
+    },
+    {
+      "id": "R04",
+      "title": "Chilli con carne",
+      "set": "heldout",
+      "source": "bbcgoodfood.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "1 large onion",
+        "1 red pepper",
+        "2 garlic cloves",
+        "1 tbsp oil",
+        "1 heaped tsp hot chilli powder (or 1 level tbsp if you only have mild)",
+        "1 tsp paprika",
+        "500g lean minced beef",
+        "1 beef stock cube",
+        "400g can Mutti chopped tomatoes",
+        "½ tsp dried marjoram",
+        "1 tsp sugar (or add a thumbnail-sized piece of dark chocolate along with the beans instead, see tip)",
+        "410g can red kidney beans",
+        "plain boiled long grain rice to serve",
+        "soured cream to serve"
+      ],
+      "method_summary": "Fry the onion, pepper, garlic and spices, brown the mince, then simmer with tomatoes, stock and beans for about an hour. Serve with rice and soured cream.",
+      "expected": {
+        "cuisine": [
+          "mexican",
+          "american"
+        ],
+        "meal_type": "dinner",
+        "effort": "easy",
+        "protein": [
+          "beef"
+        ],
+        "carb_base": [],
+        "method": [
+          "simmer"
+        ],
+        "optional": {
+          "protein": [
+            "pulses"
+          ],
+          "carb_base": [
+            "rice"
+          ],
+          "method": [
+            "fry",
+            "one_pot"
+          ]
+        }
+      }
+    },
+    {
+      "id": "R05",
+      "title": "Classic Victoria sandwich",
+      "set": "heldout",
+      "source": "bbcgoodfood.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "200g caster sugar",
+        "200g softened butter",
+        "4 eggs beaten",
+        "200g self-raising flour",
+        "1 tsp  baking powder",
+        "2 tbsp milk",
+        "100g butter softened",
+        "140g icing sugar sifted",
+        "drop vanilla extract (optional)",
+        "half a 340g jar good-quality strawberry jam",
+        "icing sugar to decorate"
+      ],
+      "method_summary": "Beat butter, sugar, eggs, flour and baking powder, bake in two tins for 20 minutes, then fill with buttercream and jam.",
+      "expected": {
+        "cuisine": "british",
+        "meal_type": [
+          "dessert",
+          "snack"
+        ],
+        "effort": "easy",
+        "protein": [],
+        "carb_base": [],
+        "method": [
+          "bake"
+        ],
+        "optional": {
+          "protein": [
+            "egg"
+          ]
+        }
+      }
+    },
+    {
+      "id": "R06",
+      "title": "Best chocolate chip cookies",
+      "set": "heldout",
+      "source": "cooking.nytimes.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "2 cups minus 2 tablespoons cake flour (8 ½ ounces)",
+        "1 ⅔ cups bread flour (8 ½ ounces)",
+        "1 ¼ teaspoons baking soda",
+        "1 ½ teaspoons coarse sea salt, plus more for sprinkling",
+        "1 ¼ cups unsalted butter (2 ½ sticks)",
+        "1 ¼ cups light brown sugar (10 ounces)",
+        "1 cup plus 2 tablespoons granulated sugar (8 ounces)",
+        "2 large eggs",
+        "2 teaspoons natural vanilla extract",
+        "1 ¼ pounds bittersweet chocolate disks or fèves, at least 60 percent cacao content (see note)"
+      ],
+      "method_summary": "Cream butter and sugars, beat in eggs and vanilla, fold in flours, leavening and chocolate, chill the dough for 24-36 hours, then bake at 350F.",
+      "expected": {
+        "cuisine": "american",
+        "meal_type": [
+          "dessert",
+          "snack"
+        ],
+        "effort": [
+          "easy",
+          "medium"
+        ],
+        "protein": [],
+        "carb_base": [],
+        "method": [
+          "bake"
+        ],
+        "optional": {
+          "protein": [
+            "egg"
+          ]
+        }
+      }
+    },
+    {
+      "id": "R07",
+      "title": "Chop suey (chicken stir fry)",
+      "set": "heldout",
+      "source": "recipetineats.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "180g (6oz )  chicken breast (, thinly sliced)",
+        "1/2 tsp baking soda / bi-carb ((optional, Note 1))",
+        "1 tbsp cornflour / corn starch",
+        "1 1/2 tbsp light soy sauce (, or all purpose soy(Note 3))",
+        "1 tbsp Oyster Sauce ((Note 4))",
+        "1 tbsp Chinese Cooking Wine (OR Mirin (Note 5))",
+        "1/2 tsp sesame oil ((optional))",
+        "Dash of white pepper ((or black))",
+        "3/4 cup (185 ml)  water",
+        "1 1/2 tbsp vegetable oil ((or other cooking oil))",
+        "2  garlic cloves (, finely chopped)",
+        "1/2  onion (, sliced (white, brown, yellow))",
+        "5 - 6  stems choy sum ((or other Asian greens))",
+        "1  medium carrot",
+        "1/2 cup sliced mushrooms ((shiitake is authentic, but any will do))",
+        "1 cup bean sprouts"
+      ],
+      "method_summary": "Velvet the sliced chicken, stir fry with garlic, onion and vegetables over high heat, then toss in the sauce until glossy. About 15 minutes.",
+      "expected": {
+        "cuisine": [
+          "chinese",
+          "american"
+        ],
+        "meal_type": "dinner",
+        "effort": "easy",
+        "protein": [
+          "chicken"
+        ],
+        "carb_base": [],
+        "method": [
+          "fry"
+        ],
+        "optional": {
+          "carb_base": [
+            "rice",
+            "noodles"
+          ]
+        }
+      }
+    },
+    {
+      "id": "R08",
+      "title": "Beef stroganoff",
+      "set": "heldout",
+      "source": "recipetineats.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "600 g / 1.2 lb   scotch fillet steak / boneless rib eye ((Note 1))",
+        "1/2 tsp cooking salt / kosher salt ((halve for table salt, +50% for flakes))",
+        "2 tbsp vegetable oil (, divided)",
+        "1  large onion ((or 2 small onions), sliced)",
+        "300 g / 10 oz   mushrooms (, sliced (not too thin))",
+        "50 g / 3 tbsp   butter",
+        "2 tbsp flour ((Note 2))",
+        "2 cups beef broth (, preferably salt reduced)",
+        "1 tbsp Dijon mustard",
+        "2/3 cup sour cream",
+        "Salt and pepper (, to taste)",
+        "250 - 300 g / 8 - 10 oz   pasta or egg noodles of choice ((Note 3))",
+        "Chopped chives (, for garnish (optional))"
+      ],
+      "method_summary": "Sear thin strips of steak, cook onion and mushrooms in butter, make a sauce with flour, broth, mustard and sour cream, return the beef and serve over pasta or egg noodles.",
+      "expected": {
+        "cuisine": "other",
+        "meal_type": "dinner",
+        "effort": "easy",
+        "protein": [
+          "beef"
+        ],
+        "carb_base": [
+          "pasta"
+        ],
+        "method": [
+          "fry"
+        ],
+        "optional": {
+          "carb_base": [
+            "noodles"
+          ],
+          "method": [
+            "simmer",
+            "one_pot"
+          ]
+        }
+      }
+    },
+    {
+      "id": "R09",
+      "title": "Leek and potato soup (vichyssoise)",
+      "set": "heldout",
+      "source": "bbcgoodfood.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "450g potatoes peeled and cut into 1cm pieces  (try Golden Wonders or Kerr Pinks)",
+        "1 small onion cut the same size as the potatoes",
+        "450g white parts of leeks sliced  (save the green tops for another soup or stock)",
+        "850ml-1.2litres/1.5-2pts light chicken or vegetable stock",
+        "142ml carton whipping cream",
+        "125ml full-fat milk",
+        "the white part of 1 leek",
+        "a small knob of butter",
+        "finely chopped chives"
+      ],
+      "method_summary": "Sweat potatoes, onion and leeks in butter, simmer in stock until soft, blend with cream and milk, and serve hot or chilled with leek and chives.",
+      "expected": {
+        "cuisine": [
+          "british",
+          "french"
+        ],
+        "meal_type": [
+          "lunch",
+          "dinner"
+        ],
+        "effort": "easy",
+        "protein": [],
+        "carb_base": [
+          "potato"
+        ],
+        "method": [
+          "simmer"
+        ],
+        "optional": {
+          "method": [
+            "fry",
+            "one_pot"
+          ]
+        }
+      }
+    },
+    {
+      "id": "R10",
+      "title": "Chicken jalfrezi",
+      "set": "heldout",
+      "source": "bbcgoodfood.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "For the sauce",
+        "½ large onion roughly chopped",
+        "1 green chilli finely chopped",
+        "vegetable oil for frying",
+        "400g can plum tomatoes",
+        "1 tbsp ground coriander",
+        "1 tsp turmeric",
+        "For the meat & veg",
+        "2-3 chicken breasts diced",
+        "2 red chillies finely chopped (optional)",
+        "2 tsp garam masala",
+        "handful of fresh, chopped coriander leaves",
+        "cooked basmati rice or naan bread to serve"
+      ],
+      "method_summary": "Blend onion, garlic, chilli and tomatoes into a sauce with spices and cook down, fry the spiced chicken with onion and peppers, then combine and simmer. Finish with garam masala and coriander.",
+      "expected": {
+        "cuisine": "indian",
+        "meal_type": "dinner",
+        "effort": "medium",
+        "protein": [
+          "chicken"
+        ],
+        "carb_base": [],
+        "method": [
+          "simmer"
+        ],
+        "optional": {
+          "carb_base": [
+            "rice",
+            "bread"
+          ],
+          "method": [
+            "fry"
+          ]
+        }
+      }
+    },
+    {
+      "id": "R11",
+      "title": "Chicken biryani",
+      "set": "heldout",
+      "source": "bbcgoodfood.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "1 bay leaf",
+        "3 cardamom pods",
+        "small  cinnamon stick",
+        "4 skinless chicken breasts cut into large chunks",
+        "4 tbsp balti curry paste",
+        "85g raisins",
+        "850ml chicken stock",
+        "30g coriander ½ chopped, ½ leaves picked and 2 tbsp toasted flaked almonds, to serve"
+      ],
+      "method_summary": "Soak the rice, fry onion with whole spices, add chicken and curry paste, layer with rice and raisins, pour over stock and cook covered until the rice is tender.",
+      "expected": {
+        "cuisine": "indian",
+        "meal_type": "dinner",
+        "effort": "easy",
+        "protein": [
+          "chicken"
+        ],
+        "carb_base": [
+          "rice"
+        ],
+        "method": [
+          "simmer"
+        ],
+        "optional": {
+          "method": [
+            "fry",
+            "one_pot",
+            "bake"
+          ]
+        }
+      }
+    },
+    {
+      "id": "R12",
+      "title": "Fish parcels and tomato orzo",
+      "set": "heldout",
+      "source": "jamieoliver.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "150g dried orzo",
+        "1 x 400g tin of plum tomatoes",
+        "2 cloves of garlic",
+        "1 fresh red chilli",
+        "½ a bunch of basil (15g)",
+        "160g roasted red peppers",
+        "1 small courgette (160g)",
+        "olive oil",
+        "2 x 130g chunky white fish fillets, skin on, scaled, pin-boned, from sustainable sources",
+        "15g Parmesan cheese"
+      ],
+      "method_summary": "Cook orzo in a quick tomato, garlic and chilli sauce with peppers and courgette, then bake the fish in foil parcels on top for 10 minutes.",
+      "expected": {
+        "cuisine": [
+          "italian",
+          "other"
+        ],
+        "meal_type": "dinner",
+        "effort": "easy",
+        "protein": [
+          "fish"
+        ],
+        "carb_base": [
+          "pasta"
+        ],
+        "method": [
+          "bake"
+        ],
+        "optional": {
+          "method": [
+            "simmer"
+          ],
+          "protein": [
+            "cheese"
+          ]
+        }
+      }
+    },
+    {
+      "id": "R13",
+      "title": "Chickpea arrabbiata",
+      "set": "heldout",
+      "source": "jamieoliver.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "1 clove of garlic",
+        "200g passata",
+        "½ x 400g tin of chickpeas",
+        "125g fresh lasagne sheets",
+        "30g rocket",
+        "optional: extra virgin olive oil"
+      ],
+      "method_summary": "Fry garlic and chilli, add passata and chickpeas, simmer briefly, toss with torn fresh lasagne sheets and rocket, finish with Parmesan.",
+      "expected": {
+        "cuisine": "italian",
+        "meal_type": "dinner",
+        "effort": "easy",
+        "protein": [
+          "pulses"
+        ],
+        "carb_base": [
+          "pasta"
+        ],
+        "method": [
+          "simmer"
+        ],
+        "optional": {
+          "protein": [
+            "cheese"
+          ],
+          "method": [
+            "fry",
+            "one_pot"
+          ]
+        }
+      },
+      "dietary": {
+        "vegetarian": false,
+        "vegan": false,
+        "why": "Labelled vegetarian by the site, but Parmesan is made with animal rennet. Derivation from the hierarchy must catch this."
+      }
+    },
+    {
+      "id": "R14",
+      "title": "Easy roast chicken",
+      "set": "heldout",
+      "source": "jamieoliver.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "1 x 1.6kg whole free-range chicken",
+        "2 medium onions",
+        "2 sticks of celery",
+        "1 bulb of garlic",
+        "1 bunch of mixed fresh herbs such as thyme, rosemary, bay"
+      ],
+      "method_summary": "Roast a whole chicken on a bed of onion, carrot, celery and garlic with lemon and herbs for about 1 hour 20 minutes, rest it, and make gravy from the tray.",
+      "expected": {
+        "cuisine": "british",
+        "meal_type": "dinner",
+        "effort": "easy",
+        "protein": [
+          "chicken"
+        ],
+        "carb_base": [],
+        "method": [
+          "roast"
+        ],
+        "optional": {}
+      }
+    },
+    {
+      "id": "R15",
+      "title": "Vegan chilli",
+      "set": "heldout",
+      "source": "bbcgoodfood.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "2 sweet potatoes peeled and cut into medium chunks",
+        "2 tsp smoked paprika",
+        "2 celery sticks chopped",
+        "1-2 tsp chilli powder (depending on how hot you like it)",
+        "1 tsp dried oregano",
+        "400g can black beans drained",
+        "lime wedges guacamole, rice and coriander to serve"
+      ],
+      "method_summary": "Roast sweet potato with spices, fry the onion, carrot, celery and pepper, simmer with tomatoes and beans, and serve with lime, guacamole, rice and coriander.",
+      "expected": {
+        "cuisine": [
+          "mexican",
+          "american"
+        ],
+        "meal_type": "dinner",
+        "effort": "easy",
+        "protein": [
+          "pulses"
+        ],
+        "carb_base": [],
+        "method": [
+          "simmer"
+        ],
+        "optional": {
+          "carb_base": [
+            "rice",
+            "potato"
+          ],
+          "method": [
+            "roast",
+            "fry",
+            "one_pot"
+          ]
+        }
+      },
+      "dietary": {
+        "vegetarian": true,
+        "vegan": true,
+        "why": "No animal products on any line."
+      }
+    },
+    {
+      "id": "R16",
+      "title": "Greek salad",
+      "set": "heldout",
+      "source": "bbcgoodfood.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "4 large  vine tomatoes cut into irregular wedges",
+        "1 cucumber peeled, deseeded, then roughly chopped",
+        "½ a red onion thinly sliced",
+        "16 Kalamata olives",
+        "85g feta cheese cut into chunks (barrel matured feta is the best)",
+        "4 tbsp Greek extra virgin olive oil"
+      ],
+      "method_summary": "Chop tomatoes, cucumber and onion, add olives, feta and oregano, and dress with olive oil. No cooking.",
+      "expected": {
+        "cuisine": "greek",
+        "meal_type": [
+          "side",
+          "lunch"
+        ],
+        "effort": "easy",
+        "protein": [
+          "cheese"
+        ],
+        "carb_base": [],
+        "method": [
+          "no_cook"
+        ],
+        "optional": {}
+      },
+      "dietary": {
+        "vegetarian": "depends_on_product",
+        "vegan": false,
+        "why": "Some feta uses animal rennet; the hierarchy needs a per-product flag or an 'unknown' state."
+      }
+    },
+    {
+      "id": "R17",
+      "title": "Easy pancakes",
+      "set": "heldout",
+      "source": "bbcgoodfood.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "300ml milk",
+        "1 tbsp sunflower or vegetable oil plus a little extra for frying",
+        "lemon wedges to serve (optional)",
+        "caster sugar to serve (optional)"
+      ],
+      "method_summary": "Whisk flour, eggs, milk and oil into a batter, then fry thin pancakes one at a time. Serve with lemon and sugar.",
+      "expected": {
+        "cuisine": "british",
+        "meal_type": "breakfast",
+        "effort": "easy",
+        "protein": [],
+        "carb_base": [],
+        "method": [
+          "fry"
+        ],
+        "optional": {
+          "protein": [
+            "egg"
+          ]
+        }
+      }
+    },
+    {
+      "id": "R18",
+      "title": "Easy egg-fried rice",
+      "set": "heldout",
+      "source": "bbcgoodfood.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "250g long grain rice",
+        "3 tbsp vegetable oil",
+        "2 spring onions sliced, to serve"
+      ],
+      "method_summary": "Cook the rice, fry the onion, push aside and scramble the eggs, then toss everything together over high heat with spring onions.",
+      "expected": {
+        "cuisine": "chinese",
+        "meal_type": "side",
+        "effort": "easy",
+        "protein": [
+          "egg"
+        ],
+        "carb_base": [
+          "rice"
+        ],
+        "method": [
+          "fry"
+        ],
+        "optional": {
+          "method": [
+            "simmer"
+          ]
+        }
+      }
+    },
+    {
+      "id": "R19",
+      "title": "Easy naan bread",
+      "set": "heldout",
+      "source": "bbcgoodfood.com",
+      "capture": "json-ld",
+      "ingredients": [
+        "½-1 tsp strongly-flavoured seeds such as nigella or cumin seeds (optional)",
+        "2 tbsp  melted butter",
+        "8 tbsp  natural yogurt",
+        "oil for the bowl",
+        "small handful of coriander finely chopped, plus extra to serve"
+      ],
+      "method_summary": "Make a yogurt dough with flour, sugar, baking powder and seeds, rest it, roll into ovals and cook in a hot dry pan, then brush with garlic butter.",
+      "expected": {
+        "cuisine": "indian",
+        "meal_type": "side",
+        "effort": "medium",
+        "protein": [],
+        "carb_base": [
+          "bread"
+        ],
+        "method": [
+          "fry"
+        ],
+        "optional": {
+          "method": [
+            "grill",
+            "bake"
+          ]
+        }
+      }
+    },
+    {
+      "id": "R20",
+      "title": "Shepherd's pie (household notes)",
+      "set": "heldout",
+      "source": "household",
+      "capture": "manual",
+      "ingredients": [
+        "mince 500g",
+        "onion, carrot",
+        "tom puree squeeze",
+        "worcester sauce glug",
+        "1 oxo",
+        "1kg spuds for mash",
+        "butter + milk for mash",
+        "cheese on top if feeling it",
+        "Gas 6, 30-40 mins",
+        "Serves 4 + leftovers"
+      ],
+      "method_summary": "Brown the mince with onion and carrot, add puree, worcester sauce and an Oxo with water, simmer, top with mash and cheese, bake at gas 6 for 30-40 minutes.",
+      "expected": {
+        "cuisine": "british",
+        "meal_type": "dinner",
+        "effort": "easy",
+        "protein": [],
+        "carb_base": [
+          "potato"
+        ],
+        "method": [
+          "bake"
+        ],
+        "optional": {
+          "protein": [
+            "lamb",
+            "beef",
+            "cheese"
+          ],
+          "method": [
+            "fry",
+            "simmer"
+          ]
+        }
+      },
+      "synthetic": true
     }
   ]
 }

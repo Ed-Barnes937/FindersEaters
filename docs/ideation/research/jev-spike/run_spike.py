@@ -353,11 +353,16 @@ def main() -> None:
     ap.add_argument("--model", default=DEFAULT_MODEL)
     ap.add_argument("--framing", choices=("v1", "v2"), default="v1", help="question framing (v2 = phase 2 retry)")
     ap.add_argument("--rescore", type=Path, help="re-score an existing results file offline; no network")
+    ap.add_argument("--set", choices=("all", "dev", "heldout"), default="all",
+                    help="dev = L01-L44 and R01-R03 (v2 was tuned on these); heldout = lines added 2026-10-13")
     args = ap.parse_args()
     global FRAMING
     FRAMING = args.framing
 
     golden = json.loads((HERE / "golden.json").read_text())
+    if args.set != "all":
+        for k in ("lines", "recipes"):
+            golden[k] = [it for it in golden[k] if it.get("set", "dev") == args.set]
     lines = golden["lines"][: args.limit] if args.limit else golden["lines"]
     recipes = golden["recipes"] if (args.recipes or not args.limit) else []
     line_reqs = [(item, *build_line_request(item)) for item in lines]

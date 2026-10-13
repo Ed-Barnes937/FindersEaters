@@ -25,7 +25,7 @@ The recipe exactly as the user supplied it, kept forever so it can be re-parsed.
 _Avoid_: Raw recipe, source
 
 **Engine output**:
-The structured form the engine derived from the original text: parsed lines, tags and recipe-level facts.
+The structured form the engine derived from the original text: parsed lines, tags and recipe-level facts such as total time (time is a fact, not a tag).
 _Avoid_: Parse, parsed recipe
 
 **Correction**:
@@ -33,7 +33,7 @@ A user's override of part of the engine output. It survives re-parsing.
 _Avoid_: Edit
 
 **Personal layer**:
-Household facts about a recipe (favourite, rating, notes, times cooked), held apart from the recipe itself.
+Household facts about a recipe (favourite, rating, notes, times cooked, user tags), held apart from the recipe itself.
 _Avoid_: User data, metadata
 
 **Provenance**:
@@ -58,9 +58,29 @@ _Avoid_: Base unit, standard unit
 Shared reference facts about food: the ingredient hierarchy, synonyms, dietary properties and conversions. It is not owned by any household.
 _Avoid_: Ingredient database, KB (in prose)
 
+**Golden set**:
+Hand-labelled recipe lines and recipes with the answer the engine should give for each stage. It is the engine's regression suite.
+_Avoid_: Test data, fixtures
+
+**Held-out set**:
+The part of the golden set that nothing is tuned on. Engine accuracy is reported against it only. The rest of the golden set, which framing and thresholds may be tuned on, is the dev set.
+_Avoid_: Test split, validation set
+
 **Tag**:
-A label on a recipe from a fixed dimension (cuisine, meal type, main protein, carb base, method, time, effort, dietary, equipment, season), or a free-form user tag. Every fixed tag has a written definition.
+A label on a recipe: either a value from a fixed dimension, or a user tag. Every fixed value has a written definition.
 _Avoid_: Category, label
+
+**Dimension**:
+One fixed axis of tags with a closed set of values: meal type, cuisine, main protein, carb base, method, effort, equipment or dietary. Each is either single- or multi-valued.
+_Avoid_: Facet, tag type
+
+**Derived tag**:
+A tag computed from a recipe's ingredients and the food knowledge base rather than judged by the engine. Dietary tags are derived. It is corrected by correcting the ingredients, never directly.
+_Avoid_: Inferred tag
+
+**User tag**:
+A free-form label a household puts on a recipe. It is a household fact, kept in the personal layer, and the app never interprets it.
+_Avoid_: Custom tag, label
 
 ### Search and planning
 
@@ -77,11 +97,17 @@ A query plus a limit, applied to a plan ("at most 1 `tag:pasta`").
 _Avoid_: Constraint, filter
 
 **Plan**:
-A list of recipes keyed by date, with day assignment optional. It stores servings directly.
+A list of plan items, each optionally on a date. A date can hold any number of plan items.
 _Avoid_: Meal plan, week, schedule
 
+**Plan item**:
+One entry in a plan. For now it is always a single recipe with its own servings, optionally on a date.
+_Avoid_: Meal, slot
+
+"Meal" is not a domain term: what is eaten together is the plan items that share a date.
+
 **Anchor**:
-A recipe the household has already chosen for a plan, which suggestions are built around.
+A plan item the household has already chosen, which suggestions are built around.
 _Avoid_: Pinned recipe, seed
 
 **Suggestion**:
@@ -111,7 +137,3 @@ _Avoid_: Pantry, staples, inventory
 **Link pack**:
 A curated, themed list of recipe links that a household can import in one tap. Recipes are fetched per household and never hosted by us.
 _Avoid_: Stock library, starter recipes
-
-## Flagged ambiguities
-
-- **Plan item**: is it always one recipe, or can it be a meal of several (curry, rice and a side)? This is unresolved. Until it is, "plan item" is not a defined term.
