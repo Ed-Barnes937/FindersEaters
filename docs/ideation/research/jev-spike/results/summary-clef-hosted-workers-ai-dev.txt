@@ -1,0 +1,106 @@
+L01   454ms ok  200g basmati rice
+L02  1114ms ok  1 x 400g tin chopped tomatoes, drained
+L03   477ms ok  2 red onions, finely chopped
+L04   678ms ok  1 large onion, finely chopped (about 200g)
+L05   316ms ok  Salt and pepper
+L06  1433ms ok  salt, to taste
+L07   443ms ERR a splash of water
+L08   422ms ok  A knob of butter
+L09   541ms ok  1½ tsp ground cumin
+L10   599ms ok  ½ tsp chilli flakes
+L11   528ms ok  2-3 fat garlic cloves, crushed
+L12   501ms ok  100g plain flour, plus extra for dusting
+L13   656ms ok  1 cup (240ml) whole milk
+L14   561ms ok  2 cups all-purpose flour
+L15   412ms ok  1 pint chicken stock
+L16   510ms ok  1 pint heavy cream
+L17   421ms ok  1 cup frozen peas
+L18  1214ms ok  300ml double cream
+L19   562ms ok  1 tbsp olive oil, plus extra for drizzling
+L20   373ms ok  Olive oil, for frying
+L21   451ms ok  For the sauce:
+L22   348ms ok  FOR THE TOPPING
+L23   265ms ERR Marinade
+L24   629ms ok  Tip: you can use frozen peas instead of fresh.
+L25   275ms ok  Serves 4
+L26   609ms ok  1 x 25g pack coriander, leaves picked
+L27   557ms ok  250g/9oz spaghetti
+L28   952ms ok  1kg floury potatoes, such as Maris Piper, peeled and cut into chunks
+L29   699ms ok  2 x 400g cans chickpeas, drained and rinsed
+L30  1041ms ok  Juice of 1 lemon
+L31  1401ms ERR zest and juice of 1 unwaxed lemon
+L32   596ms ERR 100g salt and vinegar crisps, crushed
+L33   392ms ok  butter or margarine, for greasing
+L34   354ms ok  a pinch of saffron
+L35   461ms ERR a handful of basil leaves, torn
+L36  2371ms ERR 6 large free-range eggs
+L37   458ms ok  1 heaped tbsp tomato purée
+L38   492ms ok  1 cup (2 sticks) unsalted butter, softened
+L39   670ms ok  3/4 cup granulated sugar
+L40   692ms ok  1 vegetable stock cube, crumbled into 500ml boiling water
+L41   413ms ok  freshly ground black pepper
+L42   367ms ok  1-1.5kg beef brisket
+L43   586ms ok  2 tbsp Greek yoghurt, to serve
+L44   451ms ERR enough cold water to cover
+R01   515ms Chicken tikka masala
+R02   588ms Shakshuka
+R03   504ms Slow-cooker beef and ale stew
+
+model=@cf/cloudflare/clef framing=v2 taxonomy=phase2 raw results: run-20261013-172719-_cf_cloudflare_clef-dev-v2-phase2.jsonl
+response top-level keys seen: ['errors,messages,result,success']
+
+probe                                n    acc  acc@0.6 auto@0.6  acc@0.8 auto@0.8 near
+segment.role                        44   0.93     1.00     0.89     1.00     0.80     
+segment.compound                    39   0.97     1.00     0.64     1.00     0.18     
+classify.kind                       39   1.00     1.00     0.87     1.00     0.69     
+extract.tokens.quantity             35   0.97     1.00     0.40     1.00     0.03     
+extract.tokens.unit                 35   0.97     1.00     0.40     1.00     0.03     
+extract.tokens.size                 35   1.00     1.00     0.40     1.00     0.03     
+extract.tokens.ingredient           35   1.00     1.00     0.40     1.00     0.03     
+extract.tokens.prep                 35   1.00     1.00     0.40     1.00     0.03     
+extract.tokens.note                 35   1.00     1.00     0.40     1.00     0.03     
+extract.tokens.ALL_FIELDS           35   0.97     1.00     0.40     1.00     0.03     
+extract.tokens.CORE_FIELDS          35   0.97     1.00     0.40     1.00     0.03     
+extract.span.ingredient             35   0.97     1.00     0.57     1.00     0.43     
+resolve.ingredient                  18   0.94     1.00     0.89     1.00     0.56     
+resolve.unit_system                  7   1.00     1.00     1.00     1.00     0.57     
+tag.cuisine                          3   1.00     1.00     0.67        -     0.00     
+tag.meal_type                        3   1.00     1.00     0.67        -     0.00     
+tag.effort                           3   1.00     1.00     0.67        -     0.00     
+tag.protein(multi)                   3   1.00        -        -        -        -     
+tag.carb_base(multi)                 3   1.00        -        -        -        -     
+tag.method(multi)                    3   0.33        -        -        -        -     
+
+(acc@g = accuracy of answers with confidence >= g; auto@g = share auto-accepted at gate g; near = wrong answers that were a listed near miss)
+
+calibration (answers with a confidence, by stage):
+stage             [0,0.5)      [0.5,0.6)      [0.6,0.8)     [0.8,0.95)       [0.95,1]
+segment         0.73 n=15       1.00 n=4      1.00 n=22      1.00 n=40       1.00 n=2
+classify         1.00 n=3       1.00 n=2       1.00 n=7      1.00 n=26       1.00 n=1
+extract        0.96 n=115      1.00 n=68     1.00 n=109      1.00 n=23              -
+resolve          1.00 n=1       0.00 n=1       1.00 n=9      1.00 n=14              -
+tag              1.00 n=3              -       1.00 n=6              -              -
+requests=47 latency p50=515ms p95=1401ms max=2371ms
+input_tokens=157862 est_cost=$0.00663
+
+failures:
+  L07  segment.role                   got='note' expected='ingredient' conf=0.1353
+  L23  segment.role                   got='ingredient' expected='header' conf=0.0814
+  L31  segment.compound               got='compound' expected='single' conf=0.1688
+  L32  resolve.ingredient             got='crisps_ready_salted' expected='none' conf=0.5172
+  L35  extract.tokens.quantity        got=None expected='a' conf=0.2944
+  L35  extract.tokens.unit            got='a handful' expected='handful' conf=0.2944
+  L35  extract.tokens.ALL_FIELDS      got={'quantity': None, 'unit': 'a handful', 'size': None, 'ingredient': 'basil leaves', 'prep': 'torn', 'note': None} expected={'quantity': 'a', 'unit': 'handful', 'size': None, 'ingredient': ['basil leaves', 'basil'], 'prep': 'torn', 'note': None} conf=0.2944
+  L35  extract.tokens.CORE_FIELDS     got={'quantity': None, 'unit': 'a handful', 'size': None, 'ingredient': 'basil leaves'} expected={'quantity': 'a', 'unit': 'handful', 'size': None, 'ingredient': ['basil leaves', 'basil']} conf=0.2944
+  L36  extract.span.ingredient        got='large free-range eggs' expected=['free-range eggs', 'eggs'] conf=0.3345
+  L44  segment.role                   got='note' expected='ingredient' conf=0.146
+  R02  tag.method(multi)              got=['fry', 'one_pot', 'simmer'] expected=['one_pot', 'simmer'] conf=None
+  R03  tag.method(multi)              got=['one_pot', 'slow_cook'] expected=['slow_cook'] conf=None
+
+repeat check on first 6 line requests:
+  L01   811ms questions=9 same_top=9 byte_identical=9 max_conf_delta=0.0000
+  L02   746ms questions=13 same_top=13 byte_identical=13 max_conf_delta=0.0000
+  L03   761ms questions=10 same_top=10 byte_identical=10 max_conf_delta=0.0000
+  L04   678ms questions=13 same_top=13 byte_identical=13 max_conf_delta=0.0000
+  L05   410ms questions=7 same_top=7 byte_identical=7 max_conf_delta=0.0000
+  L06   427ms questions=7 same_top=7 byte_identical=7 max_conf_delta=0.0000

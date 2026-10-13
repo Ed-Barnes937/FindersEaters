@@ -1,0 +1,146 @@
+L01   903ms ok  200g basmati rice
+L02  1168ms ERR 1 x 400g tin chopped tomatoes, drained
+L03   860ms ok  2 red onions, finely chopped
+L04  1069ms ERR 1 large onion, finely chopped (about 200g)
+L05   641ms ok  Salt and pepper
+L06   814ms ok  salt, to taste
+L07   830ms ERR a splash of water
+L08   756ms ok  A knob of butter
+L09   909ms ok  1½ tsp ground cumin
+L10  1645ms ok  ½ tsp chilli flakes
+L11   870ms ERR 2-3 fat garlic cloves, crushed
+L12  1044ms ERR 100g plain flour, plus extra for dusting
+L13  1032ms ERR 1 cup (240ml) whole milk
+L14   874ms ok  2 cups all-purpose flour
+L15   760ms ok  1 pint chicken stock
+L16   818ms ok  1 pint heavy cream
+L17   920ms ok  1 cup frozen peas
+L18   788ms ok  300ml double cream
+L19  1123ms ERR 1 tbsp olive oil, plus extra for drizzling
+L20   587ms ok  Olive oil, for frying
+L21   616ms ok  For the sauce:
+L22   510ms ok  FOR THE TOPPING
+L23  1258ms ok  Marinade
+L24  1126ms ok  Tip: you can use frozen peas instead of fresh.
+L25   403ms ok  Serves 4
+L26  1271ms ERR 1 x 25g pack coriander, leaves picked
+L27  1721ms ERR 250g/9oz spaghetti
+L28  1907ms ERR 1kg floury potatoes, such as Maris Piper, peeled and cut into chunks
+L29  1695ms ERR 2 x 400g cans chickpeas, drained and rinsed
+L30   591ms ok  Juice of 1 lemon
+L31   984ms ok  zest and juice of 1 unwaxed lemon
+L32  1192ms ERR 100g salt and vinegar crisps, crushed
+L33   792ms ok  butter or margarine, for greasing
+L34  1001ms ok  a pinch of saffron
+L35   851ms ok  a handful of basil leaves, torn
+L36   596ms ok  6 large free-range eggs
+L37  1125ms ok  1 heaped tbsp tomato purée
+L38  1182ms ERR 1 cup (2 sticks) unsalted butter, softened
+L39   844ms ok  3/4 cup granulated sugar
+L40  1466ms ERR 1 vegetable stock cube, crumbled into 500ml boiling water
+L41   798ms ok  freshly ground black pepper
+L42   816ms ok  1-1.5kg beef brisket
+L43  1191ms ok  2 tbsp Greek yoghurt, to serve
+L44   944ms ERR enough cold water to cover
+R01   853ms Chicken tikka masala
+R02   787ms Shakshuka
+R03   875ms Slow-cooker beef and ale stew
+
+model=@cf/cloudflare/clef-flash framing=v2 taxonomy=phase2 raw results: run-20261013-172627-_cf_cloudflare_clef-flash-dev-v2-phase2.jsonl
+response top-level keys seen: ['errors,messages,result,success']
+
+probe                                n    acc  acc@0.6 auto@0.6  acc@0.8 auto@0.8 near
+segment.role                        44   1.00     1.00     0.68     1.00     0.11     
+segment.compound                    39   1.00     1.00     0.82     1.00     0.26     
+classify.kind                       39   0.95     1.00     0.90     1.00     0.72     
+extract.tokens.quantity             35   0.94     1.00     0.14        -     0.00     
+extract.tokens.unit                 35   0.77     1.00     0.14        -     0.00     
+extract.tokens.size                 35   0.89     1.00     0.14        -     0.00     
+extract.tokens.ingredient           35   0.91     1.00     0.14        -     0.00     
+extract.tokens.prep                 35   0.97     1.00     0.14        -     0.00     
+extract.tokens.note                 35   0.77     1.00     0.14        -     0.00     
+extract.tokens.ALL_FIELDS           35   0.66     1.00     0.14        -     0.00     
+extract.tokens.CORE_FIELDS          35   0.71     1.00     0.14        -     0.00     
+extract.span.ingredient             35   1.00     1.00     0.37     1.00     0.06     
+resolve.ingredient                  18   0.94     1.00     0.78     1.00     0.44     
+resolve.unit_system                  7   1.00     1.00     0.71        -     0.00     
+tag.cuisine                          3   1.00        -     0.00        -     0.00     
+tag.meal_type                        3   1.00     1.00     0.67        -     0.00     
+tag.effort                           3   1.00        -     0.00        -     0.00     
+tag.protein(multi)                   3   1.00        -        -        -        -     
+tag.carb_base(multi)                 3   0.67        -        -        -        -     
+tag.method(multi)                    3   1.00        -        -        -        -     
+
+(acc@g = accuracy of answers with confidence >= g; auto@g = share auto-accepted at gate g; near = wrong answers that were a listed near miss)
+
+calibration (answers with a confidence, by stage):
+stage             [0,0.5)      [0.5,0.6)      [0.6,0.8)     [0.8,0.95)       [0.95,1]
+segment         1.00 n=13       1.00 n=8      1.00 n=47      1.00 n=15              -
+classify         0.33 n=3       1.00 n=1       1.00 n=7      1.00 n=28              -
+extract        0.78 n=217      1.00 n=45      1.00 n=51       1.00 n=2              -
+resolve          0.75 n=4       1.00 n=2      1.00 n=11       1.00 n=7       1.00 n=1
+tag              1.00 n=5       1.00 n=2       1.00 n=2              -              -
+requests=47 latency p50=875ms p95=1695ms max=1907ms
+input_tokens=157862 est_cost=$0.00663
+
+failures:
+  L02  extract.tokens.unit            got='g tin' expected='tin' conf=0.3158
+  L02  extract.tokens.size            got='400' expected='400g' conf=0.3158
+  L02  extract.tokens.ALL_FIELDS      got={'quantity': '1', 'unit': 'g tin', 'size': '400', 'ingredient': 'chopped tomatoes', 'prep': 'drained', 'note': None} expected={'quantity': '1', 'unit': 'tin', 'size': '400g', 'ingredient': 'chopped tomatoes', 'prep': 'drained', 'note': None} conf=0.3158
+  L02  extract.tokens.CORE_FIELDS     got={'quantity': '1', 'unit': 'g tin', 'size': '400', 'ingredient': 'chopped tomatoes'} expected={'quantity': '1', 'unit': 'tin', 'size': '400g', 'ingredient': 'chopped tomatoes'} conf=0.3158
+  L04  extract.tokens.quantity        got='1 200' expected='1' conf=0.1103
+  L04  extract.tokens.unit            got='g' expected=None conf=0.1103
+  L04  extract.tokens.note            got=None expected=['about 200g', '(about 200g)'] conf=0.1103
+  L04  extract.tokens.ALL_FIELDS      got={'quantity': '1 200', 'unit': 'g', 'size': 'large', 'ingredient': 'onion', 'prep': 'finely chopped', 'note': None} expected={'quantity': '1', 'unit': None, 'size': 'large', 'ingredient': 'onion', 'prep': 'finely chopped', 'note': ['about 200g', '(about 200g)']} conf=0.1103
+  L04  extract.tokens.CORE_FIELDS     got={'quantity': '1 200', 'unit': 'g', 'size': 'large', 'ingredient': 'onion'} expected={'quantity': '1', 'unit': None, 'size': 'large', 'ingredient': 'onion'} conf=0.1103
+  L07  classify.kind                  got='quantified' expected='not_ingredient' conf=0.4301
+  L11  extract.tokens.size            got=None expected='fat' conf=0.2119
+  L11  extract.tokens.ingredient      got='fat garlic' expected=['garlic', 'garlic cloves'] conf=0.2119
+  L11  extract.tokens.ALL_FIELDS      got={'quantity': '2 3', 'unit': 'cloves', 'size': None, 'ingredient': 'fat garlic', 'prep': 'crushed', 'note': None} expected={'quantity': '2-3', 'unit': ['cloves', None], 'size': 'fat', 'ingredient': ['garlic', 'garlic cloves'], 'prep': 'crushed', 'note': None} conf=0.2119
+  L11  extract.tokens.CORE_FIELDS     got={'quantity': '2 3', 'unit': 'cloves', 'size': None, 'ingredient': 'fat garlic'} expected={'quantity': '2-3', 'unit': ['cloves', None], 'size': 'fat', 'ingredient': ['garlic', 'garlic cloves']} conf=0.2119
+  L12  extract.tokens.note            got='extra for dusting' expected='plus extra for dusting' conf=0.0838
+  L12  extract.tokens.ALL_FIELDS      got={'quantity': '100', 'unit': 'g', 'size': None, 'ingredient': 'plain flour', 'prep': None, 'note': 'extra for dusting'} expected={'quantity': '100', 'unit': 'g', 'size': None, 'ingredient': 'plain flour', 'prep': None, 'note': 'plus extra for dusting'} conf=0.0838
+  L13  extract.tokens.unit            got='cup ml' expected='cup' conf=0.2231
+  L13  extract.tokens.note            got='240' expected=['240ml', '(240ml)'] conf=0.2231
+  L13  extract.tokens.ALL_FIELDS      got={'quantity': '1', 'unit': 'cup ml', 'size': None, 'ingredient': 'whole milk', 'prep': None, 'note': '240'} expected={'quantity': '1', 'unit': 'cup', 'size': None, 'ingredient': 'whole milk', 'prep': None, 'note': ['240ml', '(240ml)']} conf=0.2231
+  L13  extract.tokens.CORE_FIELDS     got={'quantity': '1', 'unit': 'cup ml', 'size': None, 'ingredient': 'whole milk'} expected={'quantity': '1', 'unit': 'cup', 'size': None, 'ingredient': 'whole milk'} conf=0.2231
+  L19  extract.tokens.note            got='extra for drizzling' expected='plus extra for drizzling' conf=0.0803
+  L19  extract.tokens.ALL_FIELDS      got={'quantity': '1', 'unit': 'tbsp', 'size': None, 'ingredient': 'olive oil', 'prep': None, 'note': 'extra for drizzling'} expected={'quantity': '1', 'unit': 'tbsp', 'size': None, 'ingredient': 'olive oil', 'prep': None, 'note': 'plus extra for drizzling'} conf=0.0803
+  L26  extract.tokens.unit            got='g pack' expected='pack' conf=0.2155
+  L26  extract.tokens.size            got='25' expected='25g' conf=0.2155
+  L26  extract.tokens.ALL_FIELDS      got={'quantity': '1', 'unit': 'g pack', 'size': '25', 'ingredient': 'coriander', 'prep': 'leaves picked', 'note': None} expected={'quantity': '1', 'unit': 'pack', 'size': '25g', 'ingredient': ['coriander', 'coriander leaves'], 'prep': ['leaves picked', 'picked'], 'note': None} conf=0.2155
+  L26  extract.tokens.CORE_FIELDS     got={'quantity': '1', 'unit': 'g pack', 'size': '25', 'ingredient': 'coriander'} expected={'quantity': '1', 'unit': 'pack', 'size': '25g', 'ingredient': ['coriander', 'coriander leaves']} conf=0.2155
+  L27  extract.tokens.unit            got='g oz' expected='g' conf=0.2776
+  L27  extract.tokens.note            got='9' expected=['9oz', None] conf=0.2776
+  L27  extract.tokens.ALL_FIELDS      got={'quantity': '250', 'unit': 'g oz', 'size': None, 'ingredient': 'spaghetti', 'prep': None, 'note': '9'} expected={'quantity': '250', 'unit': 'g', 'size': None, 'ingredient': 'spaghetti', 'prep': None, 'note': ['9oz', None]} conf=0.2776
+  L27  extract.tokens.CORE_FIELDS     got={'quantity': '250', 'unit': 'g oz', 'size': None, 'ingredient': 'spaghetti'} expected={'quantity': '250', 'unit': 'g', 'size': None, 'ingredient': 'spaghetti'} conf=0.2776
+  L28  extract.tokens.ingredient      got='floury potatoes such as Maris Piper' expected=['floury potatoes', 'potatoes'] conf=0.2105
+  L28  extract.tokens.note            got=None expected='such as Maris Piper' conf=0.2105
+  L28  extract.tokens.ALL_FIELDS      got={'quantity': '1', 'unit': 'kg', 'size': None, 'ingredient': 'floury potatoes such as Maris Piper', 'prep': 'peeled and cut into chunks', 'note': None} expected={'quantity': '1', 'unit': 'kg', 'size': None, 'ingredient': ['floury potatoes', 'potatoes'], 'prep': 'peeled and cut into chunks', 'note': 'such as Maris Piper'} conf=0.2105
+  L28  extract.tokens.CORE_FIELDS     got={'quantity': '1', 'unit': 'kg', 'size': None, 'ingredient': 'floury potatoes such as Maris Piper'} expected={'quantity': '1', 'unit': 'kg', 'size': None, 'ingredient': ['floury potatoes', 'potatoes']} conf=0.2105
+  L29  extract.tokens.unit            got='g cans' expected='cans' conf=0.1682
+  L29  extract.tokens.size            got='400' expected='400g' conf=0.1682
+  L29  extract.tokens.ALL_FIELDS      got={'quantity': '2', 'unit': 'g cans', 'size': '400', 'ingredient': 'chickpeas', 'prep': 'drained and rinsed', 'note': None} expected={'quantity': '2', 'unit': 'cans', 'size': '400g', 'ingredient': 'chickpeas', 'prep': 'drained and rinsed', 'note': None} conf=0.1682
+  L29  extract.tokens.CORE_FIELDS     got={'quantity': '2', 'unit': 'g cans', 'size': '400', 'ingredient': 'chickpeas'} expected={'quantity': '2', 'unit': 'cans', 'size': '400g', 'ingredient': 'chickpeas'} conf=0.1682
+  L32  resolve.ingredient             got='crisps_ready_salted' expected='none' conf=0.3823
+  L38  extract.tokens.unit            got='cup sticks' expected='cup' conf=0.1212
+  L38  extract.tokens.note            got='2' expected=['2 sticks', '(2 sticks)'] conf=0.1212
+  L38  extract.tokens.ALL_FIELDS      got={'quantity': '1', 'unit': 'cup sticks', 'size': None, 'ingredient': 'unsalted butter', 'prep': 'softened', 'note': '2'} expected={'quantity': '1', 'unit': 'cup', 'size': None, 'ingredient': 'unsalted butter', 'prep': 'softened', 'note': ['2 sticks', '(2 sticks)']} conf=0.1212
+  L38  extract.tokens.CORE_FIELDS     got={'quantity': '1', 'unit': 'cup sticks', 'size': None, 'ingredient': 'unsalted butter'} expected={'quantity': '1', 'unit': 'cup', 'size': None, 'ingredient': 'unsalted butter'} conf=0.1212
+  L40  extract.tokens.quantity        got='1 500' expected='1' conf=0.1354
+  L40  extract.tokens.unit            got='ml' expected=None conf=0.1354
+  L40  extract.tokens.ingredient      got='vegetable stock cube water' expected=['vegetable stock cube', 'stock cube'] conf=0.1354
+  L40  extract.tokens.prep            got='crumbled boiling' expected='crumbled' conf=0.1354
+  L40  extract.tokens.note            got=None expected=['into 500ml boiling water', '500ml boiling water'] conf=0.1354
+  L40  extract.tokens.ALL_FIELDS      got={'quantity': '1 500', 'unit': 'ml', 'size': None, 'ingredient': 'vegetable stock cube water', 'prep': 'crumbled boiling', 'note': None} expected={'quantity': '1', 'unit': None, 'size': None, 'ingredient': ['vegetable stock cube', 'stock cube'], 'prep': 'crumbled', 'note': ['into 500ml boiling water', '500ml boiling water']} conf=0.1354
+  L40  extract.tokens.CORE_FIELDS     got={'quantity': '1 500', 'unit': 'ml', 'size': None, 'ingredient': 'vegetable stock cube water'} expected={'quantity': '1', 'unit': None, 'size': None, 'ingredient': ['vegetable stock cube', 'stock cube']} conf=0.1354
+  L44  classify.kind                  got='unquantified' expected='not_ingredient' conf=0.2948
+  R02  tag.carb_base(multi)           got=[] expected=['bread'] conf=None
+
+repeat check on first 6 line requests:
+  L01   778ms questions=9 same_top=9 byte_identical=9 max_conf_delta=0.0000
+  L02  1041ms questions=13 same_top=13 byte_identical=13 max_conf_delta=0.0000
+  L03   747ms questions=10 same_top=10 byte_identical=10 max_conf_delta=0.0000
+  L04  1233ms questions=13 same_top=13 byte_identical=13 max_conf_delta=0.0000
+  L05   589ms questions=7 same_top=7 byte_identical=7 max_conf_delta=0.0000
+  L06   895ms questions=7 same_top=7 byte_identical=7 max_conf_delta=0.0000
