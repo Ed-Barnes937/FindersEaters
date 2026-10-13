@@ -29,8 +29,8 @@ The structured form the engine derived from the original text: parsed lines, tag
 _Avoid_: Parse, parsed recipe
 
 **Correction**:
-A user's override of part of the engine output. It survives re-parsing.
-_Avoid_: Edit
+A user's decision about part of the engine output: a changed value, or a confirmation that the engine's value is right. It is an input to the engine, so it survives re-parsing and holds that part fixed against later engine changes.
+_Avoid_: Edit, override
 
 **Personal layer**:
 Household facts about a recipe (favourite, rating, notes, times cooked, user tags), held apart from the recipe itself.
@@ -110,6 +110,22 @@ _Avoid_: Inferred tag
 A free-form label a household puts on a recipe. It is a household fact, kept in the personal layer, and the app never interprets it.
 _Avoid_: Custom tag, label
 
+**Flag**:
+A note the engine attaches to part of its output that it is unsure of or found inconsistent, asking the household to check it. A recipe needs review while it has a flag whose part has no correction.
+_Avoid_: Warning, error, issue
+
+**Re-parse**:
+Running the engine again over a recipe's original text, with its corrections held fixed. It happens when the engine changes. A food knowledge base change only re-runs resolution and what follows it.
+_Avoid_: Reprocess, refresh
+
+**Unit system**:
+The measuring convention a recipe was written in (UK, US or Australian), which fixes what a cup, a tablespoon and a pint mean. It belongs to the recipe, not to a line.
+_Avoid_: Locale, region
+
+**Optional line**:
+An ingredient line the recipe marks as optional. It still counts towards dietary tags.
+_Avoid_: Garnish
+
 ### Search and planning
 
 **Query**:
@@ -143,16 +159,36 @@ A plan item the household has already chosen, which suggestions are built around
 _Avoid_: Pinned recipe, seed
 
 **Suggestion**:
-A recipe the planner proposes for a plan. It always carries its reasons.
+A recipe the planner proposes for a plan. It always carries its reasons. It is not part of the plan until the household accepts it, which makes it a plan item (and so an anchor).
 _Avoid_: Recommendation
 
 **Reason**:
-A human-readable part of a suggestion's score ("uses the rest of the coriander").
+A human-readable part of a suggestion's score ("uses the rest of the coriander"). Every reason is one term of the score, positive or negative, and the reasons add up to the score.
 _Avoid_: Explanation
 
 **Cadence**:
-A recipe's natural gap between cookings, which makes it "due" as that gap approaches.
+A recipe's natural gap between cookings, which makes it "due" as that gap approaches. Until cadence is learned, every recipe shares one default gap.
 _Avoid_: Recency, frequency
+
+**Candidate pool**:
+The recipes a suggestion request may draw from: those matching the request's query, not already in the plan and not skipped. Hard rules narrow it; soft signals only rank it.
+_Avoid_: Candidates list, eligible recipes
+
+**Overlap**:
+The ingredients a suggestion shares with the rest of the plan, each weighted by its distinctiveness. Always-have ingredients never count.
+_Avoid_: Shared ingredients score, reuse
+
+**Distinctiveness**:
+How rare an ingredient is in the household's own library. Shared fennel is distinctive; shared salt is not.
+_Avoid_: Rarity, weight
+
+**Variety**:
+How different a suggestion is from the rest of the plan in main protein, carb base, cuisine and method. Each repeat costs more than the last.
+_Avoid_: Diversity, similarity score
+
+**Skip**:
+Turning down a suggestion for this planning session only, which replaces it with the next best. It is not remembered.
+_Avoid_: Dismiss (reserved for the later dismiss with a reason), reject
 
 ### Shopping
 
