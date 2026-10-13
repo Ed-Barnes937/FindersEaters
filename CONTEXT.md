@@ -14,6 +14,10 @@ _Avoid_: Account, family, team
 A person who signs in and acts for a household.
 _Avoid_: Member (reserved for a future concept: a person who eats, who may not have an account)
 
+**Import token**:
+A secret that lets one device (such as the iPhone Shortcut) add recipes to a household's library from outside the app. It belongs to the household, is made by a user and can only import: it cannot read the library or sign in.
+_Avoid_: API key
+
 ### Recipes
 
 **Recipe**:
@@ -114,6 +118,17 @@ _Avoid_: Custom tag, label
 A note the engine attaches to part of its output that it is unsure of or found inconsistent, asking the household to check it. A recipe needs review while it has a flag whose part has no correction.
 _Avoid_: Warning, error, issue
 
+**Scale factor**:
+How many times the recipe as written a plan item or recipe view uses: the chosen servings divided by the recipe's servings (or by its yield count for a "makes" recipe). As written, or with unknown servings, it is 1.
+_Avoid_: Multiplier
+
+**Scaling note**:
+A short instruction shown on a scaled ingredient line that does not scale cleanly ("Rounded from 1½", "Part tin - keep the rest", "start with less and add to taste"), plus one recipe-level note that times and tin sizes are as written. Unlike a flag, it depends on the scale factor, asks nothing of the household and never makes a recipe need review.
+_Avoid_: Scaling flag, warning
+
+**Use amount**:
+The single amount of a scaled line that a cook will actually use and the shopping list buys: the top of a range, a whole count for things that only come whole, and the combined value of an arithmetic quantity.
+
 **Check line**:
 A parsed line with a flag other than review-first, shown expanded on the review screen with a question to answer.
 _Avoid_: Problem line, error line
@@ -171,8 +186,12 @@ A dated plan item, counted as the recipe being cooked on that date, whether the 
 _Avoid_: Cook event, history entry
 
 **Current plan**:
-The household's most recently created plan, which the Plan and Shop screens open by default; older plans stay as history. Starting a new plan can bring over the old plan's undated items.
+The household's most recently created plan, which the Plan and Shop screens open by default; older plans stay as history. Starting a new plan can bring over the old plan's items that are not cooked yet (undated, or dated today or later).
 _Avoid_: Active plan, this week
+
+**Finished plan**:
+A plan whose date range has ended, or, with no range, one that has dated items and none dated today or later. The household is nudged to start a new plan, but a plan never ends on its own.
+_Avoid_: Expired plan, closed plan
 
 **Anchor**:
 A plan item the household has already chosen, which suggestions are built around.
@@ -217,7 +236,7 @@ _Avoid_: Replace, substitute
 ### Shopping
 
 **Shopping list**:
-The shopping items needed for a plan, merged across its recipes, one per ingredient. It always reflects the current plan; only its ticks are kept, by item.
+The shopping items needed for every plan item in a plan, whatever the item's date, merged across its recipes, one per ingredient. Each plan has its own list, so a new plan starts with fresh ticks. It always reflects the plan as it is now; only its ticks are kept, by item.
 _Avoid_: Grocery list
 
 **Shopping item**:
@@ -225,7 +244,7 @@ One entry on a shopping list: an ingredient (or the exact wording of an unresolv
 _Avoid_: Row, line (a line is an ingredient line in a recipe)
 
 **Tick**:
-Marking a shopping item as got. It remembers the amount the shopper saw, so if the plan later needs more, the item is unticked again.
+Marking a shopping item as got. It remembers the amount the shopper saw, so if the plan later needs more, the item is unticked again. When a new plan brings over recipes not cooked yet, their ticks come with them and show as At home.
 _Avoid_: Check, done
 
 **Aisle**:
