@@ -17,20 +17,22 @@ Two Fly apps, one image each: `finders-eaters` (production, from `main`) and `fi
 | Domain | `<sub>.homeofed.com` (Cloudflare) | `<sub>-staging.homeofed.com` |
 
 - **Staging holds real household data.** That is the point: `develop`'s migrations, KB loads and re-parses are rehearsed on the real library before `main` gets them. It is acceptable for one household whose owner is the operator. Before any second household exists this needs revisiting (anonymised refresh or synthetic data).
-- **Fly secrets** per app: `DATABASE_URL` (pooled), `DATABASE_URL_DIRECT` (migrations, KB load, batch commands), `TYPESAFE_API_KEY` (Jev), `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`. Staging gets its own auth secret; the Jev key may be shared.
-- **GitHub secrets**: one app-scoped Fly deploy token per app (`fly tokens create deploy -a <app>`), not an org token. `BACKUP_DATABASE_URL` (production, direct, a dedicated read-only `backup` role with `pg_read_all_data`), `STAGING_DATABASE_URL_DIRECT`, and Tigris keys scoped to the backup bucket.
+- **Fly secrets** per app: `DATABASE_URL` (pooled), `DATABASE_URL_DIRECT` (migrations, KB load, batch commands), `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` (a token scoped to Workers AI, for hosted Clef per `docs/adr/0002-clef-on-workers-ai.md`), `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`. Staging gets its own auth secret; the Cloudflare account and token may be shared.
+- **GitHub secrets**: one app-scoped Fly deploy token per app (`fly tokens create deploy -a <app>`), not an org token. `BACKUP_DATABASE_URL` (production, direct, a dedicated read-only `backup` role with `pg_read_all_data`), `STAGING_DATABASE_URL_DIRECT`, Tigris keys scoped to the backup bucket, and `CLOUDFLARE_ACCOUNT_ID` plus `CLOUDFLARE_API_TOKEN` for the Clef canary and the manual live golden-set workflow.
 
 ## 3. The deploy pipeline
 
 All in GitHub Actions, with one concurrency group per environment so two deploys never overlap.
 
 **On every PR** (to `develop` or `main`):
-1. Lint, typecheck, unit tests, the golden-set suite against recorded Jev answers (engine spec section 7).
+1. Lint, typecheck, unit tests, the golden-set suite against recorded Clef answers (engine spec section 7).
 2. **Migration checks** against a fresh `pgvector/pgvector:pg17` service container: apply every migration from empty; `drizzle-kit check` (the schema and the migration history agree); the destructive-statement lint (section 4).
 
 **On push to `develop`**: build the KB artifact (below), `fly deploy` to staging, then `GET /health` (a deep database round-trip) as a smoke test.
 
 **On push to `main`**: the same, to production.
+
+**The Clef canary** (`docs/adr/0002-clef-on-workers-ai.md`, engine spec section 4): a scheduled workflow, once a day, sends the dev golden requests to hosted Clef and compares the answer fingerprint (choices and probabilities) with the one in engine configuration. The same job runs before every production deploy, and a mismatch blocks that deploy. A daily mismatch fails the job and opens an issue with per-stage scores and the changed answers; production keeps running. About $0.04 a run.
 
 - **The KB artifact.** `kb build` runs in CI before the Docker build (raw source downloads cached by the hash of `sources.json`), and writes one compressed artifact carrying its KB version. The Dockerfile copies it into the image; a missing artifact fails the build. The release step loads it. The image is therefore self-contained: a release never downloads from Open Food Facts, Intake24 or USDA.
 - **Each environment builds its own image** from its branch head. Under gitflow the `main` merge has the same tree as the reviewed `develop`, so promoting staging's exact image is not worth the extra plumbing in V0.1.
@@ -42,7 +44,7 @@ All in GitHub Actions, with one concurrency group per environment so two deploys
 
 1. **Migrate.** The Drizzle migrator applies pending migrations under a Postgres advisory lock, with `lock_timeout = 5s` and `statement_timeout = 60s` for the session. A lock timeout fails the release rather than queueing behind live traffic.
 2. **Load the knowledge base** if the artifact's KB version differs from the loaded one (recorded in `ops.meta`). Upsert and retire, never truncate (data model section 8), in one transaction. Recipes become KB-stale and are re-resolved lazily or by the batch command (section 7).
-3. **Rebuild projections** (`recipe_tag`, `recipe_line`, `needs_review`) from stored engine output if the projection version (a constant in `packages/db`, recorded in `ops.meta`) changed. Deterministic, no Jev, one transaction.
+3. **Rebuild projections** (`recipe_tag`, `recipe_line`, `needs_review`) from stored engine output if the projection version (a constant in `packages/db`, recorded in `ops.meta`) changed. Deterministic, no Clef calls, one transaction.
 4. **Report staleness**: print how many recipes have a stale engine version or KB version, so the deploy log says whether the batch re-parse is due.
 
 KB tables' DDL lives in the Drizzle migrations like every other schema, so there is one schema history; the KB load writes rows only.
@@ -147,12 +149,12 @@ Then the same command with `--apply`. The Machine inherits the app's secrets and
 - `--stale` selects recipes whose engine version or KB version is stale; an engine-stale recipe gets a full re-parse, a KB-stale-only recipe gets re-resolution (engine spec section 7).
 - The report lists, per recipe, fields changed and flags added or cleared, plus orphaned corrections. On staging it is the review gate; on production it is the record.
 - Writes are compare-and-set on the recipe's revision (data model section 4.5), so running it while the household uses the app is safe; a recipe edited mid-run is retried from its new state.
-- Jev failures leave recipes `partial`, completed lazily or by the next run. Rerunning is always safe.
+- Clef failures leave recipes `partial`, completed lazily or by the next run. Rerunning is always safe.
 - `node apps/server/src/cli.ts rebuild-projections` is available the same way for repairs, though the release step runs it whenever the projection version changes.
 
 If the batch ever needs to run on a timer, the same command becomes a Fly scheduled Machine; nothing in V0.1 needs that.
 
 ## 8. Hand-offs
 
-- **Spec assembly**: this file is the operations section of `docs/spec/v0.1.md`. The implementation tickets it implies: Dockerfile and both `fly.toml`s, the CI workflows (PR, deploy, nightly backup, staging refresh), the `cli.ts` commands (`release`, `reparse`, `rebuild-projections`), the `ops.meta` table, the destructive-statement lint, and the human go-live steps (Neon project, branch and restore window, `backup` role, Tigris bucket and lifecycle rules, Fly apps, tokens and secrets, Cloudflare records).
+- **Spec assembly**: this file is the operations section of `docs/spec/v0.1.md`. The implementation tickets it implies: Dockerfile and both `fly.toml`s, the CI workflows (PR, deploy, nightly backup, staging refresh, Clef canary), the `cli.ts` commands (`release`, `reparse`, `rebuild-projections`), the `ops.meta` table, the destructive-statement lint, and the human go-live steps (Neon project, branch and restore window, `backup` role, Tigris bucket and lifecycle rules, Fly apps, tokens and secrets including the Cloudflare account ID and Workers AI token, Cloudflare records).
 - **Test and evaluation strategy** (still in the map's fog): owns the test database approach; this file only fixes that migration checks run against a `pgvector/pgvector:pg17` container.

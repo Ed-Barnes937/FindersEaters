@@ -168,8 +168,8 @@ _Avoid_: Garnish
 **Metric hint**:
 A muted metric equivalent shown after an amount written in cups, ounces, pounds, fluid ounces, pints or Australian tablespoons. It never replaces the original or scaled text.
 
-**Jev spend cap**:
-The daily app-wide limit on Jev requests. Past it, recipes are still saved and read partly, then finished later.
+**Clef spend cap**:
+The daily app-wide limit on Clef requests. Past it, recipes are still saved and read partly, then finished later.
 
 ### Search and planning
 

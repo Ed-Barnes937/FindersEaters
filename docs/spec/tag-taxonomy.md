@@ -2,7 +2,7 @@
 
 Resolves [Design the tag taxonomy](https://github.com/Ed-Barnes937/FindersEaters/issues/7). Feeds the V0.1 spec (`docs/spec/v0.1.md`), the engine pipeline, the query model, suggestion scoring and the golden set.
 
-Every decision here was made by the agent under the owner's standing rules and is reversible: tags are engine output, and the engine can re-tag the whole library cheaply (Jev costs fractions of a penny per recipe) whenever the taxonomy changes.
+Every decision here was made by the agent under the owner's standing rules and is reversible: tags are engine output, and the engine can re-tag the whole library cheaply (Clef costs about a penny per recipe) whenever the taxonomy changes.
 
 ## Summary
 
@@ -30,7 +30,7 @@ Changes from the ten dimensions proposed in `docs/ideation/README.md`:
 ## Principles
 
 1. **A tag is a recipe fact, a user tag is a household fact.** Fixed tags belong to the engine output (plus corrections), so they are the same in every household that imports the same recipe. User tags belong to the household, alongside favourites and notes.
-2. **Fixed dimensions are closed sets.** Every value has a stable slug, a display label and a written definition. The definition is the text Jev is given and the text the golden set is graded against, so they cannot drift apart.
+2. **Fixed dimensions are closed sets.** Every value has a stable slug, a display label and a written definition. The definition is the text Clef is given and the text the golden set is graded against, so they cannot drift apart.
 3. **Definitions are non-overlapping within a dimension.** Where two values could both apply, the definition says which wins. Multi-valued dimensions are multi-valued because real recipes have several true answers, not to dodge a boundary.
 4. **Derive before classifying.** If a tag can be computed from parsed ingredients and the ingredient hierarchy, it is derived, not guessed (dietary). If a classification can be checked against the ingredients, it is (main protein).
 5. **Unknown is a valid answer.** A tag the engine is not confident about is not applied. Unknown is better than wrong, because the planner treats unknown as neutral, while a wrong tag actively misleads search and variety.
@@ -40,13 +40,13 @@ Changes from the ten dimensions proposed in `docs/ideation/README.md`:
 
 ### Applying tags
 
-- **Single-valued dimensions** (`cuisine`, `method`, `effort`) are one Jev Choice over the dimension's values plus `none`. The value applies if confidence is at or above the dimension's threshold; otherwise the dimension is left unknown and the top answer is offered as a suggestion in the review screen.
-- **Multi-valued dimensions** (`meal`, `protein`, `carb`, `equipment`) are one Jev Noul per value, each with its own threshold, as the spike recommended.
+- **Single-valued dimensions** (`cuisine`, `method`, `effort`) are one Clef Choice over the dimension's values plus `none`. The value applies if confidence is at or above the dimension's threshold; otherwise the dimension is left unknown and the top answer is offered as a suggestion in the review screen.
+- **Multi-valued dimensions** (`meal`, `protein`, `carb`, `equipment`) are one Clef Noul per value, each with its own threshold, as the spike recommended.
 - **Meal type always has at least one value.** If no Noul passes, a Choice over the same values picks one, flagged for review. A recipe with no meal type could never be suggested.
 - **Main protein is gated by the ingredients.** A `protein` value only applies if a parsed ingredient resolves under the matching branch of the ingredient hierarchy. This stops a "serve with grilled chicken" suggestion becoming a protein, and catches hallucination cheaply.
 - **Carb base is not gated**, because "serve with rice" is a real carb base even when rice is not in the ingredient list. (How that interacts with the shopping list is part of [Decide whether a plan item is one recipe or a meal](https://github.com/Ed-Barnes937/FindersEaters/issues/3).)
 - **Thresholds** start at 0.8 for every value (the spike's "always correct" line) and are tuned per value against the golden set. They live in engine configuration, not the taxonomy.
-- **Jev input** for tagging is the recipe title, the parsed ingredient lines and the method text.
+- **Clef input** for tagging is the recipe title, the parsed ingredient lines and the method text.
 
 ### Dietary derivation
 
@@ -87,7 +87,7 @@ Changes from the ten dimensions proposed in `docs/ideation/README.md`:
 
 ## Dimensions and definitions
 
-The **definition** column is the text given to Jev and used to grade the golden set. Display labels are UK English.
+The **definition** column is the text given to Clef and used to grade the golden set. Display labels are UK English.
 
 ### Meal type (`meal`): multi, at least one
 
@@ -205,7 +205,7 @@ Question: "How much hands-on effort and skill does this take for a typical home 
 | `medium` | Medium | Up to about an hour hands-on, or a few components to time together, or one technique that needs attention (making a roux, a risotto). |
 | `hard` | Hard | Over an hour hands-on, or demanding technique (laminated or hot-water pastry, tempering, deboning), or many components that must come together at once. |
 
-Classified as a Jev Choice (Score is not needed for three levels). The planner reads it as an ordinal: easy < medium < hard.
+Classified as a Clef Choice (Score is not needed for three levels). The planner reads it as an ordinal: easy < medium < hard.
 
 ### Equipment (`equipment`): multi, may be empty
 

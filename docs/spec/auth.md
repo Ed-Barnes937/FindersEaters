@@ -39,7 +39,7 @@ Rules:
 
 ## 4. Accounts: no public sign-up, a CLI instead
 
-The app runs on a public URL and every import spends Jev calls, so open registration is a cost and abuse risk with no V0.1 benefit. Accounts are made by a CLI command in the same image, run the same way as the batch re-parse (`fly ssh console` or a one-off `fly machine run --rm`):
+The app runs on a public URL and every import spends Clef calls, so open registration is a cost and abuse risk with no V0.1 benefit. Accounts are made by a CLI command in the same image, run the same way as the batch re-parse (`fly ssh console` or a one-off `fly machine run --rm`):
 
 | Command | Does |
 | --- | --- |
@@ -110,7 +110,7 @@ An import token lets one device add recipes to a household's library from outsid
 ### Using a token
 
 - Sent as `Authorization: Bearer fe_imp_...`. Never in the query string or body, so it never lands in access logs. The logger redacts `authorization` and `cookie` headers.
-- **Scope**: `POST /api/v1/import` only. A token cannot call tRPC, read the library, sign in or create tokens. The worst a leaked token does is add recipes (visible, deletable) and spend Jev calls.
+- **Scope**: `POST /api/v1/import` only. A token cannot call tRPC, read the library, sign in or create tokens. The worst a leaked token does is add recipes (visible, deletable) and spend Clef calls.
 - **Rate limit**: 30 imports per hour per token (`@fastify/rate-limit`, memory store, keyed by token id), answered with `429` and a message the Shortcut can show.
 - **Errors**: missing, malformed, unknown and revoked tokens all return `401` with one JSON body the Shortcut shows as-is: `{ "error": "invalid_token", "message": "This Shortcut's import key no longer works. Make a new one in Finders Eaters: Settings, Import from iPhone." }`.
 - On success, `last_used_at` is set and the import runs as in `docs/spec/data-model.md` section 4, with `created_by` the token's creator. The request body and response are the import capture contract's.

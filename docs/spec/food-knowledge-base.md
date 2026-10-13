@@ -113,7 +113,7 @@ An ingredient with no conversion data and no reviewed proposal gets mass as its 
 
 ## 7. Resolution, and ingredients the knowledge base lacks
 
-How the engine matches a line to an ingredient (deterministic name lookup, Jev, or both) belongs to [Design the engine pipeline](https://github.com/Ed-Barnes937/FindersEaters/issues/10). The knowledge base supplies a normalised name index (lowercase, singular, accents stripped) over own-layer en-gb names first, then other own-layer names, then OFF names, and the candidates' ancestors.
+How the engine matches a line to an ingredient (deterministic name lookup, Clef, or both) belongs to [Design the engine pipeline](https://github.com/Ed-Barnes937/FindersEaters/issues/10). The knowledge base supplies a normalised name index (lowercase, singular, accents stripped) over own-layer en-gb names first, then other own-layer names, then OFF names, and the candidates' ancestors.
 
 Each resolved line records one of three outcomes:
 
