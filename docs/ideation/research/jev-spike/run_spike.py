@@ -13,6 +13,9 @@ Usage:
     python3 run_spike.py --dry-run          # build requests, no network, no key needed
     python3 run_spike.py --limit 3          # smoke test on 3 lines + 0 recipes
     python3 run_spike.py                    # full run, writes results/run-<ts>.jsonl
+    python3 run_spike.py --workers-ai --model @cf/cloudflare/clef --framing v2 --set dev --repeat 6
+                                            # hosted Clef on Workers AI, dev set only; needs
+                                            # CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN in env
 
 One request per golden line carries every line-level question at once (the
 documented "speculative fan-out" pattern): role, compound, kind, one role
@@ -215,10 +218,37 @@ def load_key() -> str | None:
 
 
 HTTP_TIMEOUT = 30
+BODY_MODEL = None  # model name sent in the body when it differs from --model (Workers AI: "clef")
+ENVELOPES: list[list[str]] = []  # top-level keys of each raw response, before unwrapping
+SECRETS: list[str] = []  # values scrubbed from anything printed or written
+
+
+def redact(text: str) -> str:
+    for v in SECRETS:
+        if v:
+            text = text.replace(v, "<redacted>")
+    return text
+
+
+def workers_ai_setup(model_id: str) -> str:
+    """Build the Workers AI URL from env. Neither value is ever printed or written."""
+    acct, tok = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "").strip(), os.environ.get("CLOUDFLARE_API_TOKEN", "").strip()
+    if not acct or not tok:
+        sys.exit("CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_API_TOKEN not set in env. Nothing was called.")
+    SECRETS.extend([acct, tok])
+    return f"https://api.cloudflare.com/client/v4/accounts/{acct}/ai/run/{model_id}"
+
+
+def unwrap(data: dict) -> dict:
+    """Workers AI may wrap the SystemOne body in {result, success, errors, messages}."""
+    ENVELOPES.append(sorted(data.keys()))
+    if isinstance(data, dict) and "result" in data and "answers" not in data:
+        return data["result"]
+    return data
 
 
 def call(payload: dict, key: str | None, model: str, max_retries: int = 5) -> tuple[dict, float]:
-    body = json.dumps({**payload, "model": model}).encode()
+    body = json.dumps({**payload, "model": BODY_MODEL or model}).encode()
     for attempt in range(max_retries + 1):
         headers = {"Content-Type": "application/json"}
         if key:
@@ -228,16 +258,16 @@ def call(payload: dict, key: str | None, model: str, max_retries: int = 5) -> tu
         try:
             with urllib.request.urlopen(req, timeout=HTTP_TIMEOUT) as r:
                 data = json.loads(r.read())
-            return data, time.perf_counter() - t0
+            return unwrap(data), time.perf_counter() - t0
         except urllib.error.HTTPError as e:
-            detail = e.read().decode(errors="replace")[:500]
+            detail = redact(e.read().decode(errors="replace")[:500])
             if e.code in (429, 529) and attempt < max_retries:
                 wait = float(e.headers.get("retry-after") or 2 ** attempt)
                 print(f"  {e.code}, retrying in {wait:.1f}s", file=sys.stderr)
                 time.sleep(wait)
                 continue
-            if e.code == 401:
-                sys.exit("401 Unauthorized: JEV_API_KEY was rejected (value not shown).")
+            if e.code in (401, 403):
+                sys.exit(f"HTTP {e.code}: credentials were rejected (values not shown).")
             raise RuntimeError(f"HTTP {e.code}: {detail}") from None
     raise RuntimeError("retries exhausted")
 
@@ -466,9 +496,21 @@ def main() -> None:
                     help="dev = L01-L44 and R01-R03 (v2 was tuned on these); heldout = lines added 2026-10-13")
     ap.add_argument("--api-url", help="SystemOne-compatible endpoint other than Jev (e.g. a local Clef server); no key sent")
     ap.add_argument("--timeout", type=float, default=30, help="HTTP timeout in seconds (local laptop inference is slow)")
+    ap.add_argument("--workers-ai", action="store_true",
+                    help="call Cloudflare Workers AI at /ai/run/<--model> (e.g. @cf/cloudflare/clef); reads "
+                         "CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN from env and never prints them")
+    ap.add_argument("--repeat", type=int, default=0, help="after the run, re-send the first N line requests and compare answers")
     args = ap.parse_args()
-    global FRAMING, TAG_SCHEME, API_URL, HTTP_TIMEOUT
+    global FRAMING, TAG_SCHEME, API_URL, HTTP_TIMEOUT, BODY_MODEL
     HTTP_TIMEOUT = args.timeout
+    if args.workers_ai:
+        if args.api_url:
+            sys.exit("--workers-ai and --api-url are exclusive.")
+        if args.set != "dev":
+            sys.exit("--workers-ai requires --set dev (held-out is off limits for this spike).")
+        if not args.dry_run and not args.rescore:
+            args.api_url = workers_ai_setup(args.model)
+        BODY_MODEL = args.model.rsplit("/", 1)[-1]
     if args.api_url:
         # Spike guard: a non-Jev model may only ever see the dev set. The held-out labels await
         # the owner's blind check, and seeing another model's results first would spoil it.
@@ -518,7 +560,10 @@ def main() -> None:
         print(f"JEV_API_KEY set: {load_key() is not None}")
         return
 
-    key = None if args.api_url else load_key()
+    if args.workers_ai:
+        key = os.environ["CLOUDFLARE_API_TOKEN"].strip()
+    else:
+        key = None if args.api_url else load_key()
     if not key and not args.api_url:
         sys.exit("JEV_API_KEY is not set (env var or research/jev-spike/.env). Nothing was called.")
 
@@ -544,8 +589,30 @@ def main() -> None:
             rows += scored
             out.write(json.dumps({"id": rec["id"], "latency_s": dt, "response": data, "scored": scored}, ensure_ascii=False) + "\n")
             print(f"{rec['id']} {dt * 1000:5.0f}ms {rec['title']}")
-    print(f"\nmodel={args.model} framing={FRAMING} taxonomy={TAG_SCHEME} raw results: {out_path}")
+    print(f"\nmodel={args.model} framing={FRAMING} taxonomy={TAG_SCHEME} raw results: {out_path.name}")
+    if ENVELOPES:
+        shapes = sorted({",".join(k) for k in ENVELOPES})
+        print(f"response top-level keys seen: {shapes}")
     summarise(rows, latencies, tokens)
+    if args.repeat:
+        # Determinism: re-send identical requests and compare every answer exactly.
+        print(f"\nrepeat check on first {args.repeat} line requests:")
+        first = {}
+        for raw in out_path.read_text().splitlines():
+            rec = json.loads(raw)
+            first[rec["id"]] = rec["response"]["answers"]
+        for item, payload, meta in line_reqs[: args.repeat]:
+            data, dt = call(payload, key, args.model)
+            a, b = first[item["id"]], data["answers"]
+            same_choice = sum(1 for q in a if json.dumps(a[q].get("choice", a[q].get("answer")), sort_keys=True)
+                              == json.dumps(b.get(q, {}).get("choice", b.get(q, {}).get("answer")), sort_keys=True))
+            identical = sum(1 for q in a if a[q] == b.get(q))
+            maxdiff = 0.0
+            for q in a:
+                ca, cb = a[q].get("confidence"), b.get(q, {}).get("confidence")
+                if isinstance(ca, (int, float)) and isinstance(cb, (int, float)):
+                    maxdiff = max(maxdiff, abs(ca - cb))
+            print(f"  {item['id']} {dt * 1000:5.0f}ms questions={len(a)} same_top={same_choice} byte_identical={identical} max_conf_delta={maxdiff:.4f}")
 
 
 if __name__ == "__main__":
