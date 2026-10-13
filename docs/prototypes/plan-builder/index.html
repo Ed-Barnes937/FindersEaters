@@ -1,0 +1,601 @@
+<title>Plan Builder Prototype</title>
+<!--
+  PROTOTYPE - throwaway. Answers "Prototype building a plan with suggestions"
+  (https://github.com/Ed-Barnes937/FindersEaters/issues/15).
+  Three structurally different variants of building a plan on a phone (inline list,
+  one-at-a-time deck, day board), switchable from the side panel, over one in-memory
+  planner that implements docs/spec/suggestion-scoring.md (five terms, set-aware greedy
+  selection, hash tie-break, skip re-picks one slot). Full state is printed after every
+  action. No persistence. Open the file in a browser; nothing to install.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+:root{
+  --ground:#EEF1EA; --surface:#FBFCF8; --ink:#1C231E; --muted:#5F6B62; --line:#D5DCD0;
+  --accent:#2C6B4B; --accent-ink:#FFFFFF; --accent-soft:#DCEBDF;
+  --warn:#9A5B0B; --warn-soft:#F6E7CC; --neg:#A23B2A; --neg-soft:#F5DDD6;
+  --shadow:0 1px 2px rgba(28,35,30,.08),0 8px 30px rgba(28,35,30,.10);
+  --ui:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --display:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#101412; --surface:#181D1A; --ink:#E5EBE4; --muted:#9AA79D; --line:#2C3530;
+    --accent:#74C496; --accent-ink:#0F1B14; --accent-soft:#1F3328;
+    --warn:#E7B464; --warn-soft:#3A2D16; --neg:#EE8F7C; --neg-soft:#3A201A;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 30px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#101412; --surface:#181D1A; --ink:#E5EBE4; --muted:#9AA79D; --line:#2C3530;
+  --accent:#74C496; --accent-ink:#0F1B14; --accent-soft:#1F3328;
+  --warn:#E7B464; --warn-soft:#3A2D16; --neg:#EE8F7C; --neg-soft:#3A201A;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--ui);font-size:15px;line-height:1.45;padding-inline:16px;padding-block:20px 40px}
+h1,h2,h3,h4{font-family:var(--display);text-wrap:balance;margin:0}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:24px;grid-template-columns:minmax(0,400px) minmax(0,1fr);align-items:start}
+@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr)}}
+.intro{grid-column:1/-1;display:flex;flex-direction:column;gap:6px;max-width:72ch}
+.intro h1{font-size:28px;font-weight:800;letter-spacing:-.01em}
+.intro p{margin:0;color:var(--muted)}
+.tag{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--warn);background:var(--warn-soft);padding:2px 8px;border-radius:4px;width:max-content}
+
+/* phone */
+.phone{width:100%;max-width:400px;height:760px;background:var(--surface);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;position:relative;justify-self:center}
+.ph-head{padding:16px 18px 10px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+.ph-head h2{font-size:22px;font-weight:800}
+.ph-sub{font-size:13px;color:var(--muted)}
+.ph-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:12px 14px 18px;display:flex;flex-direction:column;gap:14px}
+.ph-foot{border-top:1px solid var(--line);padding:10px 14px;display:flex;gap:8px;align-items:center;background:var(--surface)}
+.ph-foot[hidden]{display:none}
+.sec{display:flex;flex-direction:column;gap:8px}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.sec-h h3{font-size:15px;font-weight:600}
+.sec-h small{color:var(--muted);font-size:12.5px}
+.empty{color:var(--muted);font-size:14px;margin:0}
+
+/* plan item rows */
+.item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.item .t{font-weight:700;line-height:1.25}
+.item .meta{font-size:12.5px;color:var(--muted)}
+.item .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.ctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{border:1px solid var(--line);background:var(--ground);padding:3px 10px;border-radius:999px;font-size:13px}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.x{border:0;background:none;color:var(--muted);font-size:18px;line-height:1;padding:2px 4px}
+.step{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;font-size:13px;overflow:hidden}
+.step button{border:0;background:var(--ground);width:26px;height:24px}
+.step span{padding:0 8px;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* suggestion card */
+.sug{border:1.5px dashed var(--accent);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;background:var(--surface);transition:background .4s}
+.sug.flash{background:var(--accent-soft)}
+.sug .t{font-weight:700;line-height:1.25}
+.sug .meta{font-size:12.5px;color:var(--muted)}
+.reasons{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;font-size:13.5px}
+.reasons li{display:flex;gap:6px;align-items:baseline}
+.reasons li::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:var(--accent);transform:translateY(-1px)}
+.reasons li.neg::before{background:var(--neg)}
+.reasons li.zero::before{background:var(--muted)}
+.why{border:0;background:none;padding:0;color:var(--accent);font-size:13px;text-decoration:underline;width:max-content}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--ground);padding:7px 12px;border-radius:999px;font-size:14px}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn.wide{flex:1}
+.btn:disabled{opacity:.45;cursor:default}
+.addrow{border:1px dashed var(--line);background:none;border-radius:12px;padding:10px;color:var(--accent);font-weight:700;text-align:left}
+
+/* suggest bar */
+.sbar{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:12px;background:var(--ground)}
+.sbar .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sbar select{border:1px solid var(--line);border-radius:999px;background:var(--surface);padding:3px 8px;font-size:14px}
+.note{font-size:13px;color:var(--warn);background:var(--warn-soft);padding:6px 10px;border-radius:8px;margin:0}
+
+/* deck */
+.strip{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.strip .chip{white-space:nowrap}
+.deck{border:1.5px dashed var(--accent);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px;min-height:330px}
+.deck .count{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.deck h3{font-size:24px;font-weight:800}
+.deck .reasons{font-size:15px;gap:6px}
+.deck .acts .btn{flex:1;padding:12px}
+
+/* board */
+.day{display:flex;flex-direction:column;gap:6px;padding:8px 0;border-bottom:1px solid var(--line)}
+.day-h{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.mini{display:flex;gap:8px;align-items:center;padding:7px 10px;border-radius:10px;border:1px solid var(--line);font-size:14px}
+.mini.s{border:1.5px dashed var(--accent)}
+.mini .grow{flex:1;min-width:0;display:flex;flex-direction:column}
+.mini .grow small{color:var(--muted);font-size:12px}
+.mini button{border:1px solid var(--line);background:var(--ground);border-radius:999px;font-size:12.5px;padding:3px 9px}
+
+/* sheets */
+.scrim{position:absolute;inset:0;background:rgba(10,14,12,.45);display:flex;align-items:flex-end;z-index:5}
+.scrim[hidden]{display:none}
+.sheet{background:var(--surface);width:100%;max-height:86%;border-radius:20px 20px 0 0;padding:14px 16px 18px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sheet-h h3{font-size:18px;font-weight:800}
+.sheet-b{overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.search{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--ground);width:100%}
+.prow{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.prow .grow{flex:1;min-width:0}
+.prow .grow small{display:block;color:var(--muted);font-size:12.5px}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:1fr;gap:3px;font-size:14px}
+.bar .track{position:relative;height:8px;background:var(--ground);border-radius:4px}
+.bar .track::after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--muted)}
+.bar .track i{position:absolute;top:0;bottom:0;border-radius:4px}
+.bar .track i.p{left:50%;background:var(--accent)}
+.bar .track i.n{right:50%;background:var(--neg)}
+.days{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.days button{border:1px solid var(--line);background:var(--ground);border-radius:10px;padding:8px 4px;font-size:13px}
+.days button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.toast{position:absolute;left:12px;right:12px;bottom:66px;background:var(--ink);color:var(--surface);border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;font-size:14px;gap:8px;z-index:4}
+.toast[hidden]{display:none}
+.toast button{border:0;background:none;color:var(--surface);font-weight:700;text-decoration:underline}
+
+/* side */
+.side{display:flex;flex-direction:column;gap:20px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.panel h3{font-size:16px;font-weight:600}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btns button{border:1px solid var(--line);background:var(--ground);padding:8px 12px;border-radius:999px;font-size:14px}
+.btns button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.state{overflow-x:auto}
+table{border-collapse:collapse;font-size:12.5px;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:4px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td.num{text-align:right}
+td.neg{color:var(--neg)}
+th{color:var(--muted);font-weight:400;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.log{font-size:12.5px;max-height:170px;overflow:auto;margin:0;padding-left:18px;color:var(--muted)}
+.verdict{border-color:var(--accent)}
+.verdict ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:14px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="tag">Prototype - throwaway</span>
+    <h1>Building a plan with suggestions</h1>
+    <p>A 24-recipe example library, planning from Tue 13 Oct 2026. The planner below is the real scoring and selection design (overlap, favourite, effort, recently cooked, variety; set-aware greedy; skip re-picks one slot). Pick a scenario, then add anchors, ask for suggestions, add, skip or swap them, and put things on days. The score table updates after every action.</p>
+  </header>
+
+  <section class="phone" aria-label="Phone">
+    <div class="ph-head">
+      <h2 id="phTitle">Plan</h2>
+      <div class="ph-sub" id="phSub"></div>
+    </div>
+    <div class="ph-body" id="body"></div>
+    <div class="ph-foot" id="foot" hidden></div>
+    <div class="toast" id="toast" hidden><span id="toastMsg"></span><button id="undo" type="button">Undo</button></div>
+    <div class="scrim" id="scrim" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+  </section>
+
+  <div class="side">
+    <section class="panel">
+      <h3>Variant</h3>
+      <div class="btns" id="variants">
+        <button type="button" data-v="A">A. Inline in the plan</button>
+        <button type="button" data-v="B">B. One at a time</button>
+        <button type="button" data-v="C">C. Day board</button>
+      </div>
+      <p class="hint" id="vhint"></p>
+    </section>
+    <section class="panel">
+      <h3>Scenario</h3>
+      <div class="btns" id="scenarios">
+        <button type="button" data-s="worked">Worked example: fennel pasta anchor</button>
+        <button type="button" data-s="cold">Cold start: no anchors</button>
+        <button type="button" data-s="dated">Two dated anchors, quick only</button>
+        <button type="button" data-s="tiny">Tiny library (6 recipes)</button>
+      </div>
+      <p class="hint">Resets the plan. The worked example matches section 8 of the scoring spec in shape; scores differ because this library has 24 recipes, not 60.</p>
+    </section>
+    <section class="panel">
+      <h3>Pending suggestions, scored against everything else on screen</h3>
+      <div class="state" id="scoreTable"></div>
+      <p class="hint">Contributions sum to the score. Reasons on the cards are recomputed against the current set (plan items plus the other pending suggestions) after every change, so they stay true after a skip; which recipe sits in each slot only changes on that slot's own skip.</p>
+    </section>
+    <section class="panel">
+      <h3>Session state</h3>
+      <div class="state" id="stateTable"></div>
+      <ol class="log" id="log" reversed></ol>
+    </section>
+    <section class="panel verdict">
+      <h3>Locked flow (variant A)</h3>
+      <ul>
+        <li>One Plan screen: plan items on top (grouped by day once any is dated), suggestions inline underneath as dashed cards. Nothing is in the plan until added.</li>
+        <li>Anchors: "Add recipes" opens the Recipes screen in pick mode; Add to plan also works from a recipe view.</li>
+        <li>Suggest bar: meal type, "how many more" (defaults to 5 minus plan items, at least 1), and the same Filters sheet as Recipes.</li>
+        <li>Card: title, time and effort, at most two positive reasons (overlap names one shared ingredient, or two from the same recipe), "Why this?", then Add, Another, Swap.</li>
+        <li>Reasons on every card are recomputed against the current set after any change, so they stay true and read both ways ("lime with Fish tacos" on both cards).</li>
+        <li>Another = skip: the card is replaced in place, others stay put. Swap = the next five for that slot, or search; the chosen one goes straight into the plan.</li>
+        <li>"Add all" in the footer. Why this? shows every reason as a signed bar, no numbers.</li>
+        <li>Day and servings live on plan items only: a day chip opens a two-week day picker plus "Any day".</li>
+      </ul>
+    </section>
+  </div>
+</div>
+
+<script>
+/* ---------- example library ---------- */
+const REF = new Date(2026, 9, 13); // Tue 13 Oct 2026
+const ALWAYS = new Set(["olive_oil","salt","pepper","butter"]);
+const PARENT = {penne:"pasta",spaghetti:"pasta",rice_noodles:"noodles",egg_noodles:"noodles",arborio:"rice",basmati:"rice",
+  chicken_thigh:"chicken",chicken_breast:"chicken",beef_mince:"beef",lamb_mince:"lamb",parmesan:"cheese",cheddar:"cheese",
+  feta:"cheese",halloumi:"cheese",cod:"fish",salmon:"fish",creme_fraiche:"cream",soured_cream:"cream",chorizo:"pork",sausages:"pork",
+  black_beans:"beans",cannellini:"beans",red_onion:"onion",spring_onion:"onion"};
+const NAMES = {creme_fraiche:"crème fraîche",chicken_thigh:"chicken thighs",chicken_breast:"chicken breast",beef_mince:"beef mince",
+  lamb_mince:"lamb mince",rice_noodles:"rice noodles",egg_noodles:"egg noodles",tinned_tomatoes:"chopped tomatoes",coconut_milk:"coconut milk",
+  soured_cream:"soured cream",spring_onion:"spring onions",red_onion:"red onion",green_curry_paste:"green curry paste",soy_sauce:"soy sauce",
+  smoked_paprika:"smoked paprika",black_beans:"black beans",sweet_potato:"sweet potato",pak_choi:"pak choi",fish_sauce:"fish sauce",
+  green_beans:"green beans",olive_oil:"olive oil",red_cabbage:"red cabbage"};
+const nm = i => NAMES[i] || i.replace(/_/g," ");
+const R = (id,title,time,effort,fav,cooked,meal,cuisine,protein,carb,method,ings)=>({id,title,time,effort,fav,cooked,meal,cuisine,protein,carb,method,ings});
+// cooked: day offsets from 13 Oct (negative = past, positive = in another plan)
+const LIB = [
+  R("fsp","Fennel and sausage pasta",35,"medium",false,[-40],["dinner"],"italian",["pork"],["pasta"],"simmer",["fennel","sausages","penne","parmesan","creme_fraiche","garlic","olive_oil"]),
+  R("foc","Fennel, orange and chicken traybake",50,"easy",false,[-56],["dinner"],"british",["chicken"],["potato"],"roast",["fennel","orange","chicken_thigh","potato","garlic","olive_oil"]),
+  R("arr","Penne arrabbiata",20,"easy",true,[-10],["dinner"],"italian",["none"],["pasta"],"simmer",["penne","tinned_tomatoes","chilli","garlic","parmesan","olive_oil"]),
+  R("kat","Chicken katsu curry",50,"medium",true,[-33],["dinner"],"japanese",["chicken"],["rice"],"fry",["chicken_breast","panko","egg","basmati","carrot","onion","curry_powder","ginger"]),
+  R("tgc","Thai green curry",30,"easy",false,[],["dinner"],"thai",["chicken"],["rice"],"simmer",["chicken_thigh","coconut_milk","green_curry_paste","basmati","coriander","lime","green_beans"]),
+  R("csc","Chickpea and spinach curry",30,"easy",true,[-5],["dinner"],"indian",["legumes"],["rice"],"simmer",["chickpeas","spinach","coconut_milk","tinned_tomatoes","onion","garlic","ginger","basmati","coriander"]),
+  R("stn","Salmon teriyaki noodles",20,"easy",false,[],["dinner"],"japanese",["fish"],["noodles"],"stir_fry",["salmon","egg_noodles","soy_sauce","ginger","spring_onion","pak_choi"]),
+  R("cop","Cottage pie",90,"medium",false,[-20],["dinner"],"british",["beef"],["potato"],"bake",["beef_mince","potato","carrot","onion","worcestershire_sauce","cheddar","butter"]),
+  R("hal","Halloumi and chickpea traybake",40,"easy",false,[],["dinner"],"mediterranean",["cheese"],["none"],"roast",["halloumi","peppers","red_onion","courgette","chickpeas","lemon","olive_oil"]),
+  R("fta","Fish tacos with lime slaw",30,"easy",true,[-61],["dinner"],"mexican",["fish"],["bread"],"fry",["cod","tortillas","red_cabbage","lime","coriander","avocado","soured_cream"]),
+  R("ccs","Chorizo and chickpea stew",40,"easy",false,[],["dinner"],"spanish",["pork"],["bread"],"simmer",["chorizo","chickpeas","tinned_tomatoes","peppers","onion","smoked_paprika","crusty_bread"]),
+  R("mri","Mushroom risotto",45,"medium",false,[-70],["dinner"],"italian",["none"],["rice"],"simmer",["arborio","mushrooms","parmesan","white_wine","onion","stock","butter"]),
+  R("rag","Slow beef ragu",180,"hard",true,[-30],["dinner"],"italian",["beef"],["pasta"],"slow_cook",["beef_mince","tinned_tomatoes","carrot","celery","red_wine","spaghetti","parmesan"]),
+  R("lps","Leek and potato soup",45,"easy",false,[],["lunch"],"british",["none"],["potato"],"simmer",["leeks","potato","onion","stock","butter"]),
+  R("ppt","Prawn pad thai",30,"medium",false,[],["dinner"],"thai",["shellfish"],["noodles"],"stir_fry",["prawns","rice_noodles","egg","beansprouts","lime","peanuts","coriander","fish_sauce"]),
+  R("lko","Lamb kofta with flatbreads",35,"medium",false,[],["dinner"],"middle_eastern",["lamb"],["bread"],"grill",["lamb_mince","flatbreads","cumin","yoghurt","cucumber","mint","red_onion"]),
+  R("sfp","Spinach and feta pie",60,"hard",false,[],["dinner"],"greek",["cheese"],["pastry"],"bake",["spinach","feta","filo","egg","onion","dill"]),
+  R("ccl","Coriander chicken with lime rice",30,"easy",false,[],["dinner"],null,["chicken"],["rice"],"grill",["chicken_thigh","coriander","lime","basmati","garlic","chilli"]),
+  R("sbc","Sausage and bean casserole",60,"easy",false,[-14,9],["dinner"],"british",["pork"],["none"],"slow_cook",["sausages","cannellini","tinned_tomatoes","onion","smoked_paprika"]),
+  R("sbb","Sweet potato and black bean chilli",50,"easy",false,[],["dinner"],"mexican",["legumes"],["rice"],"simmer",["sweet_potato","black_beans","tinned_tomatoes","peppers","cumin","basmati","soured_cream","coriander"]),
+  R("mlp","Creamy mushroom and leek pasta",25,"easy",false,[],["dinner"],"italian",["none"],["pasta"],"simmer",["mushrooms","leeks","penne","creme_fraiche","parmesan","garlic"]),
+  R("efr","Egg fried rice",15,"easy",true,[-3],["dinner","lunch"],"chinese",["egg"],["rice"],"stir_fry",["basmati","egg","peas","spring_onion","soy_sauce"]),
+  R("bcc","Baked cod with chorizo crust",35,"medium",false,[],["dinner"],"spanish",["fish"],["potato"],"bake",["cod","chorizo","breadcrumbs","lemon","potato"]),
+  R("shk","Shakshuka",30,"easy",false,[],["dinner","lunch"],"middle_eastern",["egg"],["bread"],"simmer",["egg","tinned_tomatoes","peppers","onion","cumin","feta","crusty_bread"]),
+];
+const LABEL = {italian:"Italian",british:"British",japanese:"Japanese",thai:"Thai",indian:"Indian",mediterranean:"Mediterranean",mexican:"Mexican",
+  spanish:"Spanish",middle_eastern:"Middle Eastern",greek:"Greek",chinese:"Chinese",pork:"pork",chicken:"chicken",beef:"beef",lamb:"lamb",fish:"fish",
+  shellfish:"prawn",legumes:"bean",cheese:"cheese",egg:"egg",pasta:"pasta",rice:"rice",potato:"potato",noodles:"noodle",bread:"bread",pastry:"pastry",
+  simmer:"simmered",roast:"roast",bake:"baked",fry:"fried",stir_fry:"stir-fry",grill:"grilled",slow_cook:"slow-cooked"};
+
+/* ---------- planner (docs/spec/suggestion-scoring.md) ---------- */
+const W = {overlap:1.0,favourite:0.6,effort:0.3,recent:0.5,variety:1.0}, GAP=28;
+const VAR = [["protein",.30,true],["carb",.30,true],["cuisine",.25,false],["method",.15,false]];
+const anc = i => { const out=[i]; let p=PARENT[i]; while(p){out.push(p);p=PARENT[p];} return out; };
+let lib = LIB, byId = {}, DF = {}, N = 0;
+function indexLibrary(){
+  byId = Object.fromEntries(lib.map(r=>[r.id,r])); N = lib.length; DF = {};
+  for(const r of lib){ const seen=new Set(); r.ings.forEach(i=>anc(i).forEach(a=>seen.add(a))); seen.forEach(a=>DF[a]=(DF[a]||0)+1); }
+}
+const dist = i => Math.log((N+1)/((DF[i]||0)+1))/Math.log(N+1);
+function hash(s){ let h=2166136261; for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619);} return h>>>0; }
+function addDays(n){ const d=new Date(REF); d.setDate(d.getDate()+n); return d; }
+const fmtDay = d => d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
+const dayOff = d => Math.round((d - REF)/864e5);
+
+function refOffset(){ const ds=S.items.filter(i=>i.day!=null).map(i=>i.day); return ds.length?Math.min(...ds):0; }
+function explain(rid, setIds){
+  const c = byId[rid], P = setIds.map(id=>byId[id]).filter(Boolean);
+  const reasons = [];
+  // overlap
+  const shared = {};
+  for(const a of c.ings){ if(ALWAYS.has(a)) continue; const aa=anc(a);
+    for(const p of P) for(const b of p.ings){ if(ALWAYS.has(b)) continue; const bb=anc(b);
+      let g=null; if(a===b) g=a; else if(bb.includes(a)) g=a; else if(aa.includes(b)) g=b;
+      if(g && !shared[g]) shared[g]={ing:g,with:p.id,w:dist(g)}; } }
+  const sh = Object.values(shared).sort((x,y)=>y.w-x.w);
+  const ov = Math.min(1, sh.reduce((s,x)=>s+x.w,0)/1.5);
+  if(ov>0) reasons.push({kind:"overlap",contribution:W.overlap*ov,shared:sh.slice(0,2)});
+  if(c.fav) reasons.push({kind:"favourite",contribution:W.favourite});
+  const ef = c.effort==="easy"?1:c.effort==="hard"?-1:0;
+  if(ef) reasons.push({kind:"effort",contribution:W.effort*ef,value:c.effort});
+  // recently cooked: nearest cooking (other plans) to the reference date, either direction
+  const ref = refOffset();
+  if(c.cooked.length){ const near = c.cooked.reduce((b,d)=>Math.abs(d-ref)<Math.abs(b-ref)?d:b);
+    const rc = Math.max(0,1-Math.abs(ref-near)/GAP);
+    if(rc>0) reasons.push({kind:"recently_cooked",contribution:-W.recent*rc,date:near,ref}); }
+  // variety
+  let v=0; const vs=[];
+  for(const [dim,w,multi] of VAR){
+    const cv = multi?c[dim]:[c[dim]];
+    const count = P.filter(p=>{ const pv=multi?p[dim]:[p[dim]]; return cv.some(x=>x&&x!=="none"&&pv.includes(x)); }).length;
+    if(count){ v+=w*(1-Math.pow(.5,count)); vs.push({dimension:dim,value:cv.find(x=>x&&x!=="none"&&P.some(p=>(multi?p[dim]:[p[dim]]).includes(x))),count}); }
+  }
+  if(v>0) reasons.push({kind:"variety",contribution:-W.variety*v,shared:vs});
+  const score = reasons.reduce((s,r)=>s+r.contribution,0);
+  return {score,reasons,planEmpty:P.length===0};
+}
+function poolFor(exclude){
+  const q = S.request;
+  return lib.filter(r=>r.meal.includes(q.meal) && (!q.quick || r.time<=30) &&
+    !S.items.some(i=>i.rid===r.id) && !S.pending.some(p=>p.rid===r.id) && !S.skipped.includes(r.id) && !exclude.includes(r.id));
+}
+function best(pool, setIds){
+  let top=null, ts=-Infinity, th=0;
+  for(const r of pool){ const s=explain(r.id,setIds).score, h=hash(S.planId+r.id);
+    if(s>ts+1e-9 || (Math.abs(s-ts)<=1e-9 && h<th)){top=r;ts=s;th=h;} }
+  return top;
+}
+function rankFor(pool,setIds){
+  return pool.map(r=>({r,e:explain(r.id,setIds),h:hash(S.planId+r.id)})).sort((a,b)=>b.e.score-a.e.score||a.h-b.h);
+}
+const planIds = () => S.items.map(i=>i.rid);
+function suggest(n){
+  const picks=[];
+  for(let k=0;k<n;k++){
+    const set=[...planIds(),...S.pending.map(p=>p.rid),...picks.map(p=>p.rid)];
+    const b=best(poolFor(picks.map(p=>p.rid)), set); if(!b) break; picks.push({rid:b.id,day:null});
+  }
+  S.lastAsk={asked:n,got:picks.length};
+  return picks;
+}
+function skipSlot(idx){
+  const old=S.pending[idx]; S.skipped.push(old.rid);
+  const others=S.pending.filter((_,j)=>j!==idx).map(p=>p.rid);
+  const b=best(poolFor([]), [...planIds(),...others]);
+  if(b){ S.pending[idx]={rid:b.id,day:old.day}; log(`skipped ${byId[old.rid].title}; slot re-picked: ${b.title}`); flash=b.id; }
+  else { S.pending.splice(idx,1); log(`skipped ${byId[old.rid].title}; nothing left to suggest, slot removed`); toast("No more to suggest for that slot"); }
+}
+function alternatives(idx,k){
+  const others=S.pending.filter((_,j)=>j!==idx).map(p=>p.rid);
+  return rankFor(poolFor([]), [...planIds(),...others]).slice(0,k);
+}
+
+/* ---------- reason copy (client side) ---------- */
+const ORD = ["","Another","Third","Fourth","Fifth"];
+function reasonText(r, planEmpty){
+  switch(r.kind){
+    case "overlap": { const s=r.shared;
+      if(s.length===1) return `Uses the rest of the ${nm(s[0].ing)} from ${byId[s[0].with].title}`;
+      if(s[0].with===s[1].with) return `Shares ${nm(s[0].ing)} and ${nm(s[1].ing)} with ${byId[s[0].with].title}`;
+      return `Shares ${nm(s[0].ing)} with ${byId[s[0].with].title}, ${nm(s[1].ing)} with ${byId[s[1].with].title}`; }
+    case "favourite": return "A favourite";
+    case "effort": return r.value==="easy"?"Easy":"Hard: more hands-on";
+    case "recently_cooked": { const d=r.date-r.ref;
+      return r.date<0 ? `Had it ${-r.date} day${r.date===-1?"":"s"} ago` : `Already planned for ${fmtDay(addDays(r.date))}`; }
+    case "variety": { const s=r.shared, n=Math.max(...s.map(x=>x.count));
+      const cu=s.find(x=>x.dimension==="cuisine"), noun=s.find(x=>x.dimension==="carb")||s.find(x=>x.dimension==="protein"), me=s.find(x=>x.dimension==="method");
+      const words=[cu&&LABEL[cu.value], noun?LABEL[noun.value]:(me&&LABEL[me.value])].filter(Boolean).join(" ");
+      return `${ORD[Math.min(n,4)]} ${words} dish`; }
+    case "fresh": return planEmpty?"A first pick: nothing to match yet":"Different from the rest of the plan";
+  }
+}
+function cardReasons(e){
+  const pos=e.reasons.filter(r=>r.contribution>=0.1).sort((a,b)=>b.contribution-a.contribution).slice(0,2);
+  // card copy is compact: overlap names only the most distinctive shared ingredient (or two, when both come from the same recipe)
+  const compact = r => r.kind==="overlap" && r.shared.length===2 && r.shared[0].with!==r.shared[1].with ? reasonText({...r,shared:[r.shared[0]]}) : reasonText(r);
+  if(pos.length) return pos.map(r=>({t:compact(r),cls:""}));
+  return [{t:reasonText({kind:"fresh"},e.planEmpty),cls:"zero"}];
+}
+const setFor = rid => [...planIds(),...S.pending.map(p=>p.rid)].filter(id=>id!==rid);
+
+/* ---------- state ---------- */
+let S, variant="A", flash=null, undoFn=null, toastTimer=null, sheetState=null;
+const HINTS = {
+  A:"Suggestions sit under the plan as dashed cards, all visible at once, so reasons that point at each other make sense. Add all in the footer.",
+  B:"One suggestion fills the screen with every reason. Feels decisive, but you cannot see what the other suggestions are, and 'Uses the rest of the fennel from...' may point at a card you have not seen.",
+  C:"Days first: empty days get filled. Every suggestion lands on a day, which forces dates on a household that may not want them, and makes count depend on the calendar."
+};
+function scenario(s){
+  lib = s==="tiny" ? LIB.filter(r=>["fsp","arr","tgc","cop","efr","lps"].includes(r.id)) : LIB; indexLibrary();
+  S = {planId:"plan-"+s, items:[], pending:[], skipped:[], request:{meal:"dinner",quick:false,count:5}, lastAsk:null, log:[]};
+  if(s==="worked"){ S.items=[{rid:"fsp",servings:2,day:null}]; }
+  if(s==="dated"){ S.items=[{rid:"tgc",servings:2,day:1},{rid:"cop",servings:4,day:3}]; S.request.quick=true; }
+  S.request.count=Math.max(1,5-S.items.length);
+  log(`scenario: ${s}`); closeSheet(); render();
+}
+function log(m){ S.log.unshift(m); }
+function toast(msg, undo){
+  undoFn=undo||null; document.getElementById("toastMsg").textContent=msg;
+  document.getElementById("undo").hidden=!undo; document.getElementById("toast").hidden=false;
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>{document.getElementById("toast").hidden=true;undoFn=null;},4000);
+}
+document.getElementById("undo").onclick=()=>{ if(undoFn){undoFn();undoFn=null;} document.getElementById("toast").hidden=true; render(); };
+
+/* actions */
+function doSuggest(n, days){
+  const picks=suggest(n);
+  if(days) picks.forEach((p,i)=>p.day=days[i]);
+  S.pending.push(...picks);
+  log(`suggest ${n} (${S.request.meal}${S.request.quick?", under 30 min":""}): ${picks.map(p=>byId[p.rid].title).join(", ")||"none"}`);
+  if(picks.length<n) toast(picks.length?`Only ${picks.length} ${S.request.meal}s left to suggest`:`No ${S.request.meal}s left to suggest`);
+}
+function accept(idx){
+  const p=S.pending.splice(idx,1)[0];
+  S.items.push({rid:p.rid,servings:2,day:p.day}); log(`added ${byId[p.rid].title} to the plan`);
+  toast(`Added ${byId[p.rid].title}`, ()=>{ S.items=S.items.filter(i=>i.rid!==p.rid); S.pending.splice(idx,0,p); log(`undo add ${byId[p.rid].title}`); });
+}
+function acceptAll(){ const n=S.pending.length; S.pending.forEach(p=>S.items.push({rid:p.rid,servings:2,day:p.day})); S.pending=[]; log(`added all ${n}`); toast(`Added ${n} to the plan`); }
+function removeItem(rid){ const i=S.items.findIndex(x=>x.rid===rid); const it=S.items.splice(i,1)[0];
+  log(`removed ${byId[rid].title} from the plan`); toast(`Removed ${byId[rid].title}`, ()=>{S.items.splice(i,0,it);}); }
+function swapTo(idx, rid){
+  const old=S.pending[idx]; S.skipped.push(old.rid); S.pending.splice(idx,1);
+  S.items.push({rid,servings:2,day:old.day}); log(`swapped ${byId[old.rid].title} for ${byId[rid].title} (added to plan)`);
+}
+
+/* ---------- rendering ---------- */
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const metaOf = r => `${r.time<60?r.time+" min":(r.time/60).toFixed(r.time%60?1:0)+" hr"} · ${r.effort[0].toUpperCase()+r.effort.slice(1)}${r.fav?" · Favourite":""}`;
+function itemRow(it){
+  const r=byId[it.rid];
+  return `<div class="item"><div class="grow"><div><div class="t">${esc(r.title)}</div><div class="meta">${metaOf(r)}</div></div>
+    <div class="ctl"><button class="chip ${it.day!=null?"on":""}" data-act="day" data-rid="${r.id}">${it.day!=null?fmtDay(addDays(it.day)):"Any day"}</button>
+    <span class="step"><button data-act="serv-" data-rid="${r.id}" aria-label="Fewer servings">-</button><span>${it.servings} servings</span><button data-act="serv+" data-rid="${r.id}" aria-label="More servings">+</button></span></div></div>
+    <button class="x" data-act="remove" data-rid="${r.id}" aria-label="Remove ${esc(r.title)}">×</button></div>`;
+}
+function sugCard(p, idx){
+  const r=byId[p.rid], e=explain(p.rid,setFor(p.rid));
+  return `<div class="sug ${flash===r.id?"flash":""}"><div><div class="t">${esc(r.title)}</div><div class="meta">${metaOf(r)}</div></div>
+    <ul class="reasons">${cardReasons(e).map(x=>`<li class="${x.cls}">${esc(x.t)}</li>`).join("")}</ul>
+    <button class="why" data-act="why" data-idx="${idx}">Why this?</button>
+    <div class="acts"><button class="btn pri" data-act="accept" data-idx="${idx}">Add</button><button class="btn" data-act="skip" data-idx="${idx}">Another</button><button class="btn" data-act="swap" data-idx="${idx}">Swap</button></div></div>`;
+}
+function suggestBar(label){
+  const q=S.request;
+  return `<div class="sbar"><div class="row"><span>Suggest</span>
+    <span class="step"><button data-act="cnt-" aria-label="Fewer">-</button><span>${q.count}</span><button data-act="cnt+" aria-label="More">+</button></span>
+    <span>more</span><select id="meal" aria-label="Meal type"><option value="dinner" ${q.meal==="dinner"?"selected":""}>dinners</option><option value="lunch" ${q.meal==="lunch"?"selected":""}>lunches</option></select></div>
+    <div class="row"><button class="chip ${q.quick?"on":""}" data-act="quick">Under 30 min</button><button class="chip" data-act="filters">Filters</button>
+    <span style="flex:1"></span><button class="btn pri" data-act="suggest">${label||"Suggest"}</button></div></div>`;
+}
+function groupedItems(){
+  if(!S.items.length) return `<p class="empty">Nothing in the plan yet. Add a recipe you already want, or ask for suggestions.</p>`;
+  const dated=S.items.filter(i=>i.day!=null).sort((a,b)=>a.day-b.day), any=S.items.filter(i=>i.day==null);
+  if(!dated.length) return S.items.map(itemRow).join("");
+  let h="", last=null;
+  for(const it of dated){ if(it.day!==last){h+=`<div class="sec-h"><small>${fmtDay(addDays(it.day))}</small></div>`;last=it.day;} h+=itemRow(it); }
+  if(any.length) h+=`<div class="sec-h"><small>Any day</small></div>`+any.map(itemRow).join("");
+  return h;
+}
+function render(){
+  const body=document.getElementById("body"), foot=document.getElementById("foot");
+  const nItems=S.items.length;
+  document.getElementById("phTitle").textContent = variant==="C"?"This week":"Plan";
+  document.getElementById("phSub").textContent = `${nItems} recipe${nItems===1?"":"s"}${S.items.some(i=>i.day!=null)?" · "+S.items.filter(i=>i.day!=null).length+" on a day":""} · library of ${N}`;
+  let h=""; foot.hidden=true; foot.innerHTML="";
+  if(variant==="A"){
+    h+=`<div class="sec"><div class="sec-h"><h3>In the plan</h3></div>${groupedItems()}<button class="addrow" data-act="pick">+ Add recipes</button></div>`;
+    h+=suggestBar();
+    if(S.pending.length){
+      h+=`<div class="sec"><div class="sec-h"><h3>Suggested</h3><small>Not in the plan until added</small></div>${S.pending.map(sugCard).join("")}</div>`;
+      foot.hidden=false; foot.innerHTML=`<button class="btn" data-act="clear">Clear</button><button class="btn pri wide" data-act="all">Add all ${S.pending.length}</button>`;
+    }
+  } else if(variant==="B"){
+    h+=`<div class="sec"><div class="sec-h"><h3>In the plan</h3><button class="why" data-act="pick">+ Add recipes</button></div>
+      <div class="strip">${S.items.map(i=>`<span class="chip">${esc(byId[i.rid].title)}</span>`).join("")||`<span class="empty">Nothing yet</span>`}</div></div>`;
+    if(S.pending.length){
+      const p=S.pending[0], r=byId[p.rid], e=explain(p.rid,setFor(p.rid));
+      const all=e.reasons.slice().sort((a,b)=>b.contribution-a.contribution);
+      const lis = all.length ? all.map(x=>`<li class="${x.contribution<0?"neg":""}">${esc(reasonText(x))}</li>`).join("") : `<li class="zero">${esc(reasonText({kind:"fresh"},e.planEmpty))}</li>`;
+      h+=`<div class="deck ${flash===r.id?"sug flash":""}"><span class="count">Suggestion 1 of ${S.pending.length}</span><h3>${esc(r.title)}</h3><div class="meta">${metaOf(r)}</div>
+        <ul class="reasons">${lis}</ul><span style="flex:1"></span>
+        <button class="why" data-act="swap" data-idx="0">Choose a different one</button>
+        <div class="acts"><button class="btn" data-act="skip" data-idx="0">Skip</button><button class="btn pri" data-act="accept" data-idx="0">Add to plan</button></div></div>`;
+    } else h+=suggestBar("Start");
+  } else {
+    for(let d=0; d<7; d++){
+      const its=S.items.filter(i=>i.day===d), ps=S.pending.map((p,idx)=>({p,idx})).filter(x=>x.p.day===d);
+      h+=`<div class="day"><div class="day-h"><span>${fmtDay(addDays(d))}</span>${!its.length&&!ps.length?`<button class="chip" data-act="fillday" data-day="${d}">Suggest</button>`:""}</div>`;
+      h+=its.map(i=>`<div class="mini"><div class="grow">${esc(byId[i.rid].title)}<small>${i.servings} servings</small></div><button data-act="day" data-rid="${i.rid}">Move</button><button data-act="remove" data-rid="${i.rid}" aria-label="Remove">×</button></div>`).join("");
+      h+=ps.map(({p,idx})=>{ const e=explain(p.rid,setFor(p.rid)); return `<div class="mini s"><div class="grow">${esc(byId[p.rid].title)}<small>${esc(cardReasons(e).map(x=>x.t).join(" · "))}</small></div><button data-act="accept" data-idx="${idx}">Add</button><button data-act="skip" data-idx="${idx}">Another</button></div>`; }).join("");
+      h+=`</div>`;
+    }
+    const any=S.items.filter(i=>i.day==null||i.day>6);
+    h+=`<div class="day"><div class="day-h"><span>Any day</span><button class="chip" data-act="pick">+ Add</button></div>${any.map(i=>`<div class="mini"><div class="grow">${esc(byId[i.rid].title)}</div><button data-act="day" data-rid="${i.rid}">Move</button></div>`).join("")}</div>`;
+    const empty=[...Array(7).keys()].filter(d=>!S.items.some(i=>i.day===d)&&!S.pending.some(p=>p.day===d));
+    foot.hidden=false;
+    foot.innerHTML = S.pending.length ? `<button class="btn" data-act="clear">Clear</button><button class="btn pri wide" data-act="all">Add all ${S.pending.length}</button>`
+      : `<button class="btn pri wide" data-act="fill" ${empty.length?"":"disabled"}>Fill ${empty.length} empty day${empty.length===1?"":"s"}</button>`;
+  }
+  body.innerHTML=h;
+  const meal=document.getElementById("meal"); if(meal) meal.onchange=()=>{S.request.meal=meal.value;render();};
+  renderSide(); flash=null;
+}
+function renderSide(){
+  document.querySelectorAll("#variants button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===variant)));
+  document.getElementById("vhint").textContent=HINTS[variant];
+  const rows=S.pending.map(p=>{ const e=explain(p.rid,setFor(p.rid)); const g=k=>e.reasons.filter(r=>r.kind===k).reduce((s,r)=>s+r.contribution,0);
+    const c=v=>`<td class="num ${v<0?"neg":""}">${v?v.toFixed(2):"-"}</td>`;
+    return `<tr><td>${esc(byId[p.rid].title)}</td>${c(g("overlap"))}${c(g("favourite"))}${c(g("effort"))}${c(g("recently_cooked"))}${c(g("variety"))}<td class="num"><b>${e.score.toFixed(2)}</b></td></tr>`; }).join("");
+  document.getElementById("scoreTable").innerHTML = rows ? `<table><tr><th>Suggestion</th><th>Overlap</th><th>Fav</th><th>Effort</th><th>Recent</th><th>Variety</th><th>Score</th></tr>${rows}</table>` : `<p class="hint">No pending suggestions.</p>`;
+  const ref=refOffset();
+  document.getElementById("stateTable").innerHTML = `<table>
+    <tr><th>Plan items (anchors)</th><td>${S.items.map(i=>`${esc(byId[i.rid].title)} (${i.servings}${i.day!=null?", "+fmtDay(addDays(i.day)):""})`).join("<br>")||"-"}</td></tr>
+    <tr><th>pending</th><td>${S.pending.map(p=>esc(byId[p.rid].title)).join("<br>")||"-"}</td></tr>
+    <tr><th>skipped</th><td>${S.skipped.map(id=>esc(byId[id].title)).join("<br>")||"-"}</td></tr>
+    <tr><th>request</th><td>meal:${S.request.meal}${S.request.quick?" time:&lt;=30":""}, count ${S.request.count}</td></tr>
+    <tr><th>last ask</th><td>${S.lastAsk?`asked ${S.lastAsk.asked}, pool gave ${S.lastAsk.got}`:"-"}</td></tr>
+    <tr><th>reference date</th><td>${fmtDay(addDays(ref))}</td></tr></table>`;
+  document.getElementById("log").innerHTML = S.log.slice(0,40).map(m=>`<li>${esc(m)}</li>`).join("");
+}
+
+/* ---------- sheets ---------- */
+function openSheet(kind, arg){ sheetState={kind,arg,q:""}; drawSheet(); document.getElementById("scrim").hidden=false; }
+function closeSheet(){ sheetState=null; document.getElementById("scrim").hidden=true; }
+document.getElementById("scrim").addEventListener("click",e=>{ if(e.target.id==="scrim") closeSheet(); });
+function drawSheet(){
+  const sh=document.getElementById("sheet"), st=sheetState; let h="";
+  if(st.kind==="pick"||st.kind==="pickswap"){
+    const q=st.q.toLowerCase(), inPlan=new Set(planIds());
+    const rows=lib.filter(r=>!q||r.title.toLowerCase().includes(q)||r.ings.some(i=>nm(i).includes(q)));
+    h=`<div class="sheet-h"><h3>${st.kind==="pick"?"Add recipes":"Swap for any recipe"}</h3><button class="btn" data-sact="close">Done</button></div>
+      <input class="search" id="pq" placeholder="Search recipes" value="${esc(st.q)}" autocomplete="off">
+      <p class="hint">The real thing is the Recipes screen in pick mode: same search, chips and filter sheet.</p>
+      <div class="sheet-b">${rows.map(r=>`<div class="prow"><div class="grow">${esc(r.title)}<small>${metaOf(r)}</small></div>${inPlan.has(r.id)?`<span class="hint">In plan</span>`:`<button class="btn ${st.kind==="pick"?"":"pri"}" data-sact="${st.kind==="pick"?"add":"swapany"}" data-rid="${r.id}">${st.kind==="pick"?"+ Add":"Use"}</button>`}</div>`).join("")}</div>`;
+  } else if(st.kind==="why"){
+    const p=S.pending[st.arg]; if(!p){closeSheet();return;}
+    const r=byId[p.rid], e=explain(p.rid,setFor(p.rid));
+    const rs=e.reasons.slice().sort((a,b)=>b.contribution-a.contribution);
+    h=`<div class="sheet-h"><h3>Why ${esc(r.title)}?</h3><button class="btn" data-sact="close">Close</button></div>
+      <div class="sheet-b"><div class="bars">${rs.length?rs.map(x=>`<div class="bar"><span>${esc(reasonText(x))}</span><div class="track"><i class="${x.contribution>=0?"p":"n"}" style="width:${Math.min(50,Math.abs(x.contribution)*50)}%"></i></div></div>`).join(""):`<p class="empty">${esc(reasonText({kind:"fresh"},e.planEmpty))}. Nothing pulled it up and nothing pushed it down.</p>`}</div>
+      <p class="hint">Green pulls a suggestion up, red pushes it down. Compared with everything else in the plan and on screen.</p></div>`;
+  } else if(st.kind==="swap"){
+    const p=S.pending[st.arg]; const alts=alternatives(st.arg,5);
+    h=`<div class="sheet-h"><h3>Instead of ${esc(byId[p.rid].title)}</h3><button class="btn" data-sact="close">Close</button></div>
+      <div class="sheet-b">${alts.map(a=>`<div class="prow"><div class="grow">${esc(a.r.title)}<small>${esc(cardReasons(a.e).map(x=>x.t).join(" · "))}</small></div><button class="btn pri" data-sact="swapto" data-rid="${a.r.id}">Use</button></div>`).join("")||`<p class="empty">Nothing else matches this request.</p>`}
+      <button class="addrow" data-sact="swapsearch">Search all recipes</button></div>`;
+  } else if(st.kind==="day"){
+    const it=S.items.find(i=>i.rid===st.arg);
+    h=`<div class="sheet-h"><h3>${esc(byId[st.arg].title)}</h3><button class="btn" data-sact="close">Close</button></div>
+      <div class="days"><button class="${it.day==null?"on":""}" data-sact="setday" data-day="">Any day</button>${[...Array(14).keys()].map(d=>`<button class="${it.day===d?"on":""}" data-sact="setday" data-day="${d}">${fmtDay(addDays(d)).replace(" Oct","").replace(" Nov"," Nov")}</button>`).join("")}</div>`;
+  } else if(st.kind==="filters"){
+    h=`<div class="sheet-h"><h3>Filters</h3><button class="btn" data-sact="close">Show suggestions</button></div>
+      <p class="hint">The same filter sheet as the Recipes screen, with Meal preset to the chosen meal type. Only the Quick and Time rows are mocked here.</p>
+      <div class="ctl"><button class="chip ${S.request.quick?"on":""}" data-sact="quick">30 min</button></div>`;
+  }
+  sh.innerHTML=h;
+  const pq=document.getElementById("pq"); if(pq){ pq.oninput=()=>{st.q=pq.value; const pos=pq.selectionStart; drawSheet(); const n=document.getElementById("pq"); n.focus(); n.setSelectionRange(pos,pos);}; }
+}
+document.getElementById("sheet").addEventListener("click",e=>{
+  const b=e.target.closest("[data-sact]"); if(!b) return; const a=b.dataset.sact, st=sheetState;
+  if(a==="close"){closeSheet();render();return;}
+  if(a==="add"){ S.items.push({rid:b.dataset.rid,servings:2,day:null}); log(`anchor added: ${byId[b.dataset.rid].title}`); }
+  if(a==="swapto"||a==="swapany"){ swapTo(st.arg,b.dataset.rid); closeSheet(); render(); return; }
+  if(a==="swapsearch"){ sheetState={kind:"pickswap",arg:st.arg,q:""}; }
+  if(a==="setday"){ const it=S.items.find(i=>i.rid===st.arg); it.day=b.dataset.day===""?null:+b.dataset.day; log(`${byId[it.rid].title} -> ${it.day==null?"any day":fmtDay(addDays(it.day))}`); closeSheet(); render(); return; }
+  if(a==="quick"){ S.request.quick=!S.request.quick; }
+  drawSheet(); render();
+});
+
+/* ---------- phone clicks ---------- */
+document.querySelector(".phone").addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]"); if(!b||b.closest("#sheet")) return;
+  const a=b.dataset.act, idx=+b.dataset.idx, rid=b.dataset.rid;
+  if(a==="pick") return openSheet("pick");
+  if(a==="why") return openSheet("why",idx);
+  if(a==="swap") return openSheet("swap",idx);
+  if(a==="day") return openSheet("day",rid);
+  if(a==="filters") return openSheet("filters");
+  if(a==="accept") accept(idx);
+  if(a==="skip") skipSlot(idx);
+  if(a==="remove") removeItem(rid);
+  if(a==="serv-"||a==="serv+"){ const it=S.items.find(i=>i.rid===rid); it.servings=Math.max(1,it.servings+(a==="serv+"?1:-1)); }
+  if(a==="cnt-"||a==="cnt+") S.request.count=Math.min(14,Math.max(1,S.request.count+(a==="cnt+"?1:-1)));
+  if(a==="quick") S.request.quick=!S.request.quick;
+  if(a==="suggest") doSuggest(S.request.count);
+  if(a==="all") acceptAll();
+  if(a==="clear"){ log(`cleared ${S.pending.length} suggestions (not skipped)`); S.pending=[]; }
+  if(a==="fill"){ const empty=[...Array(7).keys()].filter(d=>!S.items.some(i=>i.day===d)&&!S.pending.some(p=>p.day===d)); doSuggest(empty.length, empty); }
+  if(a==="fillday") doSuggest(1,[+b.dataset.day]);
+  render();
+});
+document.querySelectorAll("#variants button").forEach(b=>b.onclick=()=>{variant=b.dataset.v;closeSheet();render();});
+document.querySelectorAll("#scenarios button").forEach(b=>b.onclick=()=>scenario(b.dataset.s));
+scenario("worked"); doSuggest(S.request.count); render();
+</script>

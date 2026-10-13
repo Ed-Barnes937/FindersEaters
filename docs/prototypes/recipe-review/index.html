@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en-GB">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recipe Review Prototype</title>
+<!--
+  PROTOTYPE - throwaway. Answers "Prototype reviewing and correcting a parsed recipe"
+  (https://github.com/Ed-Barnes937/FindersEaters/issues/14).
+  Three structurally different review screens, switchable with ?variant=a|b|c or the
+  side panel, over one in-memory model of the engine's output contract
+  (docs/spec/engine-pipeline.md section 5) for a review-first import of a real
+  BBC Good Food style recipe. Corrections, taps and elapsed time are printed after
+  every action. No persistence. Open the file in a browser; nothing to install.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+:root{
+  --ground:#EEF1EA; --surface:#FBFCF8; --ink:#1C231E; --muted:#5F6B62; --line:#D5DCD0;
+  --accent:#2C6B4B; --accent-ink:#FFFFFF; --accent-soft:#DCEBDF;
+  --warn:#9A5B0B; --warn-soft:#F6E7CC; --hl:#FBE3A6; --done:#8A948C;
+  --shadow:0 1px 2px rgba(28,35,30,.08),0 8px 30px rgba(28,35,30,.10);
+  --ui:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --display:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#101412; --surface:#181D1A; --ink:#E5EBE4; --muted:#9AA79D; --line:#2C3530;
+    --accent:#74C496; --accent-ink:#0F1B14; --accent-soft:#1F3328;
+    --warn:#E7B464; --warn-soft:#3A2D16; --hl:#5A4515; --done:#6B766E;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 30px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#101412; --surface:#181D1A; --ink:#E5EBE4; --muted:#9AA79D; --line:#2C3530;
+  --accent:#74C496; --accent-ink:#0F1B14; --accent-soft:#1F3328;
+  --warn:#E7B464; --warn-soft:#3A2D16; --hl:#5A4515; --done:#6B766E;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--ui);font-size:15px;line-height:1.45;padding:20px 16px 40px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:24px;grid-template-columns:minmax(0,400px) minmax(0,1fr);align-items:start}
+@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr)}}
+.intro{grid-column:1/-1;display:flex;flex-direction:column;gap:6px;max-width:72ch}
+.intro h1{font-size:28px;font-weight:800;letter-spacing:-.01em}
+.intro p{margin:0;color:var(--muted)}
+.tag{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--warn);background:var(--warn-soft);padding:2px 8px;border-radius:4px;width:max-content}
+
+/* phone */
+.phone{width:100%;max-width:400px;height:760px;background:var(--surface);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;position:relative;justify-self:center}
+.ph-head{padding:14px 18px 10px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+.ph-head .back{font-size:13px;color:var(--accent)}
+.ph-head h2{font-size:21px;font-weight:800}
+.ph-sub{font-size:13px;color:var(--muted)}
+.ph-body{flex:1;overflow-y:auto;overscroll-behavior:contain;position:relative}
+.ph-foot{border-top:1px solid var(--line);padding:10px 14px;background:var(--surface);display:flex;gap:10px;align-items:center}
+.primary{flex:1;min-height:52px;border-radius:14px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:16px}
+.primary:disabled{opacity:.45;cursor:default}
+.ghost{min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);padding:0 14px;font-weight:700}
+.toast{position:absolute;left:12px;right:12px;bottom:84px;background:var(--ink);color:var(--surface);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-size:14px;z-index:5}
+.toast button{background:none;border:0;color:var(--accent-soft);font-weight:700;padding:6px 8px}
+.banner{margin:12px 14px 0;padding:10px 12px;border-radius:12px;font-size:14px;background:var(--warn-soft);color:var(--warn)}
+.banner.ok{background:var(--accent-soft);color:var(--accent)}
+.sect{padding:14px 18px 4px;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;align-items:baseline}
+
+/* readings */
+.orig{font-size:16px;overflow-wrap:anywhere}
+.orig mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--ground);border-radius:8px;padding:3px 8px;font-size:13.5px;display:inline-flex;gap:5px;align-items:baseline}
+.chip small{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.chip.sugg{border-style:dashed;border-color:var(--accent);color:var(--accent);background:transparent}
+.chip.approx::after{content:"≈ parent";font-size:10.5px;color:var(--muted)}
+.chip.kind{background:transparent}
+.chip.flagged{border-color:var(--warn);background:var(--warn-soft)}
+.mini{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+
+/* tags block */
+.tagblk{margin:12px 14px 0;border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.tagblk h3{font-size:15px;font-weight:600}
+.tchip{border:1px dashed var(--accent);color:var(--accent);background:transparent;border-radius:999px;padding:6px 6px 6px 12px;font-size:14px;display:inline-flex;gap:6px;align-items:center}
+.tchip.yes{border-style:solid;background:var(--accent);color:var(--accent-ink)}
+.tchip.no{border-color:var(--line);color:var(--done);text-decoration:line-through}
+.tchip button{border:0;background:none;color:inherit;padding:2px 6px;font-size:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:7px 12px;font-size:14px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.seg button.top{box-shadow:inset 0 0 0 2px var(--warn)}
+
+/* variant A rows */
+.lrow{display:flex;gap:10px;padding:10px 14px 10px 18px;border-bottom:1px solid var(--line);align-items:flex-start}
+.lrow .m{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.lrow.clear .orig{color:var(--muted);font-size:15px}
+.lrow.done .orig{color:var(--muted)}
+.tick{width:40px;height:40px;flex:none;border-radius:50%;border:2px solid var(--line);background:var(--surface);display:grid;place-items:center}
+.tick.on{background:var(--accent);border-color:var(--accent)}
+.tick.on::after,.okmark::after{content:"";width:12px;height:7px;border-left:2.5px solid var(--accent-ink);border-bottom:2.5px solid var(--accent-ink);transform:translateY(-2px) rotate(-45deg)}
+.okmark{width:20px;height:20px;border-radius:50%;background:var(--done);display:inline-grid;place-items:center;flex:none;margin-top:2px}
+.okmark::after{width:8px;height:5px;border-width:2px}
+.lcard{margin:8px 12px;border:1.5px solid var(--warn);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.lcard.done{border-color:var(--line)}
+.why{font-size:13px;color:var(--warn);font-weight:700}
+.alts{display:flex;flex-wrap:wrap;gap:6px}
+.alts button{border:1px solid var(--line);background:var(--ground);border-radius:10px;padding:8px 10px;font-size:14px;text-align:left;min-height:40px}
+.alts button.yes{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.alts .conf{font-size:11px;color:var(--muted);margin-left:4px}
+.alts button.yes .conf{color:inherit}
+.acts{display:flex;gap:8px}
+.acts button{flex:1;min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:700}
+.acts .ok{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+/* variant B queue */
+.qwrap{padding:16px;display:flex;flex-direction:column;gap:14px;min-height:100%}
+.qbar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.qbar i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.qcard{border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.qcard .k{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.qcard .orig{font-size:22px;font-family:var(--display);font-weight:600;line-height:1.2}
+.ctx{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+.qbig{margin-top:auto;display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.qbig button{min-height:60px;border-radius:16px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:16px}
+.qbig .ok{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.link{border:0;background:none;color:var(--accent);font-weight:700;padding:8px 0;text-align:left}
+
+/* variant C piles */
+.pile{padding:4px 0 8px}
+.gt{width:100%;border-collapse:collapse;font-size:14px}
+.gt td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.gt td:first-child{padding-left:14px;width:46%}
+.gt td:last-child{width:44px;text-align:center}
+.gt .o{color:var(--muted)}
+.gt tr.off td{opacity:.5}
+input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent)}
+
+/* sheet */
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:8;display:flex;align-items:flex-end}
+.sheet{background:var(--surface);width:100%;border-radius:20px 20px 0 0;padding:16px;display:flex;flex-direction:column;gap:10px;max-height:88%;overflow:auto}
+.sheet label{display:flex;flex-direction:column;gap:3px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.sheet input,.sheet select{font-size:16px;padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:var(--ground);text-transform:none;letter-spacing:0;color:var(--ink)}
+.sheet .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ac{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ac button{border:0;border-bottom:1px solid var(--line);background:var(--surface);padding:9px 10px;text-align:left;text-transform:none;letter-spacing:0;font-size:15px;color:var(--ink)}
+.ac button:last-child{border-bottom:0}
+.done-screen{padding:40px 24px;text-align:center;color:var(--muted)}
+.done-screen b{display:block;font-family:var(--display);font-size:22px;color:var(--ink);margin-bottom:6px}
+
+/* side panel */
+.side{display:flex;flex-direction:column;gap:20px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.panel h3{font-size:16px;font-weight:600}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btns button{border:1px solid var(--line);background:var(--ground);padding:8px 12px;border-radius:999px;font-size:14px}
+.btns button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.stat{border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.stat b{display:block;font-family:var(--display);font-size:22px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.state{overflow-x:auto}
+table.st{border-collapse:collapse;font-size:12.5px;width:100%;font-variant-numeric:tabular-nums}
+.st th,.st td{text-align:left;padding:4px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.st th{color:var(--muted);font-weight:400;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.verdict{border-color:var(--accent)}
+.verdict ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="tag">Prototype - throwaway</span>
+    <h1>Reviewing a parsed recipe</h1>
+    <p>A review-first import of a 17-line, two-section recipe: every Jev decision is flagged. Can a household clear it in a few taps without rubber-stamping the lines that are genuinely wrong? Switch variants, clear the review, and compare taps and time.</p>
+  </header>
+  <div class="phone" id="phone"></div>
+  <aside class="side">
+    <section class="panel">
+      <h3>Variant</h3>
+      <div class="btns" id="variants"></div>
+      <p class="hint" id="vhint"></p>
+      <div class="btns">
+        <button id="reset">Reset recipe</button>
+        <button id="partial" aria-pressed="false">Simulate partial run (Jev down)</button>
+      </div>
+    </section>
+    <section class="panel">
+      <h3>State</h3>
+      <div class="stats" id="stats"></div>
+      <div class="state"><table class="st" id="corr"></table></div>
+    </section>
+    <section class="panel verdict">
+      <h3>Verdict</h3>
+      <ul>
+        <li><b>Variant A (in recipe order, tiered) wins.</b> Recipe order keeps the context that makes a line checkable (which section, what came before), and the two densities do the triage that variant C needed two piles for.</li>
+        <li><b>Two tiers.</b> <i>Check</i> lines (any check flag other than review-first) open as cards with the question, the highlighted span and up to three one-tap alternatives. <i>Glance</i> lines (only review-first flags) are one compact row: original text over the engine's reading.</li>
+        <li><b>Answering a card's question confirms the rest of that line</b>, so a check line costs one tap when an alternative is right.</li>
+        <li><b>One bulk action, glance lines only.</b> "Looks right - confirm N" never touches a check line or a below-gate tag. Bulk confirmations are stored with method <code>bulk</code> and are not golden-set candidates.</li>
+        <li>From cold, A clears this recipe in 7 taps (tags, effort, bulk, four answers). B needs the same 7 only if the bulk shortcut is used; otherwise it is 17 cards of "Right, Right, Right" with one line of context. C is as fast as A but reorders the recipe, so duplicate and section questions lose their context.</li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+<script>
+// ---------- engine output for one review-first import (section 5 contract) ----------
+const KB = ['Black pepper','Butter','Chicken breast','Chicken thigh','Chopped tomatoes','Coriander','Coriander seeds','Curry paste','Double cream','Garam masala','Garlic','Ghee','Ginger','Greek yogurt','Lemon','Lemon juice','Natural yogurt','Onion','Passata','Plum tomatoes','Red onion','Salt','Salted butter','Single cream','Tikka masala paste','Tomato purée','Unsalted butter','Vegetable oil'];
+const UNITS = ['','g','kg','ml','l','tsp','tbsp','clove','tin','can','pack','bunch','handful','knob','pinch','piece'];
+
+const RECIPE = {title:'Chicken tikka masala', site:'BBC Good Food', servings:'Serves 4', unitSystem:'UK (from bbcgoodfood.com)', time:'1 hr 10 min'};
+
+// tags under review-first: all left unknown, offered as suggestions. Effort is below its gate.
+const TAGS0 = [
+  {dim:'meal', label:'Meal', value:'Dinner', conf:.95},
+  {dim:'cuisine', label:'Cuisine', value:'Indian', conf:.97},
+  {dim:'protein', label:'Main protein', value:'Chicken', conf:.96},
+  {dim:'method', label:'Method', value:'Simmer', conf:.90},
+  {dim:'effort', label:'Effort', value:'Medium', conf:.71, low:true, options:[['Easy',.24],['Medium',.71],['Hard',.05]]},
+];
+
+// p(): one parsed part. ing.match: exact | parent | suggestion (review-first or below gate: unknown until confirmed)
+const p = (amount, unit, ing, match, prep='', size='') => ({amount, unit, ing, match, prep, size});
+const RF = (field, conf) => ({code:'review_first', sev:'check', field, conf});
+
+const LINES0 = [
+  {i:0, text:'For the marinade', kind:'header', parts:[], flags:[]},
+  {i:1, text:'4 skinless chicken breasts, cut into chunks', kind:'ingredient', parts:[p('4','','Chicken breast','suggestion','skinless, cut into chunks')], flags:[RF('extract',.93), RF('ingredient',.91)]},
+  {i:2, text:'150g natural yogurt', kind:'ingredient', parts:[p('150','g','Natural yogurt','exact')], flags:[RF('extract',.97)]},
+  {i:3, text:'1 tbsp garam masala', kind:'ingredient', parts:[p('1','tbsp','Garam masala','exact')], flags:[RF('extract',.98)]},
+  {i:4, text:'2 garlic cloves, crushed', kind:'ingredient', parts:[p('2','clove','Garlic','exact','crushed')], flags:[RF('extract',.91)]},
+  {i:5, text:'thumb-sized piece ginger, grated', kind:'ingredient', parts:[p('1','piece','Ginger','exact','grated','thumb-sized')],
+    flags:[{code:'low_confidence', sev:'check', field:'extract', conf:.54, span:'thumb-sized piece', why:'How much ginger?',
+      alts:[{label:'1 thumb-sized piece', conf:.54, patch:{amount:'1',unit:'piece',size:'thumb-sized'}},
+            {label:'1 thumb', conf:.27, patch:{amount:'1',unit:'',size:'thumb'}},
+            {label:'No amount', conf:.11, patch:{amount:'',unit:'',size:''}, kind:'unquantified'}]},
+      {code:'no_conversion', sev:'info', field:'measure', why:'No weight for a piece of ginger: kept as written on the shopping list.'}]},
+  {i:6, text:'juice ½ lemon', kind:'ingredient', parts:[p('½','','Lemon','exact','juice')], flags:[RF('extract',.88)]},
+  {i:7, text:'For the sauce', kind:'header', parts:[], flags:[]},
+  {i:8, text:'2 tbsp vegetable oil', kind:'ingredient', parts:[p('2','tbsp','Vegetable oil','exact')], flags:[RF('extract',.99)]},
+  {i:9, text:'1 large onion, finely chopped', kind:'ingredient', parts:[p('1','','Onion','exact','finely chopped','large')], flags:[RF('extract',.95)]},
+  {i:10, text:'2 tbsp tikka masala paste', kind:'ingredient', parts:[p('2','tbsp','Curry paste','suggestion-parent')], flags:[RF('extract',.90), RF('ingredient',.84)]},
+  {i:11, text:'400g can chopped tomatoes', kind:'ingredient', parts:[p('400','g','Chopped tomatoes','exact')],
+    flags:[{code:'extract_disagreement', sev:'check', field:'extract', conf:.81, span:'400g can', why:'Is "can" part of the amount?',
+      alts:[{label:'400 g chopped tomatoes', conf:.81, patch:{amount:'400',unit:'g'}},
+            {label:'1 can (400 g) chopped tomatoes', conf:.17, patch:{amount:'1',unit:'can',size:'400 g'}}]}]},
+  {i:12, text:'2 tbsp tomato purée', kind:'ingredient', parts:[p('2','tbsp','Tomato purée','exact')], flags:[RF('extract',.96)]},
+  {i:13, text:'150ml double cream', kind:'ingredient', parts:[p('150','ml','Double cream','exact')], flags:[RF('extract',.98)]},
+  {i:14, text:'100ml boiling water', kind:'not', parts:[p('100','ml','Water','exact')], flags:[]},
+  {i:15, text:'a knob of butter', kind:'ingredient', parts:[p('1','knob',null,'unresolved')],
+    flags:[RF('extract',.90), {code:'low_confidence', sev:'check', field:'ingredient', conf:.62, span:'butter', why:'Which butter?',
+      alts:[{label:'Butter', conf:.62, ing:'Butter'}, {label:'Unsalted butter', conf:.31, ing:'Unsalted butter'}, {label:'Ghee', conf:.04, ing:'Ghee'}]}]},
+  {i:16, text:'small bunch coriander, chopped, to serve', kind:'ingredient', parts:[p('1','bunch','Coriander','exact','chopped','small')],
+    flags:[{code:'low_confidence', sev:'check', field:'kind', conf:.58, span:'small bunch', why:'Buy this, or is it optional garnish?',
+      alts:[{label:'Shop for 1 small bunch', conf:.58, kind:'ingredient'}, {label:'To serve, no amount', conf:.40, kind:'unquantified'}]}]},
+  {i:17, text:'salt and black pepper, to taste', kind:'unquantified', parts:[p('','','Salt','exact'), p('','','Black pepper','exact')], flags:[RF('structure',.92)]},
+  {i:18, text:'1 tsp sugar', kind:'ingredient', parts:[p('1','tsp','Sugar','exact')], flags:[RF('extract',.97)]},
+];
+KB.push('Sugar','Water');
+
+// ---------- model ----------
+let S;
+function reset(){
+  S = {lines: structuredClone(LINES0), tags: structuredClone(TAGS0), corr:{}, taps:0, t0:null, toast:null, sheet:null,
+       partial: S ? S.partial : false, qpos:0, cOff:{}, open:{}};
+  render();
+}
+const key = (i, field, part=0) => `L${i}.${part}.${field}`;
+const isCheck = f => f.sev === 'check';
+const hard = f => isCheck(f) && f.code !== 'review_first';
+function tier(l){
+  if (!l.flags.some(isCheck)) return 'clear';
+  return l.flags.some(hard) ? 'check' : 'glance';
+}
+function flagDone(l, f){ return f.field === 'structure' ? !!S.corr[key(l.i,'structure')] : !!S.corr[key(l.i, f.field)]; }
+function lineDone(l){ return l.flags.filter(isCheck).every(f => flagDone(l, f)); }
+function tagDone(t){ return !!S.corr['T.'+t.dim]; }
+function openLines(){ return S.lines.filter(l => tier(l) !== 'clear' && !lineDone(l)); }
+function openTags(){ return S.tags.filter(t => !tagDone(t)); }
+function needsReview(){ return !S.partial && (openLines().length + openTags().length) > 0; }
+function glanceOpen(){ return S.lines.filter(l => tier(l)==='glance' && !lineDone(l)); }
+
+function tap(){ S.taps++; if(!S.t0) S.t0 = Date.now(); }
+function store(k, value, method){ S.corr[k] = {value, method, at: Date.now()}; }
+
+function confirmLine(l, method){
+  l.parts.forEach(pt => { if (pt.match && pt.match.startsWith('suggestion')) pt.match = pt.match === 'suggestion-parent' ? 'parent' : 'exact'; });
+  l.flags.filter(isCheck).forEach(f => { if (!flagDone(l,f)) store(key(l.i, f.field), readingOf(l, f.field), method); });
+}
+function applyAlt(l, f, alt){
+  const pt = l.parts[0];
+  if (alt.patch) Object.assign(pt, alt.patch);
+  if (alt.kind) l.kind = alt.kind;
+  if (alt.ing){ pt.ing = alt.ing; pt.match = 'exact'; }
+  store(key(l.i, f.field), alt.label, alt.label === f.alts[0].label ? 'confirm' : 'alternative');
+  // answering the last real question on a line confirms the rest of that line's reading
+  if (!l.flags.some(x => hard(x) && !flagDone(l, x))) confirmLine(l, 'confirm');
+}
+function bulkConfirm(lines){
+  const before = structuredClone({lines:S.lines, corr:S.corr});
+  lines.forEach(l => confirmLine(l, 'bulk'));
+  showToast(`Confirmed ${lines.length} lines`, () => { S.lines = before.lines; S.corr = before.corr; });
+}
+function acceptTags(){
+  const before = structuredClone({corr:S.corr});
+  const n = S.tags.filter(t => !t.low && !tagDone(t));
+  n.forEach(t => store('T.'+t.dim, t.value, 'bulk'));
+  showToast(`Added ${n.length} tags`, () => { S.corr = before.corr; });
+}
+function rejectTag(t){ store('T.'+t.dim, 'removed: '+t.value, 'reject'); }
+function pickTag(t, v){ store('T.'+t.dim, v, v === t.value ? 'confirm' : 'alternative'); }
+function showToast(msg, undo){
+  clearTimeout(S.toastTimer);
+  S.toast = {msg, undo};
+  S.toastTimer = setTimeout(() => { S.toast = null; render(); }, 4000);
+}
+
+function readingOf(l, field){
+  if (field === 'structure') return l.parts.map(x => x.ing).join(' | ');
+  if (field === 'kind') return l.kind;
+  const pt = l.parts[0];
+  if (field === 'ingredient') return pt.ing || '(unresolved)';
+  return [pt.amount, pt.unit, pt.size, pt.ing, pt.prep].filter(Boolean).join(' ');
+}
+
+// ---------- rendering helpers ----------
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function origHTML(l){
+  const f = l.flags.find(f => f.span && !flagDone(l, f));
+  if (!f) return esc(l.text);
+  const at = l.text.indexOf(f.span);
+  if (at < 0) return esc(l.text);
+  return esc(l.text.slice(0, at)) + '<mark>' + esc(f.span) + '</mark>' + esc(l.text.slice(at + f.span.length));
+}
+function amountText(pt){ return [pt.amount, pt.unit].filter(Boolean).join(pt.unit && pt.unit.length <= 2 ? '' : ' '); }
+function chipsHTML(l, opts={}){
+  if (l.kind === 'not') return `<div class="chips"><span class="chip kind">not shopped</span></div>`;
+  const out = [];
+  l.parts.forEach((pt, n) => {
+    if (n) out.push('<span class="mini">+</span>');
+    const amt = amountText(pt);
+    if (l.kind !== 'unquantified' && amt) out.push(`<span class="chip"><small>amt</small>${esc(amt)}${pt.size ? ' · '+esc(pt.size) : ''}</span>`);
+    if (pt.ing){
+      const cls = pt.match.startsWith('suggestion') ? 'chip sugg' : (pt.match === 'parent' ? 'chip approx' : 'chip');
+      out.push(`<span class="${cls}">${esc(pt.ing)}${pt.match.startsWith('suggestion') ? '?' : ''}</span>`);
+    } else out.push(`<span class="chip flagged">ingredient?</span>`);
+    if (pt.prep && !opts.short) out.push(`<span class="chip"><small>prep</small>${esc(pt.prep)}</span>`);
+  });
+  if (l.kind === 'unquantified') out.push(`<span class="chip kind">no amount</span>`);
+  return `<div class="chips">${out.join('')}</div>`;
+}
+function shortReading(l){
+  if (l.kind === 'not') return 'not shopped';
+  return l.parts.map(pt => {
+    const amt = l.kind === 'unquantified' ? '' : amountText(pt);
+    const ing = pt.ing ? pt.ing + (pt.match.startsWith('suggestion') ? '?' : (pt.match === 'parent' ? ' (≈)' : '')) : '?';
+    return [amt, pt.size, ing].filter(Boolean).join(' ');
+  }).join(' + ') + (l.kind === 'unquantified' ? ' · no amount' : '');
+}
+function altsHTML(l, f){
+  if (!f.alts) return '';
+  return `<div class="alts">${f.alts.map((a, n) => `<button data-act="alt" data-i="${l.i}" data-f="${f.field}" data-n="${n}" class="${n===0?'':''}">${esc(a.label)}<span class="conf">${Math.round(a.conf*100)}%</span></button>`).join('')}</div>`;
+}
+function checkCard(l, compact){
+  const hf = l.flags.filter(f => hard(f) && !flagDone(l, f));
+  const info = l.flags.filter(f => f.sev === 'info');
+  const done = lineDone(l);
+  return `<div class="lcard ${done?'done':''}">
+    <div class="orig">${origHTML(l)}</div>
+    ${chipsHTML(l)}
+    ${done ? '<div class="mini">Checked</div>' : hf.map(f => `<div class="why">${esc(f.why)}</div>${altsHTML(l, f)}`).join('')}
+    ${info.map(f => `<div class="mini">ⓘ ${esc(f.why)}</div>`).join('')}
+    ${done ? '' : `<div class="acts"><button data-act="edit" data-i="${l.i}">Edit</button>${hf.length ? '' : `<button class="ok" data-act="confirm" data-i="${l.i}">Looks right</button>`}</div>`}
+  </div>`;
+}
+function tagsBlock(){
+  const open = openTags();
+  if (!S.tags.length) return '';
+  const bulkN = S.tags.filter(t => !t.low && !tagDone(t)).length;
+  return `<div class="tagblk">
+    <h3>Tags we think fit</h3>
+    <div class="chips">${S.tags.filter(t => !t.low).map(t => {
+      const c = S.corr['T.'+t.dim];
+      const cls = !c ? '' : (c.method === 'reject' ? 'no' : 'yes');
+      return `<span class="tchip ${cls}">${esc(t.label)}: ${esc(t.value)}${c ? '' : `<button data-act="tagx" data-d="${t.dim}" aria-label="Not ${esc(t.value)}">✕</button>`}</span>`;
+    }).join('')}</div>
+    ${S.tags.filter(t => t.low).map(t => `<div class="mini">${esc(t.label)}: not sure, pick one</div>
+      <div class="seg">${t.options.map(([v]) => `<button data-act="tagpick" data-d="${t.dim}" data-v="${v}" class="${(S.corr['T.'+t.dim]||{}).value===v?'on':''}">${v}</button>`).join('')}</div>`).join('')}
+    ${bulkN ? `<button class="ghost" data-act="tags">Add these ${bulkN} tags</button>` : ''}
+  </div>`;
+}
+function recipeFacts(){
+  return `<div class="mini" style="padding:8px 18px 0">${esc(RECIPE.servings)} · ${esc(RECIPE.time)} · units ${esc(RECIPE.unitSystem)}</div>`;
+}
+function bannerHTML(){
+  if (S.partial) return `<div class="banner">Still being read. Lines show as written for now; nothing to check yet.</div>`;
+  const n = openLines().length + (openTags().length ? 1 : 0);
+  if (!n) return `<div class="banner ok">All checked. This recipe no longer shows "Review" in your library.</div>`;
+  const hardN = openLines().filter(l => tier(l) === 'check').length;
+  return `<div class="banner">${hardN} line${hardN===1?' needs':'s need'} a look, ${glanceOpen().length} probably right. You can leave this and come back: the recipe is already in your library.</div>`;
+}
+
+// ---------- variant A: in recipe order, tiered density ----------
+function variantA(){
+  let h = bannerHTML() + recipeFacts();
+  if (!S.partial) h += tagsBlock();
+  S.lines.forEach(l => {
+    if (l.kind === 'header'){ h += `<div class="sect">${esc(l.text)}</div>`; return; }
+    if (S.partial){ h += `<div class="lrow clear"><div class="m"><div class="orig">${esc(l.text)}</div></div></div>`; return; }
+    const t = tier(l);
+    if (t === 'check' && !lineDone(l) || S.open[l.i]) { h += checkCard(l); return; }
+    if (t === 'glance' && !lineDone(l)){
+      h += `<div class="lrow"><div class="m" data-act="expand" data-i="${l.i}"><div class="orig">${esc(l.text)}</div><div class="mini">${esc(shortReading(l))}</div></div>
+            <button class="tick" data-act="confirm" data-i="${l.i}" aria-label="Looks right"></button></div>`;
+      return;
+    }
+    h += `<div class="lrow ${t==='clear'?'clear':'done'}" data-act="expand" data-i="${l.i}"><div class="m"><div class="orig">${esc(l.text)}</div>${t==='clear' && l.kind==='not' ? '<div class="mini">not shopped</div>' : ''}</div>${t==='clear'?'':'<span class="okmark"></span>'}</div>`;
+  });
+  h += '<div style="height:16px"></div>';
+  const g = glanceOpen().length;
+  const foot = S.partial ? '' : `<div class="ph-foot">${g ? `<button class="primary" data-act="bulk">Looks right - confirm ${g}</button>` : `<button class="primary" data-act="back" ${needsReview()?'':''}>Done</button>`}</div>`;
+  return {body:h, foot};
+}
+
+// ---------- variant B: one at a time ----------
+function queue(){
+  const q = [];
+  if (openTags().length) q.push({type:'tags'});
+  S.lines.forEach(l => { if (tier(l) !== 'clear' && !lineDone(l)) q.push({type:'line', l}); });
+  return q;
+}
+function variantB(){
+  if (S.partial) return {body: bannerHTML(), foot:''};
+  const q = queue();
+  const total = S.lines.filter(l => tier(l) !== 'clear').length + 1;
+  const left = q.length;
+  if (!left) return {body: `<div class="done-screen"><b>All checked</b>${S.taps} taps.</div>`, foot:''};
+  const it = q[0];
+  let card;
+  if (it.type === 'tags'){
+    card = `<div class="qcard"><div class="k">Recipe tags</div>${tagsBlock().replace('class="tagblk"','style="display:flex;flex-direction:column;gap:10px"')}</div>`;
+  } else {
+    const l = it.l, idx = S.lines.indexOf(l);
+    const sect = [...S.lines.slice(0, idx)].reverse().find(x => x.kind === 'header');
+    const hf = l.flags.filter(f => hard(f) && !flagDone(l, f));
+    card = `<div class="qcard"><div class="k">${sect ? esc(sect.text) : 'Ingredients'} · line ${l.i}</div>
+      <div class="orig">${origHTML(l)}</div>${chipsHTML(l)}
+      ${hf.map(f => `<div class="why">${esc(f.why)}</div>${altsHTML(l, f)}`).join('') || '<div class="mini">The engine is fairly sure. Is this right?</div>'}
+      ${l.flags.filter(f=>f.sev==='info').map(f => `<div class="mini">ⓘ ${esc(f.why)}</div>`).join('')}
+      <div class="ctx">${S.lines[idx-1] ? `<span>before: ${esc(S.lines[idx-1].text)}</span>` : ''}${S.lines[idx+1] ? `<span>after: ${esc(S.lines[idx+1].text)}</span>` : ''}</div></div>`;
+  }
+  const g = glanceOpen().length;
+  const isGlance = it.type === 'line' && tier(it.l) === 'glance';
+  const body = `<div class="qwrap"><div class="qbar"><i style="width:${Math.round((1-left/total)*100)}%"></i></div>
+    <div class="mini">${left} to go</div>${card}
+    ${g > 1 ? `<button class="link" data-act="bulk">Confirm all ${g} lines the engine is fairly sure of</button>` : ''}</div>`;
+  const foot = it.type === 'line' ? `<div class="ph-foot" style="display:grid;grid-template-columns:1fr 2fr"><button class="ghost" style="min-height:56px" data-act="edit" data-i="${it.l.i}">Edit</button>${isGlance ? `<button class="primary" data-act="confirm" data-i="${it.l.i}">Right</button>` : `<button class="primary" disabled>Pick an answer</button>`}</div>` : '';
+  return {body, foot};
+}
+
+// ---------- variant C: two piles ----------
+function variantC(){
+  let h = bannerHTML() + recipeFacts();
+  if (S.partial) return {body:h, foot:''};
+  h += tagsBlock();
+  const look = S.lines.filter(l => (tier(l) === 'check' || (tier(l)==='glance' && S.cOff[l.i])) && !lineDone(l));
+  const glance = S.lines.filter(l => tier(l) === 'glance' && !lineDone(l));
+  h += `<div class="sect">Needs a look <span>${look.length}</span></div>`;
+  h += look.length ? look.map(l => checkCard(l)).join('') : '<div class="mini" style="padding:4px 18px">Nothing left.</div>';
+  const g = glance.filter(l => !S.cOff[l.i]);
+  h += `<div class="sect">Probably right <span>${g.length}</span></div>`;
+  h += g.length ? `<table class="gt">${glance.filter(l=>!S.cOff[l.i]).map(l => `<tr><td class="o">${esc(l.text)}</td><td>${esc(shortReading(l))}</td><td><input type="checkbox" checked data-act="coff" data-i="${l.i}" aria-label="Untick to look closer"></td></tr>`).join('')}</table>
+    <p class="mini" style="padding:6px 14px">Untick a line to move it up to Needs a look.</p>` : '';
+  const done = S.lines.filter(l => tier(l) !== 'clear' && lineDone(l)).length;
+  h += `<div class="sect">Checked <span>${done}</span></div><div style="height:16px"></div>`;
+  const foot = g.length ? `<div class="ph-foot"><button class="primary" data-act="bulkC">Confirm ${g.length} ticked</button></div>` : '';
+  return {body:h, foot};
+}
+
+// ---------- edit sheet (shared) ----------
+function sheetHTML(){
+  const l = S.lines.find(x => x.i === S.sheet.i), pt = l.parts[0] || {};
+  const q = S.sheet.q ?? (pt.ing || '');
+  const hits = q.length >= 2 ? KB.filter(n => n.toLowerCase().includes(q.toLowerCase())).slice(0, 5) : [];
+  return `<div class="scrim" data-act="close"><div class="sheet" data-stop>
+    <div class="orig">${esc(l.text)}</div>
+    <label>Kind<span class="seg">${[['ingredient','Shop for it'],['unquantified','No amount'],['not','Not shopped']].map(([k,t]) => `<button data-act="kind" data-k="${k}" class="${(S.sheet.kind||l.kind)===k?'on':''}">${t}</button>`).join('')}</span></label>
+    <div class="row2"><label>Amount<input id="e-amt" inputmode="decimal" value="${esc(S.sheet.amount ?? pt.amount ?? '')}"></label>
+    <label>Unit<select id="e-unit">${UNITS.map(u => `<option ${u===(S.sheet.unit ?? pt.unit)?'selected':''} value="${u}">${u||'(count)'}</option>`).join('')}</select></label></div>
+    <label>Ingredient<input id="e-ing" value="${esc(q)}" autocomplete="off"></label>
+    ${hits.length && !KB.includes(q) ? `<div class="ac">${hits.map(n => `<button data-act="pickIng" data-v="${esc(n)}">${esc(n)}</button>`).join('')}</div>` : ''}
+    <label>Prep<input id="e-prep" value="${esc(S.sheet.prep ?? pt.prep ?? '')}"></label>
+    <div class="acts"><button data-act="close">Cancel</button><button class="ok" data-act="save">Save</button></div>
+  </div></div>`;
+}
+
+// ---------- render ----------
+const VARIANTS = {
+  a:{name:'A. In recipe order', hint:'One scrolling list in recipe order. Check lines open as cards; glance lines are compact rows with a tick; one bulk button for glance lines.', fn:variantA},
+  b:{name:'B. One at a time', hint:'A queue of every flagged item, one card per screen with its neighbours as context, and a shortcut to confirm all glance lines.', fn:variantB},
+  c:{name:'C. Two piles', hint:'Needs a look on top as cards, Probably right below as an original | reading table, all pre-ticked, confirmed in one go.', fn:variantC},
+};
+let variant = (new URLSearchParams(location.search).get('variant') || 'a').toLowerCase();
+if (!VARIANTS[variant]) variant = 'a';
+
+function render(){
+  const v = VARIANTS[variant].fn();
+  const ph = document.getElementById('phone');
+  const scroll = ph.querySelector('.ph-body')?.scrollTop || 0;
+  ph.innerHTML = `<div class="ph-head"><span class="back">‹ ${esc(RECIPE.title)}</span><h2>Check this recipe</h2>
+      <span class="ph-sub">${esc(RECIPE.site)} · ${S.lines.filter(l=>l.kind!=='header').length} lines</span></div>
+    <div class="ph-body">${v.body}</div>${v.foot}
+    ${S.toast ? `<div class="toast"><span>${esc(S.toast.msg)}</span><button data-act="undo">Undo</button></div>` : ''}
+    ${S.sheet ? sheetHTML() : ''}`;
+  ph.querySelector('.ph-body').scrollTop = scroll;
+  document.getElementById('variants').innerHTML = Object.entries(VARIANTS).map(([k, x]) => `<button data-v="${k}" aria-pressed="${k===variant}">${x.name}</button>`).join('');
+  document.getElementById('vhint').textContent = VARIANTS[variant].hint;
+  document.getElementById('partial').setAttribute('aria-pressed', S.partial);
+  const secs = S.t0 ? Math.round((Date.now() - S.t0)/1000) : 0;
+  const ol = openLines();
+  document.getElementById('stats').innerHTML = [
+    [S.taps,'taps'], [secs+'s','since first tap'],
+    [ol.filter(l=>tier(l)==='check').length + ' / ' + glanceOpen().length,'check / glance open'],
+    [needsReview() ? 'yes' : 'no','needs review']].map(([b,s]) => `<div class="stat"><b>${b}</b><span>${s}</span></div>`).join('');
+  const rows = Object.entries(S.corr).sort((a,b) => a[1].at - b[1].at);
+  document.getElementById('corr').innerHTML = `<tr><th>correction key</th><th>value</th><th>method</th><th>golden candidate</th></tr>` +
+    (rows.length ? rows.map(([k, c]) => `<tr><td>${k}</td><td>${esc(c.value)}</td><td>${c.method}</td><td>${c.method==='bulk'?'no':'yes'}</td></tr>`).join('') : '<tr><td colspan="4">none yet</td></tr>');
+  const ing = document.getElementById('e-ing');
+  if (ing && S.sheet.focus){ ing.focus(); ing.setSelectionRange(ing.value.length, ing.value.length); }
+}
+
+function readSheet(){
+  const g = id => document.getElementById(id)?.value;
+  Object.assign(S.sheet, {amount:g('e-amt'), unit:g('e-unit'), prep:g('e-prep'), q:g('e-ing')});
+}
+
+document.addEventListener('click', e => {
+  const vb = e.target.closest('#variants button');
+  if (vb){ variant = vb.dataset.v; history.replaceState(null, '', '?variant=' + variant); S.qpos = 0; render(); return; }
+  if (e.target.id === 'reset'){ reset(); return; }
+  if (e.target.id === 'partial'){ S.partial = !S.partial; render(); return; }
+  const el = e.target.closest('[data-act]');
+  if (!el || !el.closest('#phone')) return;
+  const act = el.dataset.act;
+  if (act === 'close' && e.target.closest('[data-stop]') && !e.target.closest('button[data-act="close"]')) return;
+  const l = el.dataset.i !== undefined ? S.lines.find(x => x.i === +el.dataset.i) : null;
+  if (act !== 'expand' && act !== 'close') tap();
+  switch (act){
+    case 'confirm': confirmLine(l, 'confirm'); delete S.open[l.i]; break;
+    case 'alt': { const f = l.flags.find(f => f.field === el.dataset.f); applyAlt(l, f, f.alts[+el.dataset.n]); break; }
+    case 'bulk': bulkConfirm(glanceOpen()); break;
+    case 'bulkC': bulkConfirm(S.lines.filter(x => tier(x)==='glance' && !lineDone(x) && !S.cOff[x.i])); break;
+    case 'coff': S.cOff[l.i] = true; break;
+    case 'tags': acceptTags(); break;
+    case 'tagx': rejectTag(S.tags.find(t => t.dim === el.dataset.d)); break;
+    case 'tagpick': pickTag(S.tags.find(t => t.dim === el.dataset.d), el.dataset.v); break;
+    case 'undo': S.toast.undo(); S.toast = null; break;
+    case 'expand': if (l && l.kind !== 'header') S.open[l.i] = !S.open[l.i]; break;
+    case 'edit': S.sheet = {i: l.i}; break;
+    case 'kind': readSheet(); S.sheet.kind = el.dataset.k; break;
+    case 'pickIng': readSheet(); S.sheet.q = el.dataset.v; break;
+    case 'close': S.sheet = null; break;
+    case 'save': {
+      readSheet();
+      const t = S.lines.find(x => x.i === S.sheet.i), pt = t.parts[0];
+      Object.assign(pt, {amount:S.sheet.amount, unit:S.sheet.unit, prep:S.sheet.prep});
+      if (S.sheet.q && S.sheet.q !== pt.ing){ pt.ing = S.sheet.q; pt.match = KB.includes(S.sheet.q) ? 'exact' : 'unresolved'; }
+      if (S.sheet.kind) t.kind = S.sheet.kind;
+      const fields = t.flags.filter(isCheck).map(f => f.field);
+      (fields.length ? fields : ['extract']).forEach(fd => store(key(t.i, fd), readingOf(t, fd), 'edit'));
+      S.sheet = null; delete S.open[t.i]; break;
+    }
+    case 'back': break;
+  }
+  render();
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'e-ing'){ readSheet(); S.sheet.focus = true; render(); S.sheet.focus = false; }
+});
+setInterval(() => { if (S.t0 && needsReview() && !S.sheet) render(); }, 1000);
+reset();
+</script>
+</html>

@@ -33,7 +33,7 @@ A user's decision about part of the engine output: a changed value, or a confirm
 _Avoid_: Edit, override
 
 **Personal layer**:
-Household facts about a recipe (favourite, rating, notes, times cooked, user tags), held apart from the recipe itself.
+Household facts about a recipe (favourite, rating, notes, user tags), held apart from the recipe itself. Times cooked and last cooked are not stored there: they come from cookings.
 _Avoid_: User data, metadata
 
 **Provenance**:
@@ -41,7 +41,7 @@ Where a recipe came from: a book and page, a URL, or the household's own.
 _Avoid_: Source
 
 **Library**:
-All the recipes a household has imported. Search narrows the library; an empty query is the whole library.
+All the recipes a household has imported and not deleted. Search narrows the library; an empty query is the whole library. A deleted recipe leaves the library but stays in the plans it was part of.
 _Avoid_: Collection (a named saved query), cookbook, recipe box
 
 ### The engine
@@ -114,6 +114,18 @@ _Avoid_: Custom tag, label
 A note the engine attaches to part of its output that it is unsure of or found inconsistent, asking the household to check it. A recipe needs review while it has a flag whose part has no correction.
 _Avoid_: Warning, error, issue
 
+**Check line**:
+A parsed line with a flag other than review-first, shown expanded on the review screen with a question to answer.
+_Avoid_: Problem line, error line
+
+**Glance line**:
+A parsed line whose only flags are review-first, shown as a compact row and confirmable in bulk.
+_Avoid_: Low-priority line
+
+**Bulk confirmation**:
+Confirming all glance lines of a recipe at once. It pins the engine's answers like any confirmation, but they do not become golden-set candidates.
+_Avoid_: Confirm all, accept all
+
 **Re-parse**:
 Running the engine again over a recipe's original text, with its corrections held fixed. It happens when the engine changes. A food knowledge base change only re-runs resolution and what follows it.
 _Avoid_: Reprocess, refresh
@@ -154,6 +166,14 @@ _Avoid_: Meal, slot
 
 "Meal" is not a domain term: what is eaten together is the plan items that share a date.
 
+**Cooking**:
+A dated plan item, counted as the recipe being cooked on that date, whether the date is past or future. A recipe's last cooked date is its latest cooking on or before today; an undated plan item is never a cooking.
+_Avoid_: Cook event, history entry
+
+**Current plan**:
+The household's most recently created plan, which the Plan and Shop screens open by default; older plans stay as history. Starting a new plan can bring over the old plan's undated items.
+_Avoid_: Active plan, this week
+
 **Anchor**:
 A plan item the household has already chosen, which suggestions are built around.
 _Avoid_: Pinned recipe, seed
@@ -163,7 +183,7 @@ A recipe the planner proposes for a plan. It always carries its reasons. It is n
 _Avoid_: Recommendation
 
 **Reason**:
-A human-readable part of a suggestion's score ("uses the rest of the coriander"). Every reason is one term of the score, positive or negative, and the reasons add up to the score.
+A human-readable part of a suggestion's score ("uses the rest of the coriander"). Every reason is one term of the score, positive or negative, and the reasons add up to the score. A suggestion's reasons always describe the plan as it is now (plan items plus the other suggestions on screen), so they change when the plan changes.
 _Avoid_: Explanation
 
 **Cadence**:
@@ -187,17 +207,37 @@ How different a suggestion is from the rest of the plan in main protein, carb ba
 _Avoid_: Diversity, similarity score
 
 **Skip**:
-Turning down a suggestion for this planning session only, which replaces it with the next best. It is not remembered.
+Turning down a suggestion for this planning session only, which replaces it in place with the next best. It is not remembered.
 _Avoid_: Dismiss (reserved for the later dismiss with a reason), reject
+
+**Swap**:
+Replacing a suggestion with a recipe the household chooses, from the next best for that place or from search. The chosen recipe goes straight into the plan, and the replaced suggestion counts as skipped.
+_Avoid_: Replace, substitute
 
 ### Shopping
 
 **Shopping list**:
-The ingredients needed for a plan, merged across recipes in canonical measures, one entry per ingredient, with tick state. It is regenerated when the plan changes and keeps its ticks by ingredient.
+The shopping items needed for a plan, merged across its recipes, one per ingredient. It always reflects the current plan; only its ticks are kept, by item.
 _Avoid_: Grocery list
 
+**Shopping item**:
+One entry on a shopping list: an ingredient (or the exact wording of an unresolved line) with its merged amount, the recipes it comes from and its tick.
+_Avoid_: Row, line (a line is an ingredient line in a recipe)
+
+**Tick**:
+Marking a shopping item as got. It remembers the amount the shopper saw, so if the plan later needs more, the item is unticked again.
+_Avoid_: Check, done
+
+**Aisle**:
+One of a fixed set of shop sections in a fixed walk order. Every ingredient gets one from the food knowledge base, inherited down the ingredient hierarchy.
+_Avoid_: Category, department
+
+**Serve-with item**:
+A carb the shopping list adds because a recipe is served with it (from its carb base) but none of its lines are for it. It has no amount.
+_Avoid_: Side, accompaniment
+
 **Always-have**:
-An item the household always keeps, such as oil or salt. It starts ticked on every shopping list. This is the app's only knowledge of the kitchen. Unticking one on a list means the household is out of it for this shop only; it does not change the always-have list.
+An item the household always keeps, such as oil or salt. It starts ticked on every shopping list. This is the app's only knowledge of the kitchen. Unticking one on a list means the household is out of it for this shop only; it does not change the always-have list. It covers the same ingredient, any more specific kind of it, and any more general request it satisfies (olive oil covers extra virgin olive oil and a recipe's generic oil), but not sibling kinds.
 _Avoid_: Pantry, staples, inventory
 
 ### Onboarding
