@@ -108,10 +108,16 @@ Delete asks for confirmation and says what else is affected ("It stays in 2 past
 Three routes, all in V0.1:
 
 1. **Paste a link**: a sheet with a URL field and "Import".
-2. **Share from your phone**: on Android the app appears in the share sheet; on iPhone an "Add to Finders Eaters" Shortcut does the same (set up once from Settings, see 6.8) and ends with a notification "Saved - tap to review". Design the in-app landing after a share and the one-time Shortcut setup how-to.
+2. **Share from your phone**: on Android the app appears in the share sheet; on iPhone an "Add to Finders Eaters" Shortcut does the same (set up once from Settings, see 6.8) and ends with a notification that cannot be tapped through to the app, so it says where to look: `Saved "Chicken tikka masala". 4 lines to check in Finders Eaters.` (the recipe then tops the library under Recently added with its needs-review marker). Design the in-app landing after an Android share, its states for a share with no link ("That share didn't include a link", with Type it in) and for offline ("You're offline", the link kept in the Paste a link sheet), and the one-time Shortcut setup how-to.
 3. **Type one in**: a form for a cookbook or the household's own recipe: title, provenance (book title and optional page, or "Our recipe"), serves or makes, total time, ingredients (one per line, in a plain multi-line field), method (one step per paragraph). It is deliberately a paste-friendly text form, not a structured line-by-line builder: the engine does the structuring.
 
-After any route, the recipe is **already in the library**. The app then shows one of: "Reading the recipe..." (a short wait), the review screen when there is something to check (the usual case at first), or the recipe view when there is not. Also design: "Couldn't read that page" with a way to type it in instead, and a recipe still being read ("Still being read", original lines shown, no actions). The exact capture fallbacks are being defined in [Specify the import capture contract](https://github.com/Ed-Barnes937/FindersEaters/issues/24); design the states, not the plumbing.
+After any route, the recipe is **already in the library**. The app then shows one of: "Reading the recipe..." (a short wait), the review screen when there is something to check (the usual case at first), or the recipe view when there is not. Also design:
+
+- **"Couldn't read that page"**: nothing is saved. It shows the reason's message and a **Type it in** button that opens the form with the link already filled in as provenance. The messages: "This site won't let Finders Eaters read it. On iPhone, share it from Safari with the Shortcut; or type it in.", "Couldn't open that page. Check the link, or type the recipe in.", "Couldn't find a recipe on that page. You can type it in.", "That page lists several recipes. Open the one you want and share that." and "That page didn't look like one recipe. You can type it in."
+- **Already in your library**: the link matches a recipe the household already has. **Open it**, or **Import again** to save a second copy.
+- **Still being read**: original lines shown, no actions.
+
+The plumbing behind these is in `docs/spec/import-capture.md`; design the states, not the plumbing.
 
 ### 6.5 Check this recipe (review and correct)
 
@@ -180,7 +186,7 @@ Reached from the Recipes header. A plain list screen:
 
 - **Household**: default servings (a stepper, "Serves 2").
 - **Always have**: the household's always-have ingredients as a removable list, with an "Add" autocomplete over known ingredients. A short explanation: "These start ticked on every shopping list."
-- **Import from iPhone**: a list of devices that can add recipes, each with its label ("Ed's iPhone") and "Last used 3 Oct" or "Never used", and Revoke (with confirmation). "Add a device" asks for a label, then shows the device's import code **once**, with Copy, a "Get the Shortcut" link and a short how-to; the code cannot be shown again, only revoked and replaced.
+- **Import from iPhone**: a list of devices that can add recipes, each with its label ("Ed's iPhone") and "Last used 3 Oct" or "Never used", and Revoke (with confirmation). "Add a device" asks for a label, then shows the device's import code **once**, with Copy, a "Get the Shortcut" link and a short how-to (including the one-time step: Settings > Apps > Shortcuts > Advanced > Allow Running Scripts); the code cannot be shown again, only revoked and replaced.
 - **Account**: the signed-in person's email, Change password, Sign out and "Sign out of other devices".
 
 ### 6.9 Sign in

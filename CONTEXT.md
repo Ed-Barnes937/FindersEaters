@@ -44,6 +44,14 @@ _Avoid_: User data, metadata
 Where a recipe came from: a book and page, a URL, or the household's own.
 _Avoid_: Source
 
+**Capture**:
+What a device or the server collected when a recipe was imported: a link with the page as it was seen, or the fields a person typed in. The original text is extracted from it. It is kept as evidence and never replaces the original text.
+_Avoid_: Scrape, raw import
+
+**Capture route**:
+One of the ways a recipe enters the library: paste a link, share from an Android phone, the iPhone Shortcut, or type it in. Every route ends in the same import.
+_Avoid_: Import method, channel
+
 **Library**:
 All the recipes a household has imported and not deleted. Search narrows the library; an empty query is the whole library. A deleted recipe leaves the library but stays in the plans it was part of.
 _Avoid_: Collection (a named saved query), cookbook, recipe box
@@ -152,6 +160,12 @@ _Avoid_: Locale, region
 **Optional line**:
 An ingredient line the recipe marks as optional. It still counts towards dietary tags.
 _Avoid_: Garnish
+
+**Metric hint**:
+A muted metric equivalent shown after an amount written in cups, ounces, pounds, fluid ounces, pints or Australian tablespoons. It never replaces the original or scaled text.
+
+**Jev spend cap**:
+The daily app-wide limit on Jev requests. Past it, recipes are still saved and read partly, then finished later.
 
 ### Search and planning
 

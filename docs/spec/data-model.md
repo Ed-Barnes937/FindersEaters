@@ -41,6 +41,8 @@ Import tokens belong to the household and are specified by the auth ticket.
 - **The original text never changes.** A database trigger rejects any update to `source`. A typo in it is fixed by a correction (title is a correctable field), never by editing the text, because corrections are anchored to it.
 - **Provenance is separate from the source document**: the source document is engine input; provenance is display and later filtering (`from:`, `book:`). The image URL and site name are captured now and unused in V0.1. A book is free text; promoting books to an entity later is a migration over distinct titles.
 - **Projected facts** are copied out of the output so the library list, sort and query never open the JSON: `title_sort` is the lowercased effective title without a leading article, for A to Z; `total_minutes` serves `time:` and the Quickest/Longest sorts.
+- **Duplicate lookup**: a non-unique index on `(household_id, url)` serves the import's duplicate check (`docs/spec/import-capture.md` section 5).
+- **The stored capture**: each imported recipe has one durable `recipe_capture` row (recipe_id PK and FK, route, client, requested and final URL, HTML origin, HTTP status, trimmed gzip HTML, extractor version, report JSON), defined in `docs/spec/import-capture.md` section 7. It is evidence only and never rewrites the original text.
 
 ### 4.2 Engine output: one JSON document
 
@@ -172,6 +174,7 @@ erDiagram
   user ||--o{ household_user : "belongs via"
   household ||--o{ recipe : owns
   recipe ||--o{ correction : "pinned by"
+  recipe ||--|| recipe_capture : "extracted from"
   recipe ||--o{ recipe_line : "projects (derived)"
   recipe ||--o{ recipe_tag : "projects (derived)"
   household ||--o{ recipe_personal : keeps

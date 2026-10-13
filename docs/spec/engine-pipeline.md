@@ -16,12 +16,12 @@ The engine never fetches. Ingest (capture, server fetch, JSON-LD extraction, man
 |---|---|
 | `title` | String. |
 | `ingredientLines` | Ordered list of raw strings, as captured. A line captured from an HTML section heading carries `heading: true`. |
-| `method` | Ordered list of step strings (JSON-LD `HowToStep`s, or the manual-entry text split on blank lines). Not parsed in V0.1. |
+| `method` | Ordered list of `{ text, heading? }`, like ingredient lines (JSON-LD `HowToStep`s with `HowToSection` names as headings, or the manual-entry text split on blank lines). Not parsed in V0.1. |
 | `yield` | Raw string or null ("Serves 4", "Makes 12", "4"). |
-| `times` | Raw `prepTime`, `cookTime`, `totalTime` (ISO 8601 durations from JSON-LD, or user-entered minutes), each optional. |
+| `times` | Raw `prepTime`, `cookTime`, `totalTime` (ISO 8601 durations from JSON-LD; a typed-in total time arrives as `PT<n>M`), each optional. |
 | `sourceDomain` | Registrable domain for URL imports (`bbcgoodfood.com`), else null. |
 
-Manual entry has separate title, ingredients, method, servings and time fields, so the engine never splits a pasted blob in V0.1. How each capture route fills this document is the import capture contract (see [Specify the import capture contract](#hand-offs)).
+Manual entry has separate title, ingredients, method, servings and time fields, so the engine never splits a pasted blob in V0.1. How each capture route fills this document is the import capture contract, `docs/spec/import-capture.md`.
 
 ## 3. The stages
 
