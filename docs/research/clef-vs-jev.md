@@ -13,13 +13,14 @@ Clef is the only candidate that fits. It is a direct Jev competitor and takes th
 
 ## Summary
 
-**Stay with Jev for the V0.1 build. Whether to switch is undecided until a hosted, held-out comparison has run.**
+**Revised 2026-10-13 after a hosted run, given the owner's preference for Cloudflare as a company and acceptance of the higher cost: switch the V0.1 build to hosted Clef (27B, `@cf/cloudflare/clef`), provided the owner accepts a daily live dev-set canary in place of the exact-model pin.** Not Clef-flash. The first pass, on laptop weights only, said stay with Jev; see "Hosted run" for what changed.
 
-- **Accuracy (better).** On the dev golden lines, run locally, Clef (27B) matched or beat Jev v2 on every line-level stage except KB resolution. It was much better on extraction: 0.97 vs 0.92 all-fields, and 89% vs 76% auto-accepted at a 0.6 gate, with no wrong answer at 0.6 or above.
-- **Clef-flash (worse).** Clef-flash was clearly worse on extraction (0.71). Its misses repeat the size and conversion problems that v2 fixed for Jev.
-- **Why dev cannot decide it.** The dev set is small: 35 extraction lines and 3 recipes. The v2 template was tuned on Jev's own dev misses. The runs used community 4-bit and 8-bit quantisations on a laptop, not Cloudflare's hosted weights.
-- **Pinning (blocker).** Hosted model ids are unversioned. Within 8 days of launch Clef-flash changed price and context length under the same id. That breaks the engine's exact-model-pin rule.
-- **Cost (higher).** Hosted Clef costs about 5.7x Jev per input token. That is still about 1p per recipe, but higher.
+- **Accuracy (as good or better where it counts).** On the dev golden lines, hosted Clef scored 0.97 on extraction all-fields (Jev v2 0.92) and 1.00 on kind (0.95). It was slightly worse on segment role (0.93 vs 1.00), compound (0.97 vs 1.00) and resolution (0.94 vs 1.00), but every one of those misses had a confidence below 0.6.
+- **Calibration (safe, but cautious).** No wrong answer at 0.6 or above on any stage. Hosted confidences are much lower than both Jev's and the laptop run's: at a 0.6 gate it auto-accepts 40% of extraction lines, against 76% for Jev and 89% for the laptop build. V0.1 ships every stage `review-first`, so this costs nothing at launch; it means fewer silent accepts once stages flip to `auto`.
+- **Clef-flash (no).** 0.66 on extraction, with the same size and conversion misses as on the laptop.
+- **Deterministic, enveloped, slower.** Repeats were byte-identical. Responses come wrapped in `{result, success, errors, messages}`. From the UK, Clef took p50 515 ms and p95 1.4 s, against Jev's p50 278 ms and p95 331 ms. The spec's 2 s request timeout needs raising.
+- **Pinning (owner decision).** Cloudflare offers no versioned or pinnable Clef ids, and its serving has already changed under the same id. A daily dev-set canary that fingerprints the answers would replace the pin. Relaxing the exact-pin rule is the one hard-to-reverse part, so it goes to the owner.
+- **Cost (accepted).** About 5.7x Jev per input token, about 1p per recipe.
 
 ## Hands-on comparison (dev set only)
 
@@ -62,6 +63,55 @@ Clef's confidence runs lower than Jev's. Its auto-accept share at 0.8 is lower e
 
 **Tokens and latency.** Clef's tokenizer gives about 3.4k input tokens per line request, close to Jev's 3.2k. Laptop latency (Clef-flash p50 9 s, Clef p50 31 s) says nothing about hosted latency. Cloudflare reports a median of 39 ms for Clef-flash, 209 ms for Clef and 524 ms for Jev ([model card](https://huggingface.co/Cloudflare/clef)). Those are its own measurements, not checked here.
 
+## Hosted run (dev set only, 2026-10-13)
+
+**Method.**
+- The same `run_spike.py --framing v2 --taxonomy phase2 --set dev` with a new `--workers-ai` flag. It posts to the Workers AI `/ai/run/@cf/cloudflare/<model>` endpoint, sends `"model": "clef"` or `"clef-flash"` in the body, and unwraps Cloudflare's envelope. The account ID and token come from the environment and are never printed or stored.
+- `--workers-ai` refuses anything but `--set dev`, as `--api-url` does. **No held-out line or recipe was sent to any model.**
+- 47 requests per model (44 lines, 3 recipes), sent one at a time from the UK, plus 6 repeated requests per model for determinism.
+- No Jev key was available, so the Jev column is still the 2026-10-04 v2 run.
+- Code, raw JSONL and summaries are on [`spike/clef`](https://github.com/Ed-Barnes937/FindersEaters/tree/spike/clef/docs/ideation/research/jev-spike/results) (`*_cf_cloudflare_*` and `summary-*-hosted-workers-ai-dev.txt`).
+
+| Stage (probe) | n | Jev v2 | Clef hosted | Clef laptop (4-bit) | Clef-flash hosted | Clef-flash laptop (8-bit) |
+|---|---|---|---|---|---|---|
+| Segment: role | 44 | 1.00 | 0.93 | 1.00 | 1.00 | 1.00 |
+| Segment: compound | 39 | 1.00 | 0.97 | 1.00 | 1.00 | 1.00 |
+| Classify kind | 39 | 0.95 | **1.00** | 1.00 | 0.95 | 0.95 |
+| Extract, all six fields | 35-37 | 0.92 | **0.97** | 0.97 | 0.66 | 0.71 |
+| Extract, auto-accepted at a 0.6 gate (wrong) | 35-37 | **0.76 (0)** | 0.40 (0) | 0.89 (0) | 0.14 (0) | 0.51 (0) |
+| Extract: ingredient span pick | 35-37 | 0.95 | 0.97 | 0.97 | 1.00 | 0.97 |
+| Resolve ingredient | 18 | **1.00** | 0.94 | 0.94 | 0.94 | 0.94 |
+| Resolve unit system | 7 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| Wrong answers at 0.6 or above, all stages | | 0 at 0.8 | **0** | 1 | **0** | 1 |
+| Wrong answers at 0.8 or above, all stages | | 0 | 0 | 0 | 0 | 0 |
+| Median extraction confidence | | | 0.56 | 0.76 | 0.33 | 0.62 |
+| Latency p50 / p95 | | 278 / 331 ms | 515 / 1,401 ms | 31 s (laptop) | 875 / 1,695 ms | 9 s (laptop) |
+
+**Accuracy.** Hosted Clef gave the same top answers as the laptop build on extraction, kind, span pick and resolution, with the same misses (L32 crisps, L35 "a handful", L36 span). It lost three segment answers that the laptop got right: L07 and L44, the known judgement calls, and L23, a header read as an ingredient (confidence 0.08). It also called L31 compound at 0.17. All four were far below any gate. Recipe tags matched or beat the laptop run; method Nouls still fail at 0.5 (R02, R03).
+
+**Calibration.** Hosted Clef is as accurate as the laptop build but much less confident. Answers in the [0, 0.5) band were still 96% right for extraction, so Clef is underconfident, not overconfident. A 0.4 extraction gate would auto-accept 71% with no wrong answer on dev, but a gate chosen on dev proves nothing; held-out has to set it. Resolution L32 dropped from 0.72 to 0.52, so hosted Clef had no wrong answer at 0.6.
+
+The gap between laptop and hosted confidences is itself a finding. The weights should be the same, so the difference comes from quantisation or serving. Cloudflare changed Clef's serving on 2026-10-09 ("1.7x-2.0x speedup") under the same id. Gates depend on confidences, so a silent serving change can move what auto-accepts even when answers stay the same.
+
+**Envelope.** Every response was `{"errors", "messages", "result", "success"}`, with the SystemOne body (`model`, `answers`, `usage`) inside `result`. The inner `model` is just `"clef"` or `"clef-flash"`, with no version. Input was 3.36k tokens per request, close to Jev's 3.2k.
+
+**Determinism.** The first six line requests were re-sent to each model. All 59 answers per model were byte-identical, probabilities included.
+
+**Latency.** These are wall-clock times from the UK, sequential, including TLS and Cloudflare's routing, not the 39 ms and 209 ms server medians Cloudflare publishes. Clef-flash was slower than Clef here, which suggests load or placement matters more than model size. Clef's maximum was 2.4 s, so the spec's 2 s timeout would have failed a request. Something nearer 5 s fits inside the 8 s import budget with 8 requests in parallel.
+
+**Pinning.** There are no versioned ids.
+- The Workers AI model search API lists exactly one entry each for `@cf/cloudflare/clef`, `clef-flash` and `clef-omni`. Each has a UUID, a created date, a context window and a price, and no version field.
+- The [model page](https://developers.cloudflare.com/workers-ai/models/clef/) and [changelog](https://developers.cloudflare.com/changelog/product/workers-ai/) document none either.
+- In two weeks the same ids have had a price cut, a context cut and a serving speed-up.
+- Exact pinning is possible only by self-hosting the Hugging Face weights, which is out of budget.
+
+**Minimal canary to replace the pin.**
+- **What.** A scheduled CI job, once a day and before every release, runs the golden harness on the dev set against hosted Clef: 47 requests, about 158k input tokens, about $0.04 a run.
+- **Fingerprint.** Hosted answers are deterministic, so a SHA-256 of the canonical answers (choice and probabilities as returned) works as a version id. The engine configuration stores `model: @cf/cloudflare/clef` plus that fingerprint. Both go into the engine version and the cassette key, in place of an exact model id.
+- **On a mismatch.** The job fails and opens an issue with the per-stage scores and the changed answers. Production keeps running. Before the fingerprint is re-baselined, which makes a new engine version, the golden set is rerun under the pass rule, including held-out once it is cleared. If a stage no longer passes, it goes back to `review-first`.
+- **Gap.** A change can go unnoticed for up to a day. For a household recipe app with review on every flagged decision, that is acceptable.
+- **Secrets.** CI needs the Cloudflare account ID and token as repository secrets.
+
 ## Desk findings
 
 | Question | Jev (`jev-1.13.0`) | Clef / Clef-flash | Source |
@@ -72,14 +122,14 @@ Clef's confidence runs lower than Jev's. Its auto-accept share at 0.8 is lower e
 | Per recipe (15 lines, about 50k tokens) | about 0.2p | Clef about 1p, Clef-flash about 0.2p. The 2,000-request daily cap would cost at most about $1.60 a day on Clef. | arithmetic |
 | Context | 64k per request | Hosted Clef 64k; hosted Clef-flash 24k (cut from 64k on 2026-10-09); self-hosted defaults to 16k. Our largest request is 7.4k. | [changelog](https://developers.cloudflare.com/changelog/post/2026-10-09-clef-omni-workers-ai/) |
 | Model pinning | Exact versioned id | Unversioned `@cf/cloudflare/clef` and `@cf/cloudflare/clef-flash`. Price and context changed under the same id in week one. Deprecated Workers AI models have been auto-aliased to successors. Open weights can be pinned by Hugging Face commit only if self-hosted. | [changelog](https://developers.cloudflare.com/changelog/post/2026-05-08-planned-model-deprecations/) |
-| Determinism | Choices identical across repeats in our spike | Not stated | n/a |
+| Determinism | Choices identical across repeats in our spike | Hosted: byte-identical answers and probabilities across repeats (12 requests) | hands-on |
 | UK English, metric | Nothing published | Nothing published. In the local run both Clef models got all 7 unit-system lines (UK/US/AU) right, as Jev did. | hands-on |
 | Licence and hosting | Closed SaaS | Apache-2.0 weights. Self-hosting needs a GPU: Cloudflare tested on an H200; Clef-flash in BF16 fits a 48 GB L40S. That is far beyond the £2 a month hosting budget, so in practice it means Workers AI. | [model card](https://huggingface.co/Cloudflare/clef) |
 | Data location | US (TypeSafe) | Workers AI does not support Regional Services, so there is no UK or EU-only processing | [data localisation](https://developers.cloudflare.com/data-localization/compatibility/) |
 | Lock-in | One vendor, closed weights | Same request schema on Jev, Workers AI and self-hosted SGLang. Open weights are a real exit. | blog, model card |
 | Fine-tuning | none | "RL for Calibrated Decisions" exists, but only as hands-on work with Cloudflare engineers; 37 golden lines is far too small to use it | [blog](https://blog.cloudflare.com/clef-decision-models/) |
 
-Not verified: a Clef-specific rate limit (the "Text Generation" default of 300 requests a minute is a guess); whether hosted Workers AI wraps the SystemOne body in Cloudflare's `{result, success}` envelope; hosted determinism; and UK or EU latency.
+Not verified: a Clef-specific rate limit (the "Text Generation" default of 300 requests a minute is a guess; 47 sequential requests hit no 429). The envelope, determinism and UK latency are now measured; see "Hosted run".
 
 ## Fit with the pipeline
 
@@ -91,18 +141,28 @@ Not verified: a Clef-specific rate limit (the "Text Generation" default of 300 r
 
 ## Recommendation
 
-**Stay with Jev for the V0.1 build as specified. Whether to switch is undecided, pending three things:**
+**Revised 2026-10-13. The owner prefers Cloudflare and accepts the higher cost. On that basis, switch the V0.1 build from Jev to hosted Clef (27B, `@cf/cloudflare/clef`). One condition: the owner accepts the daily dev-set canary above in place of the exact-model pin.** That condition changes a spec rule and is hard to undo once cassettes and engine versions are keyed on it, so it is the owner's call. The model choice itself is easy to undo, because Jev and Clef take the same request body.
 
-1. The owner's blind check of the held-out labels, already tracked in [Rerun Jev v2 on the held-out golden lines](https://github.com/Ed-Barnes937/FindersEaters/issues/19).
-2. A three-way held-out run of Jev v2, hosted Clef and hosted Clef-flash with the same template. This needs a **Cloudflare account ID and an API token with Workers AI Read and Edit** (the 167 held-out requests per model fit the free tier for Clef-flash in one day, and for Clef across about two days or on the Workers Paid plan). Switch only if Clef beats Jev on held-out extraction at a 0.6 gate and is no worse on every other stage under the pass rule in `docs/research/golden-set.md`.
-3. A way to meet the exact-pin rule: Cloudflare publishes versioned Clef ids, or the owner accepts a scheduled live canary in place of a pin.
+Why the dev evidence supports this now:
+1. Hosted Clef's top answers are as good as Jev v2's, and better on extraction, the stage with most of the decisions. It gave no wrong answer at 0.6 or above.
+2. V0.1 ships every stage `review-first`. Clef's low confidences only matter once a stage flips to `auto`.
+3. Hosted answers are deterministic, which is what makes a fingerprint canary a workable substitute for a pin.
 
-If Clef wins all three, the switch is cheap because the request format is identical. The cost rises from about 0.2p to about 1p per recipe, and the gates are re-tuned.
+Unchanged:
+- The flip of each stage to `auto` still waits for the owner's blind check of the held-out labels ([Rerun Jev v2 on the held-out golden lines](https://github.com/Ed-Barnes937/FindersEaters/issues/19)) and a held-out run, now against hosted Clef, under the pass rule in `docs/research/golden-set.md`.
+- Gates are re-tuned for Clef on held-out, and Clef will likely need lower ones than Jev.
+- If hosted Clef fails held-out where Jev would pass, switching back is a configuration change.
+
+Do not use Clef-flash: its extraction is too weak with the v2 template.
+
+If the owner declines the canary, stay with Jev as specified.
 
 ## What a switch would change (not applied)
 
-- **[Jev client with recorded cassettes and stage modes](https://github.com/Ed-Barnes937/FindersEaters/issues/41)**: endpoint, auth header and model id come from configuration. The response envelope may need unwrapping, Cloudflare's error and retry codes replace 429 and 529, and the cassette key uses the Workers AI id plus a canary date. It is a good idea to make the base URL and model id configuration now, whichever model ships.
-- **[Engine skeleton: pipeline, output type, versioning and the golden-set harness](https://github.com/Ed-Barnes937/FindersEaters/issues/40)**: the harness records the model id, and the engine version covers a model swap.
+Measured on the hosted run: the response envelope is `{result, success, errors, messages}`, the body sends `"model": "clef"`, the URL contains the account ID (keep it out of logs), and a 2 s timeout is too short.
+
+- **[Jev client with recorded cassettes and stage modes](https://github.com/Ed-Barnes937/FindersEaters/issues/41)**: endpoint, auth header and model id come from configuration. It must unwrap the `result` envelope, Cloudflare's error and retry codes replace 429 and 529, the timeout rises to about 5 s, and the cassette key uses the Workers AI id plus the canary fingerprint. It is a good idea to make the base URL and model id configuration now, whichever model ships.
+- **[Engine skeleton: pipeline, output type, versioning and the golden-set harness](https://github.com/Ed-Barnes937/FindersEaters/issues/40)**: the harness records the model id and answer fingerprint, the engine version covers a model swap, and the daily dev-set canary job is added here or as a new ticket.
 - **[Engine recipe level: tags, derived diet, yield and time; golden pass rule in CI](https://github.com/Ed-Barnes937/FindersEaters/issues/44)**: Noul thresholds for the multi-valued tags are re-tuned per value, because Clef's method Nouls failed at 0.5.
 - **[Lazy completion, batch re-parse, projection rebuild and Jev spend guard](https://github.com/Ed-Barnes937/FindersEaters/issues/47)**: the daily cap is re-based on Clef's price and the free-tier neuron count.
 - **[Provisioning wizard for staging and production (owner runs it)](https://github.com/Ed-Barnes937/FindersEaters/issues/35)** and **[Docker image, Fly config, release step and /health](https://github.com/Ed-Barnes937/FindersEaters/issues/34)**: the secret `TYPESAFE_API_KEY` becomes a Cloudflare account ID and token.
