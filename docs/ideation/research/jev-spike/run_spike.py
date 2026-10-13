@@ -274,6 +274,25 @@ def call(payload: dict, key: str | None, model: str, max_retries: int = 5) -> tu
 
 # ---------------------------------------------------------------- scoring
 
+# Providers fill `confidence` differently from the same probabilities (found 2026-10-13):
+#   Jev (docs.typesafe.ai/confidence.md): (p_max - 1/n) / (1 - 1/n)
+#   clef_mlx serve (laptop):              p_max
+#   Workers AI Clef:                      (n * sum(p^2) - 1) / (n - 1), a normalised Gini concentration
+# Comparing gates across providers therefore needs one definition computed here from `probabilities`.
+CONF_DEF = "jev"
+
+
+def conf(ans: dict) -> float | None:
+    probs = ans.get("probabilities")
+    if CONF_DEF == "provider" or not probs:
+        return ans.get("confidence")
+    p, n = list(probs.values()), len(probs)
+    if CONF_DEF == "top":
+        return max(p)
+    if CONF_DEF == "gini":
+        return (n * sum(x * x for x in p) - 1) / (n - 1)
+    return (max(p) - 1 / n) / (1 - 1 / n)  # jev
+
 
 CORE_FIELDS = ("quantity", "unit", "size", "ingredient")
 
@@ -313,15 +332,15 @@ def score_line(item: dict, meta: dict, answers: dict) -> list[dict]:
         rows.append({"probe": probe, "got": got, "expected": expected, "ok": matches(got, expected), "conf": conf})
 
     a = answers
-    add("segment.role", a["role"]["choice"], item["role"], a["role"]["confidence"])
+    add("segment.role", a["role"]["choice"], item["role"], conf(a["role"]))
     if item["role"] != "ingredient":
         return rows
-    add("segment.compound", a["compound"]["choice"], item["compound"], a["compound"]["confidence"])
-    add("classify.kind", a["kind"]["choice"], item["kind"], a["kind"]["confidence"])
+    add("segment.compound", a["compound"]["choice"], item["compound"], conf(a["compound"]))
+    add("classify.kind", a["kind"]["choice"], item["kind"], conf(a["kind"]))
     # Lines that are not ingredients never reach extraction, so their fields are not scored.
     if item["compound"] == "single" and item["kind"] != "not_ingredient":
         fields = assemble_fields(meta, a)
-        tok_confs = [a[f"tok_{i}"]["confidence"] for i in meta["word_idx"]]
+        tok_confs = [conf(a[f"tok_{i}"]) for i in meta["word_idx"]]
         min_conf = min(tok_confs) if tok_confs else None
         all_ok = True
         for f, exp in item["fields"].items():
@@ -334,11 +353,11 @@ def score_line(item: dict, meta: dict, answers: dict) -> list[dict]:
         rows.append({"probe": "extract.tokens.CORE_FIELDS", "got": {f: fields[f] for f in CORE_FIELDS},
                      "expected": {f: item["fields"][f] for f in CORE_FIELDS}, "ok": core_ok, "conf": min_conf})
         span = a["ingredient_span"]["choice"]
-        add("extract.span.ingredient", None if span == NONE else span, item["fields"]["ingredient"], a["ingredient_span"]["confidence"])
+        add("extract.span.ingredient", None if span == NONE else span, item["fields"]["ingredient"], conf(a["ingredient_span"]))
     if "resolve" in item:
-        add("resolve.ingredient", a["resolve"]["choice"], item["resolve"]["expected"], a["resolve"]["confidence"])
+        add("resolve.ingredient", a["resolve"]["choice"], item["resolve"]["expected"], conf(a["resolve"]))
     if "unit_system" in item:
-        add("resolve.unit_system", a["unit_system"]["choice"], item["unit_system"], a["unit_system"]["confidence"])
+        add("resolve.unit_system", a["unit_system"]["choice"], item["unit_system"], conf(a["unit_system"]))
     return rows
 
 
@@ -346,7 +365,7 @@ def score_recipe_phase2(rec: dict, answers: dict) -> list[dict]:
     rows = []
     for dim in ("cuisine", "meal_type", "effort"):
         got, exp = answers[dim]["choice"], rec["expected"][dim]
-        rows.append({"probe": f"tag.{dim}", "got": got, "expected": exp, "ok": matches(got, exp), "conf": answers[dim]["confidence"]})
+        rows.append({"probe": f"tag.{dim}", "got": got, "expected": exp, "ok": matches(got, exp), "conf": conf(answers[dim])})
     for dim in MULTI_LABEL:
         got = sorted(o for o in TAXONOMY[dim] if answers[f"{dim}__{o}"]["noul"] >= 0.5)
         exp = sorted(rec["expected"][dim])
@@ -416,7 +435,7 @@ def score_recipe_v01(rec: dict, answers: dict) -> list[dict]:
             got = answers[dim]["choice"]
             near = norm(got) in {norm(o) for o in exp_all.get("near", {}).get(dim, [])}
             rows.append({"probe": f"tag.{dim}", "got": got, "expected": exp, "ok": matches(got, exp),
-                         "near": near, "conf": answers[dim]["confidence"]})
+                         "near": near, "conf": conf(answers[dim])})
         else:
             values = list(spec["values"])
             got = sorted(v for v in values if answers[f"{dim}__{v}"]["noul"] >= 0.5)
@@ -499,10 +518,14 @@ def main() -> None:
     ap.add_argument("--workers-ai", action="store_true",
                     help="call Cloudflare Workers AI at /ai/run/<--model> (e.g. @cf/cloudflare/clef); reads "
                          "CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN from env and never prints them")
+    ap.add_argument("--confidence", choices=("jev", "top", "gini", "provider"), default="jev",
+                    help="how gates read confidence: jev = (p_max-1/n)/(1-1/n) from probabilities (default, "
+                         "comparable across providers); top = p_max; gini = Workers AI's; provider = as returned")
     ap.add_argument("--repeat", type=int, default=0, help="after the run, re-send the first N line requests and compare answers")
     args = ap.parse_args()
-    global FRAMING, TAG_SCHEME, API_URL, HTTP_TIMEOUT, BODY_MODEL
+    global FRAMING, TAG_SCHEME, API_URL, HTTP_TIMEOUT, BODY_MODEL, CONF_DEF
     HTTP_TIMEOUT = args.timeout
+    CONF_DEF = args.confidence
     if args.workers_ai:
         if args.api_url:
             sys.exit("--workers-ai and --api-url are exclusive.")
