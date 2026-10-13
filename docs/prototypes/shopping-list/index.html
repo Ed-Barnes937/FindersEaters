@@ -1,0 +1,353 @@
+<title>In-Shop List Prototype</title>
+<!--
+  PROTOTYPE - throwaway. Answers "Prototype the shopping list in the shop"
+  (https://github.com/Ed-Barnes937/FindersEaters/issues/16).
+  Three structurally different variants of the in-shop shopping list, switchable
+  from the control panel, over one in-memory sync model (device, offline queue,
+  server) whose full state is printed after every action. No persistence.
+  Open the file in a browser; nothing to install.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+:root{
+  --ground:#EEF1EA; --surface:#FBFCF8; --ink:#1C231E; --muted:#5F6B62; --line:#D5DCD0;
+  --accent:#2C6B4B; --accent-ink:#FFFFFF; --accent-soft:#DCEBDF;
+  --warn:#9A5B0B; --warn-soft:#F6E7CC; --done:#8A948C; --shadow:0 1px 2px rgba(28,35,30,.08),0 8px 30px rgba(28,35,30,.10);
+  --ui:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --display:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#101412; --surface:#181D1A; --ink:#E5EBE4; --muted:#9AA79D; --line:#2C3530;
+    --accent:#74C496; --accent-ink:#0F1B14; --accent-soft:#1F3328;
+    --warn:#E7B464; --warn-soft:#3A2D16; --done:#6B766E; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 30px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#101412; --surface:#181D1A; --ink:#E5EBE4; --muted:#9AA79D; --line:#2C3530;
+  --accent:#74C496; --accent-ink:#0F1B14; --accent-soft:#1F3328;
+  --warn:#E7B464; --warn-soft:#3A2D16; --done:#6B766E; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--ui);font-size:15px;line-height:1.45;padding-inline:16px;padding-block:20px 40px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+button{font:inherit;color:inherit}
+button:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:24px;grid-template-columns:minmax(0,400px) minmax(0,1fr);align-items:start}
+@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr)}}
+.intro{grid-column:1/-1;display:flex;flex-direction:column;gap:6px;max-width:70ch}
+.intro h1{font-size:28px;font-weight:800;letter-spacing:-.01em}
+.intro p{margin:0;color:var(--muted)}
+.tag{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--warn);background:var(--warn-soft);padding:2px 8px;border-radius:4px;width:max-content}
+
+/* phone */
+.phone{width:100%;max-width:400px;height:740px;background:var(--surface);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;position:relative;justify-self:center}
+.ph-head{padding:16px 18px 10px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
+.ph-head h2{font-size:22px;font-weight:800}
+.ph-sub{font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.net{font-size:13px;padding:7px 18px;display:flex;gap:8px;align-items:center}
+.net.off{background:var(--warn-soft);color:var(--warn)}
+.net.sync{background:var(--accent-soft);color:var(--accent)}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.ph-body{flex:1;overflow-y:auto;overscroll-behavior:contain}
+.ph-foot{border-top:1px solid var(--line);padding:10px 18px;display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--muted);background:var(--surface)}
+.progress{flex:1;height:6px;background:var(--line);border-radius:3px;margin-left:12px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.toast{position:absolute;left:12px;right:12px;bottom:58px;background:var(--ink);color:var(--surface);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-size:14px}
+.toast button{background:none;border:0;color:var(--accent-soft);font-weight:700;padding:6px 8px;cursor:pointer}
+
+/* aisle list */
+.aisle{position:sticky;top:0;z-index:1;background:var(--surface);padding:12px 18px 6px;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;border-bottom:1px solid var(--line)}
+.row{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:10px 18px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;cursor:pointer}
+.row:active{background:var(--accent-soft)}
+.r-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.r-name{font-size:17px;font-weight:700}
+.r-src{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.r-qty{font-size:16px;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.r-qty .some{color:var(--muted);font-style:italic}
+.was{display:inline-block;font-size:11px;color:var(--warn);background:var(--warn-soft);border-radius:4px;padding:0 5px;margin-left:6px;font-weight:400}
+.sw{display:inline-block;font-size:11px;color:var(--accent);border:1px dashed var(--accent);border-radius:4px;padding:0 5px;margin-left:6px;font-weight:400}
+.home{display:inline-block;font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-left:6px;font-weight:400}
+.box{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center}
+.ticked .box{background:var(--accent);border-color:var(--accent)}
+.ticked .box::after{content:"";width:10px;height:6px;border-left:2.5px solid var(--accent-ink);border-bottom:2.5px solid var(--accent-ink);transform:translateY(-2px) rotate(-45deg)}
+.ticked .r-name,.ticked .r-qty{color:var(--done);text-decoration:line-through}
+.settling{transition:opacity 1s ease .3s;opacity:.55}
+details.done{border-top:6px solid var(--ground)}
+details.done summary{padding:14px 18px;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between}
+details.done summary::-webkit-details-marker{display:none}
+details.done summary span{color:var(--muted);font-weight:400;font-size:13px}
+.empty{padding:40px 24px;text-align:center;color:var(--muted)}
+.empty b{display:block;font-family:var(--display);font-size:22px;color:var(--ink);margin-bottom:6px}
+
+/* variant B */
+.focus{padding:18px;display:flex;flex-direction:column;gap:14px;height:100%}
+.card{border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:8px}
+.card .k{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.card .n{font-family:var(--display);font-size:34px;font-weight:800;line-height:1.05}
+.card .q{font-size:22px;font-variant-numeric:tabular-nums}
+.next{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--muted)}
+.next div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding-bottom:4px}
+.big{margin-top:auto;display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.big button{min-height:64px;border-radius:16px;border:1px solid var(--line);background:var(--surface);font-size:17px;font-weight:700;cursor:pointer}
+.big .got{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+/* side panel */
+.side{display:flex;flex-direction:column;gap:20px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.panel h3{font-size:16px;font-weight:600}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btns button{border:1px solid var(--line);background:var(--ground);padding:8px 12px;border-radius:999px;cursor:pointer;font-size:14px}
+.btns button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.state{overflow-x:auto}
+table{border-collapse:collapse;font-size:12.5px;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:4px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:400;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+td.diff{color:var(--warn);font-weight:700}
+.log{font-size:12.5px;max-height:160px;overflow:auto;margin:0;padding-left:18px;color:var(--muted)}
+.verdict{border-color:var(--accent)}
+.verdict ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="tag">Prototype - throwaway</span>
+    <h1>The shopping list, in the shop</h1>
+    <p>Example plan for Mon 13 - Sun 19 Oct: chilli con carne (4), tarka dal (4), lemon roast chicken (4), pasta e ceci (2). Tap rows to tick. Use the panel to go offline, have a second phone tick, or change the plan on the server, then watch the state tables.</p>
+  </header>
+
+  <section class="phone" aria-label="Phone">
+    <div class="ph-head">
+      <h2>Shopping list</h2>
+      <div class="ph-sub"><span>4 recipes · 13-19 Oct</span><span id="asof"></span></div>
+    </div>
+    <div id="net" class="net" hidden></div>
+    <div class="ph-body" id="body"></div>
+    <div class="ph-foot"><span id="left"></span><div class="progress"><i id="bar"></i></div></div>
+    <div class="toast" id="toast" hidden><span id="toastMsg"></span><button id="undo" type="button">Undo</button></div>
+  </section>
+
+  <aside class="side">
+    <div class="panel">
+      <h3>Variant</h3>
+      <div class="btns" id="variants">
+        <button type="button" id="vA" data-v="A">A · Aisles, ticked move away</button>
+        <button type="button" id="vB" data-v="B">B · One item at a time</button>
+        <button type="button" id="vC" data-v="C">C · Checklist, ticked stay put</button>
+      </div>
+      <p class="hint" id="vhint"></p>
+    </div>
+    <div class="panel">
+      <h3>Scenarios</h3>
+      <div class="btns">
+        <button type="button" id="netBtn" aria-pressed="false">Go offline</button>
+        <button type="button" id="partner">Partner ticks beef mince on their phone</button>
+        <button type="button" id="planBtn">Plan changes: dal goes 4 to 6 servings</button>
+        <button type="button" id="refresh">Refresh this phone</button>
+        <button type="button" id="reset">Reset</button>
+      </div>
+      <p class="hint">No real-time push in V0.1: this phone sees other changes only on load, refresh or reconnect.</p>
+    </div>
+    <div class="panel">
+      <h3>State after the last action</h3>
+      <div class="state"><table id="state"></table></div>
+      <ol class="log" id="log" reversed></ol>
+    </div>
+    <div class="panel verdict">
+      <h3>Locked flow (variant A)</h3>
+      <ul>
+        <li>One row per ingredient, grouped by aisle in a fixed walk order. Empty aisles are hidden.</li>
+        <li>The whole row is the tap target (at least 60px). Ticked rows fade, then move to "In the basket" so the next item stays at the top. Undo sits in the thumb zone.</li>
+        <li>Always-have items start ticked and live in "At home". Untick one and it returns to its aisle.</li>
+        <li>Unquantified lines show no amount ("to taste" in the source line), or "+ some" after a merged amount.</li>
+        <li>"Serve with" carbs appear as unquantified rows marked "serve with".</li>
+        <li>Offline: a banner and a count of ticks saved on the phone. Reconnect sends them, then reloads. Later tick wins per item.</li>
+        <li>Plan changes keep ticks by ingredient, except an item whose amount went up, which unticks and shows what it was.</li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function(){
+const AISLES=["Fruit & veg","Bakery","Meat & fish","Dairy & eggs","Cupboard","Spices & seasonings","Oils, sauces & condiments","Frozen","Other"];
+// n = comparable amount in canonical measure, used only to detect increases on regenerate
+const V1=[
+ {id:"onion",name:"Onions",aisle:0,qty:"4",n:4,src:"Chilli 1 · Dal 2 · Pasta 1"},
+ {id:"garlic",name:"Garlic",aisle:0,qty:"9 cloves",n:9,src:"Chilli 3 · Dal 4 · Pasta 2"},
+ {id:"lemon",name:"Lemons",aisle:0,qty:"2",n:2,src:"Chicken 2"},
+ {id:"pepper",name:"Red pepper",aisle:0,qty:"1",n:1,src:"Chilli 1"},
+ {id:"ginger",name:"Ginger",aisle:0,qty:"5 cm",n:5,src:"Dal 5 cm"},
+ {id:"coriander",name:"Coriander",aisle:0,qty:"1 small bunch",some:true,n:1,src:"Chilli small bunch · Dal a handful, to serve"},
+ {id:"potato",name:"Potatoes",aisle:0,qty:"800 g",n:800,src:"Chicken 800 g"},
+ {id:"rosemary",name:"Rosemary",aisle:0,qty:"3 sprigs",n:3,src:"Chicken 2 · Pasta 1"},
+ {id:"mince",name:"Beef mince",aisle:2,qty:"500 g",n:500,src:"Chilli 500 g"},
+ {id:"chicken",name:"Whole chicken",aisle:2,qty:"1 (about 1.6 kg)",n:1,src:"Chicken 1"},
+ {id:"butter",name:"Butter",aisle:3,qty:"25 g",n:25,src:"Chicken 25 g"},
+ {id:"parmesan",name:"Parmesan",aisle:3,qty:"40 g",some:true,n:40,src:"Pasta 40 g, plus extra to serve"},
+ {id:"tomatoes",name:"Chopped tomatoes",aisle:4,qty:"3 × 400 g tins",n:3,src:"Chilli 1 · Dal 1 · Pasta 1"},
+ {id:"kidney",name:"Kidney beans",aisle:4,qty:"1 × 400 g tin",n:1,src:"Chilli 1"},
+ {id:"chickpeas",name:"Chickpeas",aisle:4,qty:"1 × 400 g tin",n:1,src:"Pasta 1"},
+ {id:"lentils",name:"Red lentils",aisle:4,qty:"250 g",n:250,src:"Dal 250 g"},
+ {id:"ditalini",name:"Ditalini",aisle:4,qty:"150 g",n:150,src:"Pasta 150 g"},
+ {id:"stock",name:"Chicken stock",aisle:4,qty:"800 ml + 1 cube",n:800,src:"Pasta 800 ml · Chilli 1 cube (no conversion, so both shown)"},
+ {id:"rice",name:"Basmati rice",aisle:4,qty:"",serveWith:true,n:0,src:"Serve with: Chilli, Dal"},
+ {id:"chilli",name:"Chilli powder",aisle:5,qty:"2 tsp",n:2,src:"Chilli 2 tsp"},
+ {id:"cumin",name:"Ground cumin",aisle:5,qty:"3 tsp",n:3,src:"Chilli 2 tsp · Dal 1 tsp",always:true},
+ {id:"turmeric",name:"Turmeric",aisle:5,qty:"1 tsp",n:1,src:"Dal 1 tsp"},
+ {id:"bay",name:"Bay leaves",aisle:5,qty:"3",n:3,src:"Chilli 1 · Dal 2",always:true},
+ {id:"salt",name:"Salt",aisle:5,qty:"",n:0,src:"Chilli, Dal, Chicken, Pasta: to taste",always:true},
+ {id:"blackpepper",name:"Black pepper",aisle:5,qty:"",n:0,src:"Chicken, Pasta: to taste",always:true},
+ {id:"olive",name:"Olive oil",aisle:6,qty:"5 tbsp",n:5,src:"Chilli 1 tbsp · Chicken 2 tbsp · Pasta 2 tbsp",always:true},
+ {id:"vegoil",name:"Vegetable oil",aisle:6,qty:"",n:0,src:"Dal: for frying",always:true},
+ {id:"puree",name:"Tomato purée",aisle:6,qty:"2 tbsp",n:2,src:"Chilli 2 tbsp"},
+];
+function v2(){ // dal 4 -> 6 servings
+  return clone(V1).map(i=>{
+    if(i.id==="onion"){i.qty="5";i.n=5;i.src="Chilli 1 · Dal 3 · Pasta 1";}
+    if(i.id==="garlic"){i.qty="11 cloves";i.n=11;i.src="Chilli 3 · Dal 6 · Pasta 2";}
+    if(i.id==="lentils"){i.qty="375 g";i.n=375;i.src="Dal 375 g";}
+    if(i.id==="ginger"){i.qty="7.5 cm";i.n=7.5;i.src="Dal 7.5 cm (flagged: does not scale cleanly)";}
+    if(i.id==="tomatoes"){i.qty="3 × 400 g tins + 200 g";i.n=4;i.src="Chilli 1 · Dal 1½ · Pasta 1";}
+    return i;});
+}
+function clone(x){return JSON.parse(JSON.stringify(x));}
+
+let S, variant="A", settling=new Set(), skipped=[], lastUndo=null, toastTimer=null, collapsedAt={};
+function fresh(){
+  const ticks={}; V1.forEach(i=>{ticks[i.id]={t:!!i.always,at:"10:00"};});
+  S={min:0,online:true,planV:1,
+     server:{items:clone(V1),ticks:clone(ticks)},
+     device:{items:clone(V1),ticks:clone(ticks),queue:[],asof:"10:00"},
+     log:["10:00 list generated from the plan; always-have items start ticked"]};
+  settling.clear(); skipped=[];
+}
+function now(){S.min++;const m=S.min;return (10+Math.floor(m/60))+":"+String(m%60).padStart(2,"0");}
+function log(s){S.log.unshift(s);}
+function byId(list,id){return list.find(i=>i.id===id);}
+function lww(store,id,w){const cur=store[id];if(!cur||w.at>=cur.at){store[id]={t:w.t,at:w.at};return true;}return false;}
+
+function tick(id,val,fromUndo){
+  const item=byId(S.device.items,id); if(!item)return;
+  const t=(val===undefined)?!S.device.ticks[id].t:val; const at=now();
+  S.device.ticks[id]={t,at}; delete item.was;
+  if(S.online){lww(S.server.ticks,id,{t,at});const si=byId(S.server.items,id);if(si)delete si.was;log(at+" "+(t?"ticked ":"unticked ")+item.name+", sent to server");}
+  else{S.device.queue=S.device.queue.filter(q=>q.id!==id);S.device.queue.push({id,t,at});log(at+" "+(t?"ticked ":"unticked ")+item.name+", queued on phone (offline)");}
+  if(!fromUndo){lastUndo={id,prev:!t};showToast((t?"Got ":"Back on the list: ")+item.name);}
+  if(t&&variant==="A"&&!item.always){settling.add(id);setTimeout(()=>{settling.delete(id);render();},1300);}
+  render();
+}
+function showToast(msg){const el=document.getElementById("toast");document.getElementById("toastMsg").textContent=msg;el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.hidden=true;lastUndo=null;},4000);}
+document.getElementById("undo").onclick=()=>{if(!lastUndo)return;const u=lastUndo;lastUndo=null;document.getElementById("toast").hidden=true;settling.delete(u.id);tick(u.id,u.prev,true);};
+
+function refresh(){
+  if(!S.online){log("refresh needs a connection: list kept as of "+S.device.asof);render();return;}
+  const at=now();
+  S.device.items=clone(S.server.items); S.device.ticks=clone(S.server.ticks); S.device.asof=at;
+  log(at+" phone reloaded the list from the server");render();
+}
+function setOnline(on){
+  S.online=on;const at=now();
+  if(!on){log(at+" signal lost: list stays usable, ticks queue on the phone");render();return;}
+  const q=S.device.queue;let won=0;
+  q.forEach(w=>{if(lww(S.server.ticks,w.id,w))won++;});
+  log(at+" back online: replayed "+q.length+" queued tick(s), "+won+" won (later tick wins per item)");
+  S.device.queue=[];render();setTimeout(()=>{refresh();flash();},400);
+}
+function flash(){const n=document.getElementById("net");n.className="net sync";n.innerHTML='<span class="dot"></span>Synced';n.hidden=false;setTimeout(()=>{if(S.online)n.hidden=true;},1500);}
+
+document.getElementById("netBtn").onclick=e=>{setOnline(!S.online);e.target.setAttribute("aria-pressed",String(!S.online));e.target.textContent=S.online?"Go offline":"Back online";};
+document.getElementById("partner").onclick=()=>{const at=now();lww(S.server.ticks,"mince",{t:true,at});log(at+" partner's phone ticked Beef mince (server only; this phone sees it on refresh)");render();};
+document.getElementById("planBtn").onclick=()=>{
+  if(S.planV===2){log("plan already changed");render();return;}
+  S.planV=2;const at=now();const old=S.server.items;const next=v2();
+  next.forEach(i=>{const o=byId(old,i.id);const tk=S.server.ticks[i.id];
+    if(o&&i.n>o.n&&tk&&tk.t&&!i.always){S.server.ticks[i.id]={t:false,at};i.was=o.qty;}});
+  S.server.items=next;log(at+" plan changed on the server: list regenerated, ticks kept by ingredient, increased ticked items unticked");render();};
+document.getElementById("refresh").onclick=refresh;
+document.getElementById("reset").onclick=()=>{fresh();const b=document.getElementById("netBtn");b.setAttribute("aria-pressed","false");b.textContent="Go offline";render();};
+document.querySelectorAll("#variants button").forEach(b=>b.onclick=()=>{variant=b.dataset.v;settling.clear();skipped=[];render();});
+
+const HINTS={A:"Recommended. Remaining items stay in aisle order at the top; done items collapse out of the way.",
+ B:"Big thumb-zone buttons, but you lose the overview: hard to see what else is in this aisle.",
+ C:"Familiar, but the list never shrinks, so you scroll past ticked rows all shop."};
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function qtyHtml(i){
+  if(!i.qty) return '<span class="some">'+(i.serveWith?"some":"")+'</span>';
+  return esc(i.qty)+(i.some?' <span class="some">+ some</span>':"");
+}
+function rowHtml(i,tk,extra){
+  const badges=(i.was?'<span class="was">was '+esc(i.was)+'</span>':"")+(i.serveWith?'<span class="sw">serve with</span>':"")+(extra==="home"?'<span class="home">at home</span>':"");
+  return '<button type="button" class="row'+(tk?" ticked":"")+(settling.has(i.id)?" settling":"")+'" data-id="'+i.id+'" aria-pressed="'+tk+'">'+
+    '<span class="r-main"><span class="r-name">'+esc(i.name)+badges+'</span><span class="r-src">'+esc(i.src)+'</span></span>'+
+    '<span class="r-qty">'+qtyHtml(i)+'</span><span class="box" aria-hidden="true"></span></button>';
+}
+function groups(items){const g=AISLES.map(()=>[]);items.forEach(i=>g[i.aisle].push(i));return g.map(l=>l.sort((a,b)=>a.name.localeCompare(b.name)));}
+
+function render(){
+  const D=S.device, T=D.ticks, items=D.items, body=document.getElementById("body");
+  const isT=i=>T[i.id]&&T[i.id].t;
+  const remaining=items.filter(i=>!isT(i)), toBuy=items.filter(i=>!(i.always&&isT(i)));
+  let h="";
+  if(variant==="A"){
+    const shown=items.filter(i=>!isT(i)||settling.has(i.id));
+    groups(shown).forEach((l,ai)=>{if(!l.length)return;
+      h+='<div class="aisle"><span>'+AISLES[ai]+'</span><span>'+l.filter(i=>!isT(i)).length+'</span></div>'+l.map(i=>rowHtml(i,isT(i))).join("");});
+    if(!remaining.length) h+='<div class="empty"><b>All done</b>Everything on the list is in the basket or at home.</div>';
+    const home=items.filter(i=>i.always&&isT(i)), basket=items.filter(i=>!i.always&&isT(i)&&!settling.has(i.id));
+    if(home.length) h+='<details class="done"><summary>At home <span>'+home.length+' always-have · tap one if you are out</span></summary>'+home.map(i=>rowHtml(i,true)).join("")+'</details>';
+    if(basket.length) h+='<details class="done"><summary>In the basket <span>'+basket.length+'</span></summary>'+basket.map(i=>rowHtml(i,true)).join("")+'</details>';
+  } else if(variant==="B"){
+    const order=[];groups(remaining).forEach(l=>order.push(...l));
+    const queue=order.filter(i=>!skipped.includes(i.id)).concat(skipped.map(id=>byId(remaining,id)).filter(Boolean));
+    const cur=queue[0];
+    if(!cur){h='<div class="empty"><b>All done</b>Nothing left to find.</div>';}
+    else{
+      h='<div class="focus"><div class="card"><span class="k">'+AISLES[cur.aisle]+'</span><span class="n">'+esc(cur.name)+'</span><span class="q">'+qtyHtml(cur)+(cur.was?'<span class="was">was '+esc(cur.was)+'</span>':"")+(cur.serveWith?'<span class="sw">serve with</span>':"")+'</span><span class="r-src">'+esc(cur.src)+'</span></div>'+
+        '<div class="next"><span class="k">Then</span>'+queue.slice(1,6).map(i=>'<div><span>'+esc(i.name)+'</span><span>'+esc(i.qty||"")+'</span></div>').join("")+'</div>'+
+        '<div class="big"><button type="button" id="skip">Not now</button><button type="button" class="got" id="got">Got it</button></div></div>';
+    }
+    body.innerHTML=h;
+    if(cur){document.getElementById("got").onclick=()=>{skipped=skipped.filter(x=>x!==cur.id);tick(cur.id,true);};
+      document.getElementById("skip").onclick=()=>{skipped=skipped.filter(x=>x!==cur.id).concat(cur.id);render();};}
+  } else {
+    groups(items).forEach((l,ai)=>{if(!l.length)return;
+      const left=l.filter(i=>!isT(i)).length;
+      h+='<div class="aisle"><span>'+AISLES[ai]+'</span><span>'+(left?left+" left":"done")+'</span></div>'+l.map(i=>rowHtml(i,isT(i),i.always&&isT(i)?"home":"")).join("");});
+  }
+  if(variant!=="B") body.innerHTML=h;
+  body.querySelectorAll(".row").forEach(r=>r.onclick=()=>tick(r.dataset.id));
+
+  const left=toBuy.filter(i=>!isT(i)).length;
+  document.getElementById("left").textContent=left+" of "+toBuy.length+" to get";
+  document.getElementById("bar").style.width=(toBuy.length?100*(toBuy.length-left)/toBuy.length:100)+"%";
+  document.getElementById("asof").textContent=S.online?"":"List as of "+D.asof;
+  const net=document.getElementById("net");
+  if(!S.online){net.className="net off";net.innerHTML='<span class="dot"></span>Offline · '+D.queue.length+' tick'+(D.queue.length===1?"":"s")+' saved on this phone';net.hidden=false;}
+  else if(net.className.indexOf("sync")<0) net.hidden=true;
+
+  document.querySelectorAll("#variants button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===variant)));
+  document.getElementById("vhint").textContent=HINTS[variant];
+
+  // state table: device vs server per item, highlighting differences
+  const q={};D.queue.forEach(w=>q[w.id]=w);
+  let t='<tr><th>Item</th><th>Phone</th><th>Queued</th><th>Server</th><th>Server qty</th></tr>';
+  S.server.items.forEach(si=>{const d=T[si.id]||{},s=S.server.ticks[si.id]||{},di=byId(items,si.id)||{};
+    const diff=(d.t!==s.t)||(di.qty!==si.qty);
+    t+='<tr><td>'+esc(si.name)+(si.always?" (always-have)":"")+'</td><td'+(diff?' class="diff"':"")+'>'+(d.t?"✓":"·")+" "+(d.at||"")+'</td><td>'+(q[si.id]?(q[si.id].t?"✓ ":"· ")+q[si.id].at:"")+'</td><td>'+(s.t?"✓":"·")+" "+(s.at||"")+'</td><td'+(di.qty!==si.qty?' class="diff"':"")+'>'+esc(si.qty||"-")+(si.was?" (was "+esc(si.was)+")":"")+'</td></tr>';});
+  document.getElementById("state").innerHTML=t;
+  document.getElementById("log").innerHTML=S.log.slice(0,30).map(l=>"<li>"+esc(l)+"</li>").join("");
+}
+
+// keep the screen on while the list is open; tolerate refusal
+try{if(navigator.wakeLock){navigator.wakeLock.request("screen").catch(()=>{});}}catch(e){}
+fresh();render();
+})();
+</script>

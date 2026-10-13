@@ -54,6 +54,10 @@ _Avoid_: Line type
 The natural measure an ingredient is stored and reasoned in (count for onions, ml for milk, grams for flour), plus rough conversions between its forms.
 _Avoid_: Base unit, standard unit
 
+**Pack size**:
+The amount an ingredient is sold in, such as a 400g tin or a 30g pack of coriander. It is separate from the canonical measure: a line counted in packs ("1 tin chopped tomatoes") converts through the pack size, not through a portion weight or density.
+_Avoid_: Can weight, tin size
+
 **Food knowledge base**:
 Shared reference facts about food: the ingredient hierarchy, synonyms, dietary properties and conversions. It is not owned by any household.
 _Avoid_: Ingredient database, KB (in prose)
@@ -85,15 +89,19 @@ _Avoid_: Custom tag, label
 ### Search and planning
 
 **Query**:
-A structured filter over recipes. Search, collections and rules are all built from it.
+A structured filter over recipes: predicates combined with and, or and not. Search, collections and rules are all built from it. It selects recipes; it never ranks or sorts them.
 _Avoid_: Filter, search string
+
+**Predicate**:
+One condition in a query, testing a single field of a recipe (`cuisine:italian`, `ing:fennel`, `time:<30`). It is true only when the recipe's known facts satisfy it, so an unknown value never matches.
+_Avoid_: Clause, term, chip (a chip is the UI's rendering of a predicate)
 
 **Collection**:
 A named, saved query.
 _Avoid_: Folder, list, smart list
 
 **Rule**:
-A query plus a limit, applied to a plan ("at most 1 `tag:pasta`").
+A query plus a limit (at least or at most N matching plan items), applied to a plan ("at most 1 `carb:pasta`").
 _Avoid_: Constraint, filter
 
 **Plan**:
@@ -125,11 +133,11 @@ _Avoid_: Recency, frequency
 ### Shopping
 
 **Shopping list**:
-The ingredients needed for a plan, merged across recipes in canonical measures, with tick state.
+The ingredients needed for a plan, merged across recipes in canonical measures, one entry per ingredient, with tick state. It is regenerated when the plan changes and keeps its ticks by ingredient.
 _Avoid_: Grocery list
 
 **Always-have**:
-An item the household always keeps, such as oil or salt. It starts ticked on every shopping list. This is the app's only knowledge of the kitchen.
+An item the household always keeps, such as oil or salt. It starts ticked on every shopping list. This is the app's only knowledge of the kitchen. Unticking one on a list means the household is out of it for this shop only; it does not change the always-have list.
 _Avoid_: Pantry, staples, inventory
 
 ### Onboarding

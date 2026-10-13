@@ -40,6 +40,9 @@ API_URL = "https://api.typesafe.ai/v1/systemone"
 DEFAULT_MODEL = "jev-1.13.0"  # pinned, per docs.typesafe.ai/models advice on tuned thresholds
 PRICE_PER_MTOK_USD = 0.042  # input tokens only; output is free (docs.typesafe.ai/models)
 CONF_GATE = 0.8  # confidence at which the pipeline would accept Jev without escalating
+GATES = (0.6, 0.8)  # auto-accept gates reported side by side
+BANDS = (0.0, 0.5, 0.6, 0.8, 0.95, 1.01)  # calibration bands [lo, hi); phase 2 reported [0,0.5) [0.5,0.8) [0.8,1]
+TAXONOMY_DOC = HERE.parents[2] / "spec" / "tag-taxonomy.md"
 NONE = "none"
 
 FRACTIONS = "½¼¾⅓⅔⅛⅜⅝⅞"
@@ -90,6 +93,7 @@ SPAN_INSTRUCTIONS_V2 = ("Which span of `line` is the shopping name of the ingred
                         "'frozen spinach' or 'caster sugar'.")
 CARB_LABEL_V2 = {"grains": "grains other than rice, such as couscous, bulgur or quinoa"}
 FRAMING = "v1"
+TAG_SCHEME = "phase2"  # phase2 = TAXONOMY below; v01 = docs/spec/tag-taxonomy.md
 
 UNIT_SYSTEM_CRITERIA = {
     "us_customary": "US measures: cup is 240ml, pint is 473ml. Typical of American sites and wording (cilantro, confectioners' sugar).",
@@ -174,7 +178,7 @@ def build_line_request(item: dict) -> tuple[dict, dict]:
     return {"state": state, "questions": q}, meta
 
 
-def build_recipe_request(rec: dict) -> dict:
+def build_recipe_request_phase2(rec: dict) -> dict:
     state = {"title": rec["title"], "ingredients": rec["ingredients"], "method": rec["method_summary"]}
     q = {
         "cuisine": choice("Which cuisine is this recipe?", {c: None for c in TAXONOMY["cuisine"]}),
@@ -303,7 +307,7 @@ def score_line(item: dict, meta: dict, answers: dict) -> list[dict]:
     return rows
 
 
-def score_recipe(rec: dict, answers: dict) -> list[dict]:
+def score_recipe_phase2(rec: dict, answers: dict) -> list[dict]:
     rows = []
     for dim in ("cuisine", "meal_type", "effort"):
         got, exp = answers[dim]["choice"], rec["expected"][dim]
@@ -318,18 +322,116 @@ def score_recipe(rec: dict, answers: dict) -> list[dict]:
     return rows
 
 
+# ---------------------------------------------------------------- V0.1 tag taxonomy (--taxonomy v01)
+# Dimensions, questions and definitions are parsed from docs/spec/tag-taxonomy.md, so the text Jev is
+# given and the text the golden set is graded against cannot drift apart (taxonomy principle 2).
+
+V01_DIMS = ("meal", "cuisine", "protein", "carb", "method", "effort", "equipment")  # diet is derived, not asked
+
+
+def load_taxonomy_v01() -> dict:
+    dims: dict[str, dict] = {}
+    cur = None
+    for raw in TAXONOMY_DOC.read_text().splitlines():
+        line = raw.strip()
+        m = re.match(r"^### .*\(`(\w+)`\): (single|multi)", line)
+        if m:
+            cur = dims.setdefault(m.group(1), {"kind": m.group(2), "question": "", "values": {}})
+            continue
+        if line.startswith("## "):
+            cur = None
+        if cur is None:
+            continue
+        if line.startswith("Question:") or line.startswith("Rule:"):
+            text = re.sub(r'^"([^"]*)"', r"\1", line.split(":", 1)[1].strip())
+            cur["question"] = (cur["question"] + " " + text).strip()
+            continue
+        m = re.match(r"^\| `(\w+)` \| ([^|]+) \| (.+) \|$", line)
+        if m:
+            cur["values"][m.group(1)] = {"label": m.group(2).strip(), "definition": m.group(3).strip()}
+    missing = [d for d in V01_DIMS if not dims.get(d, {}).get("values")]
+    if missing:
+        sys.exit(f"tag taxonomy parse failed for {missing} in {TAXONOMY_DOC}")
+    return {d: dims[d] for d in V01_DIMS}
+
+
+def build_recipe_request_v01(rec: dict) -> dict:
+    tax = load_taxonomy_v01()
+    state = {"title": rec["title"], "ingredients": rec["ingredients"], "method": rec["method_summary"]}
+    q = {}
+    for dim, spec in tax.items():
+        if spec["kind"] == "single":
+            criteria = {v: d["definition"] for v, d in spec["values"].items()}
+            criteria.setdefault(NONE, "None of the other values fits, or it cannot be told from the recipe.")
+            q[dim] = choice(spec["question"], criteria)
+        else:
+            for v, d in spec["values"].items():
+                ask = re.sub(r"\bX\b|…", d["label"].lower(), spec["question"])
+                q[f"{dim}__{v}"] = noul(f"{ask} '{d['label']}' means: {d['definition']}")
+    return {"state": state, "questions": q}
+
+
+def score_recipe_v01(rec: dict, answers: dict) -> list[dict]:
+    tax = load_taxonomy_v01()
+    exp_all = rec["expected_v01"]
+    rows = []
+    for dim, spec in tax.items():
+        exp = exp_all[dim]
+        if spec["kind"] == "single":
+            got = answers[dim]["choice"]
+            near = norm(got) in {norm(o) for o in exp_all.get("near", {}).get(dim, [])}
+            rows.append({"probe": f"tag.{dim}", "got": got, "expected": exp, "ok": matches(got, exp),
+                         "near": near, "conf": answers[dim]["confidence"]})
+        else:
+            values = list(spec["values"])
+            got = sorted(v for v in values if answers[f"{dim}__{v}"]["noul"] >= 0.5)
+            optional = set(exp_all.get("optional", {}).get(dim, []))
+            ok = set(exp) <= set(got) <= set(exp) | optional
+            rows.append({"probe": f"tag.{dim}(multi)", "got": got, "expected": sorted(exp), "ok": ok, "conf": None,
+                         "nouls": {v: answers[f"{dim}__{v}"]["noul"] for v in values}})
+    return rows
+
+
+def build_recipe_request(rec: dict) -> dict:
+    return build_recipe_request_v01(rec) if TAG_SCHEME == "v01" else build_recipe_request_phase2(rec)
+
+
+def score_recipe(rec: dict, answers: dict) -> list[dict]:
+    return score_recipe_v01(rec, answers) if TAG_SCHEME == "v01" else score_recipe_phase2(rec, answers)
+
+
 def summarise(rows: list[dict], latencies: list[float], input_tokens: int) -> None:
     probes: dict[str, list[dict]] = {}
     for r in rows:
         probes.setdefault(r["probe"], []).append(r)
-    print(f"\n{'probe':34} {'n':>3} {'acc':>6} {'gated_acc':>9} {'coverage':>8}")
+    gate_hdr = "".join(f" {'acc@' + str(g):>8} {'auto@' + str(g):>8}" for g in GATES)
+    print(f"\n{'probe':34} {'n':>3} {'acc':>6}{gate_hdr} {'near':>4}")
     for p, rs in probes.items():
         acc = sum(r["ok"] for r in rs) / len(rs)
-        gated = [r for r in rs if r["conf"] is not None and r["conf"] >= CONF_GATE]
-        gacc = f"{sum(r['ok'] for r in gated) / len(gated):.2f}" if gated else "-"
-        cov = f"{len(gated) / len(rs):.2f}" if any(r["conf"] is not None for r in rs) else "-"
-        print(f"{p:34} {len(rs):>3} {acc:>6.2f} {gacc:>9} {cov:>8}")
-    print(f"\n(gated = answers with confidence >= {CONF_GATE}; coverage = share of lines that clear the gate)")
+        cols = ""
+        for g in GATES:
+            gated = [r for r in rs if r["conf"] is not None and r["conf"] >= g]
+            gacc = f"{sum(r['ok'] for r in gated) / len(gated):.2f}" if gated else "-"
+            cov = f"{len(gated) / len(rs):.2f}" if any(r["conf"] is not None for r in rs) else "-"
+            cols += f" {gacc:>8} {cov:>8}"
+        near = sum(1 for r in rs if not r["ok"] and r.get("near"))
+        print(f"{p:34} {len(rs):>3} {acc:>6.2f}{cols} {near if near else '':>4}")
+    print("\n(acc@g = accuracy of answers with confidence >= g; auto@g = share auto-accepted at gate g;"
+          " near = wrong answers that were a listed near miss)")
+    print("\ncalibration (answers with a confidence, by stage):")
+    stages: dict[str, list[dict]] = {}
+    for r in rows:
+        if r["conf"] is not None:
+            stages.setdefault(r["probe"].split(".")[0], []).append(r)
+    labels = [f"[{lo:g},{min(hi, 1.0):g}{']' if hi > 1 else ')'}" for lo, hi in zip(BANDS, BANDS[1:])]
+    print(f"{'stage':10}" + "".join(f" {l:>14}" for l in labels))
+    for st, rs in stages.items():
+        cells = ""
+        for lo, hi in zip(BANDS, BANDS[1:]):
+            b = [r for r in rs if lo <= r["conf"] < hi]
+            cell = f"{sum(r['ok'] for r in b) / len(b):.2f} n={len(b)}" if b else "-"
+            cells += f" {cell:>14}"
+        print(f"{st:10}{cells}")
     if latencies:
         lat = sorted(latencies)
         p95 = lat[min(len(lat) - 1, int(round(0.95 * (len(lat) - 1))))]
@@ -353,11 +455,14 @@ def main() -> None:
     ap.add_argument("--model", default=DEFAULT_MODEL)
     ap.add_argument("--framing", choices=("v1", "v2"), default="v1", help="question framing (v2 = phase 2 retry)")
     ap.add_argument("--rescore", type=Path, help="re-score an existing results file offline; no network")
+    ap.add_argument("--taxonomy", choices=("phase2", "v01"), default="phase2",
+                    help="recipe tagging vocabulary: phase2 = the spike's own; v01 = docs/spec/tag-taxonomy.md (expected_v01)")
     ap.add_argument("--set", choices=("all", "dev", "heldout"), default="all",
                     help="dev = L01-L44 and R01-R03 (v2 was tuned on these); heldout = lines added 2026-10-13")
     args = ap.parse_args()
-    global FRAMING
+    global FRAMING, TAG_SCHEME
     FRAMING = args.framing
+    TAG_SCHEME = args.taxonomy
 
     golden = json.loads((HERE / "golden.json").read_text())
     if args.set != "all":
@@ -403,7 +508,7 @@ def main() -> None:
 
     out_dir = HERE / "results"
     out_dir.mkdir(exist_ok=True)
-    out_path = out_dir / f"run-{datetime.now():%Y%m%d-%H%M%S}-{FRAMING}.jsonl"
+    out_path = out_dir / f"run-{datetime.now():%Y%m%d-%H%M%S}-{FRAMING}-{TAG_SCHEME}.jsonl"
     rows, latencies, tokens = [], [], 0
     with out_path.open("w") as out:
         for item, payload, meta in line_reqs:
@@ -422,7 +527,7 @@ def main() -> None:
             rows += scored
             out.write(json.dumps({"id": rec["id"], "latency_s": dt, "response": data, "scored": scored}, ensure_ascii=False) + "\n")
             print(f"{rec['id']} {dt * 1000:5.0f}ms {rec['title']}")
-    print(f"\nmodel={args.model} framing={FRAMING} raw results: {out_path}")
+    print(f"\nmodel={args.model} framing={FRAMING} taxonomy={TAG_SCHEME} raw results: {out_path}")
     summarise(rows, latencies, tokens)
 
 

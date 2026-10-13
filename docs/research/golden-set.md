@@ -85,16 +85,32 @@ These feed the import capture contract, which the map lists under "Not yet speci
 - R16's feta depends on the product. The hierarchy needs an "unknown" state, not a guess.
 - R15 is fully vegan.
 
-## Not done: the Jev rerun
+## Not done: the Jev rerun (owner run, prepared 2026-10-13)
 
-`JEV_API_KEY` isn't available in this environment, so the v2 rerun hasn't happened. Run it with:
+The rerun needs `JEV_API_KEY` and Ed's check of the agent's labels, so it is an owner task. Tracked on [Rerun Jev v2 on the held-out golden lines](https://github.com/Ed-Barnes937/FindersEaters/issues/19). Everything that could be done without the key is done.
 
-```
-cd docs/ideation/research/jev-spike
-python3 run_spike.py --framing v2 --set heldout
-```
+### What was prepared (agent-decided, reversible)
 
-The dry run estimates about 410k input tokens. Phase 2 ran 1.5x over its estimate, so expect about $0.03. Compare each stage with the phase 2 v2 column in `docs/ideation/research/jev-capabilities.md`. Before trusting the headline numbers, review the 136 extraction-scored lines and the 65 resolution lines: these labels are the agent's, and Ed hasn't checked them.
+- **Tags graded against the V0.1 taxonomy.** `run_spike.py --taxonomy v01` reads dimensions, questions and definitions straight from `docs/spec/tag-taxonomy.md` and gives them to Jev, so the asked text and the graded text cannot drift. Single-valued dimensions (cuisine, method, effort) are one Choice with `none`. Multi-valued ones (meal, protein, carb, equipment) are one Noul per value. Diet is derived, so it is not asked. `--taxonomy phase2` (the default) keeps the old vocabulary so phase 2 results still rescore.
+- **`expected_v01` on all 20 recipes** in `golden.json`. Single-valued dimensions expect exactly one value. `near` lists near misses (shakshuka's `middle_eastern`, chilli's `american`, adjacent effort levels): they are reported in their own column but scored wrong, so the headline number is strict. R02 expects `north_african` and R03 expects `slow_cook`, as the taxonomy says. Notable relabels from the phase 2 `expected`: stroganoff is `central_eastern_european`, Victoria sandwich and cookies are `baking` (not dessert), chilli and jalfrezi carry `rice` because "serve with rice" is a carb base, and every recipe now has `equipment`.
+- **The report now shows** accuracy and auto-accept share at gates 0.6 and 0.8 side by side, and a calibration table (accuracy per confidence band, per stage; bands [0,0.5) [0.5,0.6) [0.6,0.8) [0.8,0.95) [0.95,1] so they merge back to phase 2's three). Checked offline with `--rescore` on synthetic answers.
+
+### Owner checklist
+
+1. Spot-check the agent's labels: the 136 extraction-scored and 65 resolution lines (held-out, L45-L194), and `expected_v01` on R01-R20. Fix in `golden.json` before running, never after seeing results.
+2. Optionally add household recipes as more `heldout` entries (same shape, `"set": "heldout"`).
+3. Run, from `docs/ideation/research/jev-spike`:
+   ```
+   python3 run_spike.py --framing v2 --set heldout --taxonomy v01   # the measurement, about $0.03
+   python3 run_spike.py --framing v2 --set dev --taxonomy v01       # R01-R03 on the new tags, about $0.01
+   ```
+4. Record per stage against the phase 2 v2 column in `docs/ideation/research/jev-capabilities.md`: accuracy, acc@0.6 and acc@0.8, auto-accept share at both gates, the calibration bands, and any new failure patterns. Then update that file's "Revised stage verdicts" table.
+
+### How to read the result (agent-decided, reversible)
+
+- **v2 holds** if each stage's held-out accuracy is within about 5 points of its phase 2 v2 dev number, and acc@0.8 stays at or above 0.95 for the stages the engine auto-accepts. 150 lines give roughly a plus or minus 4 point margin at 90% accuracy, so smaller gaps are noise.
+- **A stage that drops more than that** keeps its review-first default in the engine and goes back to framing work on dev lines only. Held-out lines are never tuned on.
+- **Tags** are judged per dimension. A dimension whose acc@0.8 is below 0.9 ships as a suggestion in the review screen, not an applied tag, which is already the taxonomy's unknown-is-better-than-wrong rule.
 
 ## Role in the product (agent-decided, reversible)
 

@@ -66,7 +66,7 @@ Changes from the ten dimensions proposed in `docs/ideation/README.md`:
 ### Versioning
 
 - The taxonomy is code-owned configuration in the repo, versioned as a whole. Each engine output records the taxonomy version it was tagged against.
-- Adding a value or dimension: bump the version and re-tag. Renaming a value: a migration that rewrites stored slugs and corrections. Removing a value: corrections that mention it are dropped, and the change is noted in the changelog.
+- Adding a value or dimension: bump the version and re-tag. Renaming a value: a migration that rewrites stored slugs and corrections, and also the stored query trees of collections and rules once those persist them (see `docs/spec/query-model.md`). Removing a value: corrections that mention it are dropped, and the change is noted in the changelog.
 - Slugs are lowercase `snake_case` and never reused for a different meaning.
 
 ### Query and planner contract

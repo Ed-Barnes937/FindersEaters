@@ -1,5 +1,5 @@
 {
-  "_about": "Golden set for the Jev spike. Expected values are editorial judgements, dated 2026-09-25. Field values are a verbatim span of the line, null (no such part), or a list of acceptable spans. 'source' is the domain the line came from; it only feeds the unit-system probe. 'kind' follows the README test: would you buy it or get it out? Revised 2026-10-04: resolve to the most specific entry the text supports (L08 -> butter); extraction is not scored for not_ingredient lines; a recipe's expected 'optional' lists tags that may appear but are not required; CORE_FIELDS (quantity, unit, size, ingredient) is the headline extraction score because prep and note are display only. 'one_pot' stays unaccepted for R03 until tag definitions exist.",
+  "_about": "Golden set for the Jev spike. Expected values are editorial judgements, dated 2026-09-25. Field values are a verbatim span of the line, null (no such part), or a list of acceptable spans. 'source' is the domain the line came from; it only feeds the unit-system probe. 'kind' follows the README test: would you buy it or get it out? Revised 2026-10-04: resolve to the most specific entry the text supports (L08 -> butter); extraction is not scored for not_ingredient lines; a recipe's expected 'optional' lists tags that may appear but are not required; CORE_FIELDS (quantity, unit, size, ingredient) is the headline extraction score because prep and note are display only. 'one_pot' stays unaccepted for R03 until tag definitions exist. Revised 2026-10-13: each recipe carries 'expected_v01', graded against the definitions in docs/spec/tag-taxonomy.md (run with --taxonomy v01). Single-valued dimensions (cuisine, method, effort) expect one value; 'near' lists near misses that are reported separately but scored wrong. Multi-valued dimensions (meal, protein, carb, equipment) use 'optional' as before. 'expected' stays as the phase 2 vocabulary so earlier runs can still be rescored.",
   "lines": [
     {
       "id": "L01",
@@ -4648,6 +4648,31 @@
           "simmer"
         ],
         "effort": "medium"
+      },
+      "expected_v01": {
+        "meal": [
+          "dinner"
+        ],
+        "cuisine": "indian",
+        "protein": [
+          "chicken"
+        ],
+        "carb": [
+          "rice"
+        ],
+        "method": "simmer",
+        "effort": "medium",
+        "equipment": [
+          "grill"
+        ],
+        "near": {
+          "method": [
+            "grill"
+          ],
+          "effort": [
+            "easy"
+          ]
+        }
       }
     },
     {
@@ -4682,6 +4707,32 @@
           "one_pot"
         ],
         "effort": "easy"
+      },
+      "expected_v01": {
+        "meal": [
+          "breakfast",
+          "lunch"
+        ],
+        "cuisine": "north_african",
+        "protein": [
+          "egg"
+        ],
+        "carb": [
+          "bread"
+        ],
+        "method": "simmer",
+        "effort": "easy",
+        "equipment": [],
+        "optional": {
+          "meal": [
+            "dinner"
+          ]
+        },
+        "near": {
+          "cuisine": [
+            "middle_eastern"
+          ]
+        }
       }
     },
     {
@@ -4712,6 +4763,28 @@
         "optional": {
           "method": [
             "fry"
+          ]
+        }
+      },
+      "expected_v01": {
+        "meal": [
+          "dinner"
+        ],
+        "cuisine": "british",
+        "protein": [
+          "beef"
+        ],
+        "carb": [
+          "potato"
+        ],
+        "method": "slow_cook",
+        "effort": "easy",
+        "equipment": [
+          "slow_cooker"
+        ],
+        "near": {
+          "effort": [
+            "medium"
           ]
         }
       }
@@ -4765,6 +4838,34 @@
             "one_pot"
           ]
         }
+      },
+      "expected_v01": {
+        "meal": [
+          "dinner"
+        ],
+        "cuisine": "mexican",
+        "protein": [
+          "beef"
+        ],
+        "carb": [
+          "rice"
+        ],
+        "method": "simmer",
+        "effort": "easy",
+        "equipment": [],
+        "optional": {
+          "protein": [
+            "pulses"
+          ]
+        },
+        "near": {
+          "cuisine": [
+            "american"
+          ],
+          "effort": [
+            "medium"
+          ]
+        }
       }
     },
     {
@@ -4802,6 +4903,32 @@
         "optional": {
           "protein": [
             "egg"
+          ]
+        }
+      },
+      "expected_v01": {
+        "meal": [
+          "baking"
+        ],
+        "cuisine": "british",
+        "protein": [],
+        "carb": [],
+        "method": "bake",
+        "effort": "easy",
+        "equipment": [
+          "oven"
+        ],
+        "optional": {
+          "meal": [
+            "dessert"
+          ],
+          "equipment": [
+            "electric_mixer"
+          ]
+        },
+        "near": {
+          "effort": [
+            "medium"
           ]
         }
       }
@@ -4843,6 +4970,33 @@
         "optional": {
           "protein": [
             "egg"
+          ]
+        }
+      },
+      "expected_v01": {
+        "meal": [
+          "baking"
+        ],
+        "cuisine": "american",
+        "protein": [],
+        "carb": [],
+        "method": "bake",
+        "effort": "easy",
+        "equipment": [
+          "oven"
+        ],
+        "optional": {
+          "meal": [
+            "dessert",
+            "snack"
+          ],
+          "equipment": [
+            "electric_mixer"
+          ]
+        },
+        "near": {
+          "effort": [
+            "medium"
           ]
         }
       }
@@ -4892,6 +5046,30 @@
             "noodles"
           ]
         }
+      },
+      "expected_v01": {
+        "meal": [
+          "dinner"
+        ],
+        "cuisine": "chinese",
+        "protein": [
+          "chicken"
+        ],
+        "carb": [],
+        "method": "fry",
+        "effort": "easy",
+        "equipment": [],
+        "optional": {
+          "carb": [
+            "rice",
+            "noodles"
+          ]
+        },
+        "near": {
+          "cuisine": [
+            "american"
+          ]
+        }
       }
     },
     {
@@ -4938,6 +5116,37 @@
             "one_pot"
           ]
         }
+      },
+      "expected_v01": {
+        "meal": [
+          "dinner"
+        ],
+        "cuisine": "central_eastern_european",
+        "protein": [
+          "beef"
+        ],
+        "carb": [
+          "pasta"
+        ],
+        "method": "fry",
+        "effort": "easy",
+        "equipment": [],
+        "optional": {
+          "carb": [
+            "noodles"
+          ]
+        },
+        "near": {
+          "cuisine": [
+            "none"
+          ],
+          "method": [
+            "simmer"
+          ],
+          "effort": [
+            "medium"
+          ]
+        }
       }
     },
     {
@@ -4979,6 +5188,27 @@
           "method": [
             "fry",
             "one_pot"
+          ]
+        }
+      },
+      "expected_v01": {
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "cuisine": "british",
+        "protein": [],
+        "carb": [
+          "potato"
+        ],
+        "method": "simmer",
+        "effort": "easy",
+        "equipment": [
+          "blender"
+        ],
+        "near": {
+          "cuisine": [
+            "french"
           ]
         }
       }
@@ -5025,6 +5255,36 @@
             "fry"
           ]
         }
+      },
+      "expected_v01": {
+        "meal": [
+          "dinner"
+        ],
+        "cuisine": "indian",
+        "protein": [
+          "chicken"
+        ],
+        "carb": [
+          "rice"
+        ],
+        "method": "simmer",
+        "effort": "medium",
+        "equipment": [
+          "blender"
+        ],
+        "optional": {
+          "carb": [
+            "bread"
+          ]
+        },
+        "near": {
+          "method": [
+            "fry"
+          ],
+          "effort": [
+            "easy"
+          ]
+        }
       }
     },
     {
@@ -5062,6 +5322,34 @@
             "fry",
             "one_pot",
             "bake"
+          ]
+        }
+      },
+      "expected_v01": {
+        "meal": [
+          "dinner"
+        ],
+        "cuisine": "indian",
+        "protein": [
+          "chicken"
+        ],
+        "carb": [
+          "rice"
+        ],
+        "method": "simmer",
+        "effort": "easy",
+        "equipment": [],
+        "optional": {
+          "equipment": [
+            "oven"
+          ]
+        },
+        "near": {
+          "method": [
+            "bake"
+          ],
+          "effort": [
+            "medium"
           ]
         }
       }
@@ -5109,6 +5397,31 @@
             "cheese"
           ]
         }
+      },
+      "expected_v01": {
+        "meal": [
+          "dinner"
+        ],
+        "cuisine": "italian",
+        "protein": [
+          "fish"
+        ],
+        "carb": [
+          "pasta"
+        ],
+        "method": "bake",
+        "effort": "easy",
+        "equipment": [
+          "oven"
+        ],
+        "near": {
+          "cuisine": [
+            "none"
+          ],
+          "method": [
+            "simmer"
+          ]
+        }
       }
     },
     {
@@ -5153,6 +5466,26 @@
         "vegetarian": false,
         "vegan": false,
         "why": "Labelled vegetarian by the site, but Parmesan is made with animal rennet. Derivation from the hierarchy must catch this."
+      },
+      "expected_v01": {
+        "meal": [
+          "dinner"
+        ],
+        "cuisine": "italian",
+        "protein": [
+          "pulses"
+        ],
+        "carb": [
+          "pasta"
+        ],
+        "method": "simmer",
+        "effort": "easy",
+        "equipment": [],
+        "optional": {
+          "meal": [
+            "lunch"
+          ]
+        }
       }
     },
     {
@@ -5181,6 +5514,21 @@
           "roast"
         ],
         "optional": {}
+      },
+      "expected_v01": {
+        "meal": [
+          "dinner"
+        ],
+        "cuisine": "british",
+        "protein": [
+          "chicken"
+        ],
+        "carb": [],
+        "method": "roast",
+        "effort": "easy",
+        "equipment": [
+          "oven"
+        ]
       }
     },
     {
@@ -5229,6 +5577,39 @@
         "vegetarian": true,
         "vegan": true,
         "why": "No animal products on any line."
+      },
+      "expected_v01": {
+        "meal": [
+          "dinner"
+        ],
+        "cuisine": "mexican",
+        "protein": [
+          "pulses"
+        ],
+        "carb": [
+          "rice"
+        ],
+        "method": "simmer",
+        "effort": "easy",
+        "equipment": [
+          "oven"
+        ],
+        "optional": {
+          "carb": [
+            "potato"
+          ]
+        },
+        "near": {
+          "cuisine": [
+            "american"
+          ],
+          "method": [
+            "roast"
+          ],
+          "effort": [
+            "medium"
+          ]
+        }
       }
     },
     {
@@ -5266,6 +5647,23 @@
         "vegetarian": "depends_on_product",
         "vegan": false,
         "why": "Some feta uses animal rennet; the hierarchy needs a per-product flag or an 'unknown' state."
+      },
+      "expected_v01": {
+        "meal": [
+          "side",
+          "lunch"
+        ],
+        "cuisine": "greek_turkish",
+        "protein": [],
+        "carb": [],
+        "method": "no_cook",
+        "effort": "easy",
+        "equipment": [],
+        "optional": {
+          "protein": [
+            "cheese"
+          ]
+        }
       }
     },
     {
@@ -5293,6 +5691,32 @@
         "optional": {
           "protein": [
             "egg"
+          ]
+        }
+      },
+      "expected_v01": {
+        "meal": [
+          "dessert"
+        ],
+        "cuisine": "british",
+        "protein": [],
+        "carb": [],
+        "method": "fry",
+        "effort": "easy",
+        "equipment": [],
+        "optional": {
+          "meal": [
+            "breakfast",
+            "snack"
+          ],
+          "protein": [
+            "egg"
+          ]
+        },
+        "near": {
+          "cuisine": [
+            "french",
+            "none"
           ]
         }
       }
@@ -5327,6 +5751,27 @@
             "simmer"
           ]
         }
+      },
+      "expected_v01": {
+        "meal": [
+          "side"
+        ],
+        "cuisine": "chinese",
+        "protein": [
+          "egg"
+        ],
+        "carb": [
+          "rice"
+        ],
+        "method": "fry",
+        "effort": "easy",
+        "equipment": [],
+        "optional": {
+          "meal": [
+            "lunch",
+            "dinner"
+          ]
+        }
       }
     },
     {
@@ -5358,6 +5803,29 @@
           "method": [
             "grill",
             "bake"
+          ]
+        }
+      },
+      "expected_v01": {
+        "meal": [
+          "baking",
+          "side"
+        ],
+        "cuisine": "indian",
+        "protein": [],
+        "carb": [
+          "bread"
+        ],
+        "method": "fry",
+        "effort": "medium",
+        "equipment": [],
+        "near": {
+          "method": [
+            "grill",
+            "bake"
+          ],
+          "effort": [
+            "easy"
           ]
         }
       }
@@ -5404,7 +5872,34 @@
           ]
         }
       },
-      "synthetic": true
+      "synthetic": true,
+      "expected_v01": {
+        "meal": [
+          "dinner"
+        ],
+        "cuisine": "british",
+        "protein": [],
+        "carb": [
+          "potato"
+        ],
+        "method": "bake",
+        "effort": "easy",
+        "equipment": [
+          "oven"
+        ],
+        "optional": {
+          "protein": [
+            "lamb",
+            "beef",
+            "cheese"
+          ]
+        },
+        "near": {
+          "effort": [
+            "medium"
+          ]
+        }
+      }
     }
   ]
 }
