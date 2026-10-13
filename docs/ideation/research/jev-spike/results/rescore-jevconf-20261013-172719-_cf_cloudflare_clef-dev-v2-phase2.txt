@@ -1,0 +1,49 @@
+rescored run-20261013-172719-_cf_cloudflare_clef-dev-v2-phase2.jsonl
+
+probe                                n    acc  acc@0.6 auto@0.6  acc@0.8 auto@0.8 near
+segment.role                        44   0.93     1.00     0.93     1.00     0.86     
+segment.compound                    39   0.97     1.00     0.85     1.00     0.62     
+classify.kind                       39   1.00     1.00     0.92     1.00     0.85     
+extract.tokens.quantity             35   0.97     1.00     0.71     1.00     0.34     
+extract.tokens.unit                 35   0.97     1.00     0.71     1.00     0.34     
+extract.tokens.size                 35   1.00     1.00     0.71     1.00     0.34     
+extract.tokens.ingredient           35   1.00     1.00     0.71     1.00     0.34     
+extract.tokens.prep                 35   1.00     1.00     0.71     1.00     0.34     
+extract.tokens.note                 35   1.00     1.00     0.71     1.00     0.34     
+extract.tokens.ALL_FIELDS           35   0.97     1.00     0.71     1.00     0.34     
+extract.tokens.CORE_FIELDS          35   0.97     1.00     0.71     1.00     0.34     
+extract.span.ingredient             35   0.97     1.00     0.80     1.00     0.57     
+resolve.ingredient                  18   0.94     0.94     0.94     1.00     0.89     
+resolve.unit_system                  7   1.00     1.00     1.00     1.00     1.00     
+tag.cuisine                          3   1.00     1.00     0.67     1.00     0.67     
+tag.meal_type                        3   1.00     1.00     1.00     1.00     0.67     
+tag.effort                           3   1.00     1.00     0.67     1.00     0.67     
+tag.protein(multi)                   3   1.00        -        -        -        -     
+tag.carb_base(multi)                 3   1.00        -        -        -        -     
+tag.method(multi)                    3   0.33        -        -        -        -     
+
+(acc@g = accuracy of answers with confidence >= g; auto@g = share auto-accepted at gate g; near = wrong answers that were a listed near miss)
+
+calibration (answers with a confidence, by stage):
+stage             [0,0.5)      [0.5,0.6)      [0.6,0.8)     [0.8,0.95)       [0.95,1]
+segment          0.50 n=8       1.00 n=1      1.00 n=12      1.00 n=39      1.00 n=23
+classify         1.00 n=2       1.00 n=1       1.00 n=3      1.00 n=15      1.00 n=18
+extract         0.91 n=45      0.98 n=42     1.00 n=112     1.00 n=111       1.00 n=5
+resolve                 -       1.00 n=1       0.00 n=1      1.00 n=19       1.00 n=4
+tag              1.00 n=2              -       1.00 n=1       1.00 n=6              -
+requests=47 latency p50=515ms p95=1401ms max=2371ms
+input_tokens=157862 est_cost=$0.00663
+
+failures:
+  L07  segment.role                   got='note' expected='ingredient' conf=0.22435
+  L23  segment.role                   got='ingredient' expected='header' conf=0.23274999999999998
+  L31  segment.compound               got='compound' expected='single' conf=0.36760000000000004
+  L32  resolve.ingredient             got='crisps_ready_salted' expected='none' conf=0.6955
+  L35  extract.tokens.quantity        got=None expected='a' conf=0.4290333333333334
+  L35  extract.tokens.unit            got='a handful' expected='handful' conf=0.4290333333333334
+  L35  extract.tokens.ALL_FIELDS      got={'quantity': None, 'unit': 'a handful', 'size': None, 'ingredient': 'basil leaves', 'prep': 'torn', 'note': None} expected={'quantity': 'a', 'unit': 'handful', 'size': None, 'ingredient': ['basil leaves', 'basil'], 'prep': 'torn', 'note': None} conf=0.4290333333333334
+  L35  extract.tokens.CORE_FIELDS     got={'quantity': None, 'unit': 'a handful', 'size': None, 'ingredient': 'basil leaves'} expected={'quantity': 'a', 'unit': 'handful', 'size': None, 'ingredient': ['basil leaves', 'basil']} conf=0.4290333333333334
+  L36  extract.span.ingredient        got='large free-range eggs' expected=['free-range eggs', 'eggs'] conf=0.51534
+  L44  segment.role                   got='note' expected='ingredient' conf=0.20109999999999997
+  R02  tag.method(multi)              got=['fry', 'one_pot', 'simmer'] expected=['one_pot', 'simmer'] conf=None
+  R03  tag.method(multi)              got=['one_pot', 'slow_cook'] expected=['slow_cook'] conf=None

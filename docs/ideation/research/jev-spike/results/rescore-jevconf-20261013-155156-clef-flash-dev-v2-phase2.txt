@@ -1,0 +1,82 @@
+rescored run-20261013-155156-clef-flash-dev-v2-phase2.jsonl
+
+probe                                n    acc  acc@0.6 auto@0.6  acc@0.8 auto@0.8 near
+segment.role                        44   1.00     1.00     0.91     1.00     0.68     
+segment.compound                    39   1.00     1.00     0.95     1.00     0.74     
+classify.kind                       39   0.95     1.00     0.95     1.00     0.90     
+extract.tokens.quantity             35   0.94     1.00     0.46     1.00     0.14     
+extract.tokens.unit                 35   0.83     1.00     0.46     1.00     0.14     
+extract.tokens.size                 35   0.91     1.00     0.46     1.00     0.14     
+extract.tokens.ingredient           35   0.91     1.00     0.46     1.00     0.14     
+extract.tokens.prep                 35   0.97     1.00     0.46     1.00     0.14     
+extract.tokens.note                 35   0.80     1.00     0.46     1.00     0.14     
+extract.tokens.ALL_FIELDS           35   0.71     1.00     0.46     1.00     0.14     
+extract.tokens.CORE_FIELDS          35   0.77     1.00     0.46     1.00     0.14     
+extract.span.ingredient             35   0.97     1.00     0.69     1.00     0.49     
+resolve.ingredient                  18   0.94     1.00     0.83     1.00     0.72     
+resolve.unit_system                  7   1.00     1.00     1.00     1.00     0.57     
+tag.cuisine                          3   1.00     1.00     0.67        -     0.00     
+tag.meal_type                        3   1.00     1.00     0.67     1.00     0.33     
+tag.effort                           3   1.00     1.00     0.67        -     0.00     
+tag.protein(multi)                   3   1.00        -        -        -        -     
+tag.carb_base(multi)                 3   0.67        -        -        -        -     
+tag.method(multi)                    3   1.00        -        -        -        -     
+
+(acc@g = accuracy of answers with confidence >= g; auto@g = share auto-accepted at gate g; near = wrong answers that were a listed near miss)
+
+calibration (answers with a confidence, by stage):
+stage             [0,0.5)      [0.5,0.6)      [0.6,0.8)     [0.8,0.95)       [0.95,1]
+segment          1.00 n=6              -      1.00 n=18      1.00 n=58       1.00 n=1
+classify         0.00 n=2              -       1.00 n=2      1.00 n=25      1.00 n=10
+extract        0.67 n=124      1.00 n=39      1.00 n=95      1.00 n=57              -
+resolve          1.00 n=2       0.00 n=1       1.00 n=5      1.00 n=13       1.00 n=4
+tag              1.00 n=3              -       1.00 n=5       1.00 n=1              -
+requests=47 latency p50=9124ms p95=16968ms max=25042ms
+input_tokens=157862 est_cost=$0.00663
+
+failures:
+  L02  extract.tokens.unit            got='g tin' expected='tin' conf=0.44606666666666667
+  L02  extract.tokens.size            got='400' expected='400g' conf=0.44606666666666667
+  L02  extract.tokens.ALL_FIELDS      got={'quantity': '1', 'unit': 'g tin', 'size': '400', 'ingredient': 'chopped tomatoes', 'prep': 'drained', 'note': None} expected={'quantity': '1', 'unit': 'tin', 'size': '400g', 'ingredient': 'chopped tomatoes', 'prep': 'drained', 'note': None} conf=0.44606666666666667
+  L02  extract.tokens.CORE_FIELDS     got={'quantity': '1', 'unit': 'g tin', 'size': '400', 'ingredient': 'chopped tomatoes'} expected={'quantity': '1', 'unit': 'tin', 'size': '400g', 'ingredient': 'chopped tomatoes'} conf=0.44606666666666667
+  L04  extract.tokens.quantity        got='1 200' expected='1' conf=0.3994
+  L04  extract.tokens.unit            got='g' expected=None conf=0.3994
+  L04  extract.tokens.note            got=None expected=['about 200g', '(about 200g)'] conf=0.3994
+  L04  extract.tokens.ALL_FIELDS      got={'quantity': '1 200', 'unit': 'g', 'size': 'large', 'ingredient': 'onion', 'prep': 'finely chopped', 'note': None} expected={'quantity': '1', 'unit': None, 'size': 'large', 'ingredient': 'onion', 'prep': 'finely chopped', 'note': ['about 200g', '(about 200g)']} conf=0.3994
+  L04  extract.tokens.CORE_FIELDS     got={'quantity': '1 200', 'unit': 'g', 'size': 'large', 'ingredient': 'onion'} expected={'quantity': '1', 'unit': None, 'size': 'large', 'ingredient': 'onion'} conf=0.3994
+  L07  classify.kind                  got='quantified' expected='not_ingredient' conf=0.45759999999999995
+  L11  extract.tokens.size            got=None expected='fat' conf=0.3707
+  L11  extract.tokens.ingredient      got='fat garlic' expected=['garlic', 'garlic cloves'] conf=0.3707
+  L11  extract.tokens.ALL_FIELDS      got={'quantity': '2 3', 'unit': 'cloves', 'size': None, 'ingredient': 'fat garlic', 'prep': 'crushed', 'note': None} expected={'quantity': '2-3', 'unit': ['cloves', None], 'size': 'fat', 'ingredient': ['garlic', 'garlic cloves'], 'prep': 'crushed', 'note': None} conf=0.3707
+  L11  extract.tokens.CORE_FIELDS     got={'quantity': '2 3', 'unit': 'cloves', 'size': None, 'ingredient': 'fat garlic'} expected={'quantity': '2-3', 'unit': ['cloves', None], 'size': 'fat', 'ingredient': ['garlic', 'garlic cloves']} conf=0.3707
+  L12  extract.tokens.note            got='extra for dusting' expected='plus extra for dusting' conf=0.25298333333333334
+  L12  extract.tokens.ALL_FIELDS      got={'quantity': '100', 'unit': 'g', 'size': None, 'ingredient': 'plain flour', 'prep': None, 'note': 'extra for dusting'} expected={'quantity': '100', 'unit': 'g', 'size': None, 'ingredient': 'plain flour', 'prep': None, 'note': 'plus extra for dusting'} conf=0.25298333333333334
+  L13  extract.tokens.unit            got='cup ml' expected='cup' conf=0.32134999999999997
+  L13  extract.tokens.note            got='240' expected=['240ml', '(240ml)'] conf=0.32134999999999997
+  L13  extract.tokens.ALL_FIELDS      got={'quantity': '1', 'unit': 'cup ml', 'size': None, 'ingredient': 'whole milk', 'prep': None, 'note': '240'} expected={'quantity': '1', 'unit': 'cup', 'size': None, 'ingredient': 'whole milk', 'prep': None, 'note': ['240ml', '(240ml)']} conf=0.32134999999999997
+  L13  extract.tokens.CORE_FIELDS     got={'quantity': '1', 'unit': 'cup ml', 'size': None, 'ingredient': 'whole milk'} expected={'quantity': '1', 'unit': 'cup', 'size': None, 'ingredient': 'whole milk'} conf=0.32134999999999997
+  L19  extract.tokens.note            got='extra for drizzling' expected='plus extra for drizzling' conf=0.27491666666666664
+  L19  extract.tokens.ALL_FIELDS      got={'quantity': '1', 'unit': 'tbsp', 'size': None, 'ingredient': 'olive oil', 'prep': None, 'note': 'extra for drizzling'} expected={'quantity': '1', 'unit': 'tbsp', 'size': None, 'ingredient': 'olive oil', 'prep': None, 'note': 'plus extra for drizzling'} conf=0.27491666666666664
+  L27  extract.tokens.unit            got='g oz' expected='g' conf=0.4710333333333333
+  L27  extract.tokens.note            got='9' expected=['9oz', None] conf=0.4710333333333333
+  L27  extract.tokens.ALL_FIELDS      got={'quantity': '250', 'unit': 'g oz', 'size': None, 'ingredient': 'spaghetti', 'prep': None, 'note': '9'} expected={'quantity': '250', 'unit': 'g', 'size': None, 'ingredient': 'spaghetti', 'prep': None, 'note': ['9oz', None]} conf=0.4710333333333333
+  L27  extract.tokens.CORE_FIELDS     got={'quantity': '250', 'unit': 'g oz', 'size': None, 'ingredient': 'spaghetti'} expected={'quantity': '250', 'unit': 'g', 'size': None, 'ingredient': 'spaghetti'} conf=0.4710333333333333
+  L28  extract.tokens.ingredient      got='floury potatoes such as Maris Piper' expected=['floury potatoes', 'potatoes'] conf=0.35705000000000003
+  L28  extract.tokens.note            got=None expected='such as Maris Piper' conf=0.35705000000000003
+  L28  extract.tokens.ALL_FIELDS      got={'quantity': '1', 'unit': 'kg', 'size': None, 'ingredient': 'floury potatoes such as Maris Piper', 'prep': 'peeled and cut into chunks', 'note': None} expected={'quantity': '1', 'unit': 'kg', 'size': None, 'ingredient': ['floury potatoes', 'potatoes'], 'prep': 'peeled and cut into chunks', 'note': 'such as Maris Piper'} conf=0.35705000000000003
+  L28  extract.tokens.CORE_FIELDS     got={'quantity': '1', 'unit': 'kg', 'size': None, 'ingredient': 'floury potatoes such as Maris Piper'} expected={'quantity': '1', 'unit': 'kg', 'size': None, 'ingredient': ['floury potatoes', 'potatoes']} conf=0.35705000000000003
+  L28  extract.span.ingredient        got='floury potatoes, such as Maris Piper' expected=['floury potatoes', 'potatoes'] conf=0.21274285714285715
+  L29  extract.tokens.unit            got='g cans' expected='cans' conf=0.4467666666666667
+  L29  extract.tokens.size            got='400' expected='400g' conf=0.4467666666666667
+  L29  extract.tokens.ALL_FIELDS      got={'quantity': '2', 'unit': 'g cans', 'size': '400', 'ingredient': 'chickpeas', 'prep': 'drained and rinsed', 'note': None} expected={'quantity': '2', 'unit': 'cans', 'size': '400g', 'ingredient': 'chickpeas', 'prep': 'drained and rinsed', 'note': None} conf=0.4467666666666667
+  L29  extract.tokens.CORE_FIELDS     got={'quantity': '2', 'unit': 'g cans', 'size': '400', 'ingredient': 'chickpeas'} expected={'quantity': '2', 'unit': 'cans', 'size': '400g', 'ingredient': 'chickpeas'} conf=0.4467666666666667
+  L32  resolve.ingredient             got='crisps_ready_salted' expected='none' conf=0.524125
+  L40  extract.tokens.quantity        got='1 500' expected='1' conf=0.2757333333333333
+  L40  extract.tokens.unit            got='ml' expected=None conf=0.2757333333333333
+  L40  extract.tokens.ingredient      got='vegetable stock cube water' expected=['vegetable stock cube', 'stock cube'] conf=0.2757333333333333
+  L40  extract.tokens.prep            got='crumbled boiling' expected='crumbled' conf=0.2757333333333333
+  L40  extract.tokens.note            got=None expected=['into 500ml boiling water', '500ml boiling water'] conf=0.2757333333333333
+  L40  extract.tokens.ALL_FIELDS      got={'quantity': '1 500', 'unit': 'ml', 'size': None, 'ingredient': 'vegetable stock cube water', 'prep': 'crumbled boiling', 'note': None} expected={'quantity': '1', 'unit': None, 'size': None, 'ingredient': ['vegetable stock cube', 'stock cube'], 'prep': 'crumbled', 'note': ['into 500ml boiling water', '500ml boiling water']} conf=0.2757333333333333
+  L40  extract.tokens.CORE_FIELDS     got={'quantity': '1 500', 'unit': 'ml', 'size': None, 'ingredient': 'vegetable stock cube water'} expected={'quantity': '1', 'unit': None, 'size': None, 'ingredient': ['vegetable stock cube', 'stock cube']} conf=0.2757333333333333
+  L44  classify.kind                  got='unquantified' expected='not_ingredient' conf=0.32230000000000003
+  R02  tag.carb_base(multi)           got=[] expected=['bread'] conf=None

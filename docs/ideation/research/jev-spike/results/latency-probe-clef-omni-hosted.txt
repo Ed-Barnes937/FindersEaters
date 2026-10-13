@@ -1,0 +1,18 @@
+[trivial] input_tokens=120 colos=['LHR']
+  fresh conn: tcp p50=18 p95=21 min=15 max=22 ms (n=20)
+  fresh conn: tls p50=39 p95=45 min=23 max=45 ms (n=20)
+  fresh conn: request->headers p50=228 p95=809 min=164 max=961 ms (n=20)
+  fresh conn: total p50=279 p95=870 min=220 max=1020 ms (n=20)
+  response header names: ['api-version', 'cache-control', 'cf-ai-neurons', 'cf-ai-req-id', 'cf-auditlog-id', 'cf-ray', 'connection', 'content-length', 'content-type', 'date', 'server', 'set-cookie']
+  whitelisted headers: {'cf-ray': 'a4a0f82a29918e0d-LHR'}
+  keep-alive: p50=135 p95=602 min=117 max=617 ms (n=20)
+  8 concurrent keep-alive: p50=201 p95=952 min=130 max=1399 ms (n=40)
+[full L02] input_tokens=4911 colos=['LHR']
+  fresh conn: tcp p50=18 p95=20 min=16 max=21 ms (n=20)
+  fresh conn: tls p50=38 p95=45 min=32 max=46 ms (n=20)
+  fresh conn: request->headers p50=256 p95=382 min=211 max=832 ms (n=20)
+  fresh conn: total p50=310 p95=446 min=260 max=888 ms (n=20)
+  response header names: ['api-version', 'cache-control', 'cf-ai-neurons', 'cf-ai-req-id', 'cf-auditlog-id', 'cf-ray', 'connection', 'content-length', 'content-type', 'date', 'server', 'set-cookie']
+  whitelisted headers: {'cf-ray': 'a4a0f8813ecb7685-LHR'}
+  keep-alive: p50=255 p95=760 min=202 max=995 ms (n=20)
+  8 concurrent keep-alive: p50=356 p95=520 min=235 max=870 ms (n=40)
