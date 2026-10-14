@@ -85,9 +85,9 @@ These feed the import capture contract, which the map lists under "Not yet speci
 - R16's feta depends on the product. The hierarchy needs an "unknown" state, not a guess.
 - R15 is fully vegan.
 
-## Not done: the Jev rerun (owner run, prepared 2026-10-13)
+## The held-out run (prepared 2026-10-13, run 2026-10-14)
 
-The rerun needs `JEV_API_KEY` and Ed's check of the agent's labels, so it is an owner task. Tracked on [Rerun Jev v2 on the held-out golden lines](https://github.com/Ed-Barnes937/FindersEaters/issues/19). Everything that could be done without the key is done.
+Tracked on [Run hosted Clef 27B on the held-out golden lines](https://github.com/Ed-Barnes937/FindersEaters/issues/19). The owner signed off the held-out labels as they stand on 2026-10-13, and that sign-off was recorded on the ticket before any model saw a held-out line. The engine moved from Jev to hosted Clef 27B in between (`docs/adr/0002-clef-on-workers-ai.md`), so the run measured Clef. The result and the stage verdicts are in [Held-out result: hosted Clef 27B](#held-out-result-hosted-clef-27b-2026-10-14) below.
 
 ### What was prepared (agent-decided, reversible)
 
@@ -95,7 +95,7 @@ The rerun needs `JEV_API_KEY` and Ed's check of the agent's labels, so it is an 
 - **`expected_v01` on all 20 recipes** in `golden.json`. Single-valued dimensions expect exactly one value. `near` lists near misses (shakshuka's `middle_eastern`, chilli's `american`, adjacent effort levels): they are reported in their own column but scored wrong, so the headline number is strict. R02 expects `north_african` and R03 expects `slow_cook`, as the taxonomy says. Notable relabels from the phase 2 `expected`: stroganoff is `central_eastern_european`, Victoria sandwich and cookies are `baking` (not dessert), chilli and jalfrezi carry `rice` because "serve with rice" is a carb base, and every recipe now has `equipment`.
 - **The report now shows** accuracy and auto-accept share at gates 0.6 and 0.8 side by side, and a calibration table (accuracy per confidence band, per stage; bands [0,0.5) [0.5,0.6) [0.6,0.8) [0.8,0.95) [0.95,1] so they merge back to phase 2's three). Checked offline with `--rescore` on synthetic answers.
 
-### Owner checklist
+### Owner checklist (done 2026-10-13 and 2026-10-14)
 
 1. Spot-check the agent's labels: the 136 extraction-scored and 65 resolution lines (held-out, L45-L194), and `expected_v01` on R01-R20. Fix in `golden.json` before running, never after seeing results.
 2. Optionally add household recipes as more `heldout` entries (same shape, `"set": "heldout"`).
@@ -111,6 +111,69 @@ The rerun needs `JEV_API_KEY` and Ed's check of the agent's labels, so it is an 
 - **v2 holds** if each stage's held-out accuracy is within about 5 points of its phase 2 v2 dev number, and acc@0.8 stays at or above 0.95 for the stages the engine auto-accepts. 150 lines give roughly a plus or minus 4 point margin at 90% accuracy, so smaller gaps are noise.
 - **A stage that drops more than that** keeps its review-first default in the engine and goes back to framing work on dev lines only. Held-out lines are never tuned on.
 - **Tags** are judged per dimension. A dimension whose acc@0.8 is below 0.9 ships as a suggestion in the review screen, not an applied tag, which is already the taxonomy's unknown-is-better-than-wrong rule.
+
+## Held-out result: hosted Clef 27B (2026-10-14)
+
+**Run.** `@cf/cloudflare/clef` on Workers AI, v2 framing, `--taxonomy v01`, confidence computed from `probabilities` with the Jev formula, one kept-alive connection. All 150 held-out lines and 17 held-out recipes, plus the dev set on the V0.1 tags for comparison. No Jev baseline: no Jev key was available. Code, raw JSONL and summaries are on [`spike/clef`](https://github.com/Ed-Barnes937/FindersEaters/tree/spike/clef/docs/ideation/research/jev-spike/results) (`*-heldout-v2-v01*`, `*-dev-v2-v01*`, `summary-clef-hosted-workers-ai-*-v01.txt`). The guard that keeps non-Jev models off held-out was lifted for this one run with an explicit `--sanctioned-heldout-run` flag. The dev answers were identical to the 2026-10-13 run, so the canary fingerprint would have held.
+
+**Comparator.** The pass rule names the phase 2 v2 dev number. The engine now runs Clef, so each stage is held to Clef's own dev number (same model, same templates) and also shown against Jev v2's. Every verdict comes out the same under either comparator.
+
+### Line stages
+
+| Stage | n | Jev v2 dev | Clef dev | Clef held-out | acc@0.6 / auto@0.6 | acc@0.8 / auto@0.8 | Verdict |
+|---|---|---|---|---|---|---|---|
+| Segment: role | 150 | 1.00 | 0.93 | **0.99** | 1.00 / 0.95 | 1.00 / 0.89 | **Pass.** `auto`, gate 0.8 |
+| Segment: structure (single / compound / alternatives) | 146 | 1.00 | 0.97 | **0.88** | 0.90 / 0.88 | 0.92 / 0.57 | **Fail** (down 9 points, acc@0.8 below 0.95). `review-first` |
+| Classify kind | 146 | 0.95 | 1.00 | **0.95** | 0.99 / 0.94 | 0.99 / 0.85 | **Pass** (down 5, at the margin). `auto`, gate 0.8 |
+| Extract, all six fields | 136 | 0.92 | 0.97 | **0.80** | 1.00 / 0.54 | 1.00 / 0.30 | **Fail** (down 17). `review-first` |
+| Extract: ingredient span cross-check | 136 | 0.95 | 0.97 | 0.97 | 1.00 / 0.74 | 1.00 / 0.51 | Part of extract |
+| Resolve ingredient | 65 | 1.00 | 0.94 | **0.95** | 1.00 / 0.88 | 1.00 / 0.68 | **Pass.** `auto`, gate 0.8 |
+| Resolve unit system | 10 | 1.00 | 1.00 | **1.00** | 1.00 / 0.90 | 1.00 / 0.50 | **Pass.** `auto`, gate 0.8 |
+
+Extract per field on held-out: quantity 0.93, unit 0.93, size 0.93, ingredient 0.92, prep 0.97, note 0.88. Calibration bands (accuracy, held-out):
+
+| Stage | [0,0.5) | [0.5,0.6) | [0.6,0.8) | [0.8,0.95) | [0.95,1] |
+|---|---|---|---|---|---|
+| Segment | 0.59 (17) | 1.00 (8) | 0.89 (54) | 0.95 (146) | 1.00 (71) |
+| Classify | 0.20 (5) | 0.75 (4) | 0.92 (13) | 0.98 (57) | 1.00 (67) |
+| Extract (per token) | 0.73 (389) | 0.93 (151) | 1.00 (286) | 1.00 (375) | 1.00 (23) |
+| Resolve | 0.33 (3) | 0.83 (6) | 1.00 (17) | 1.00 (40) | 1.00 (9) |
+
+Latency with a kept-alive connection: p50 464 ms, p95 1.0 s, max 1.7 s. Held-out requests averaged about 4.2k input tokens (RecipeTin Eats lines are long), so a 15-line recipe is nearer 65k tokens, about 1.5p, than the 50k the spec assumed.
+
+### What failed, and why
+
+- **Extraction drops 17 points, but every miss is low confidence.** No extraction line at or above 0.6 was wrong (73 lines, 54%), or at or above 0.8 (41 lines, 30%). The 27 wrong lines all sat below 0.6 and fall into known patterns: RecipeTin Eats' broken bracketed notes ("(, or all purpose soy(Note 3))") leaking words into the ingredient (9 lines); pack sizes ("400g can", "142ml carton") read as quantity plus size (4); arithmetic quantities ("2 cups minus 2 tablespoons", 2); unit-like words read as quantities or missed ("Dash", "drop", "bay leaf", "small handful", "optional:", "1 Oxo"); and long BBC lines without commas (L145, L147, L160). Dev has almost none of these shapes, which is why the held-out number is lower. The 0.6 gate rule (acc@0.6 at least 0.95) is met, but it only applies to a stage that passes, and extraction does not.
+- **Structure answers "alternatives" with confidence for bracketed "(or ...)" notes and slash synonyms.** Seven wrong answers at 0.8 or above (L55, L85, L87, L89, L92, L96, L180), all cases that labelling rules 4 and 5 call single. Clef is not told those rules. In the engine, structure is only asked when code finds a split point, so a split-point rule that ignores "or" inside brackets would remove most of them, but that is framing or rule work on dev lines only.
+- **Classify's one confident miss is caught by a rule.** L88 "3/4 cup (185 ml) water" was read as quantified at 0.92. The engine's tap-water rule decides it before Clef is asked.
+- **Resolution misses are all below 0.6:** L96 beef fillet for rib eye (0.42), L180 cumin seed for none (0.50), L189 "1 Oxo" as a chicken stock cube (0.30, needs the brand synonym rule 6 asks for). The UK senses hold: tomato purée resolves to `tomato_puree` (L37, 0.92) and cornflour to `cornflour` (L82, 0.97).
+
+### Tags (per dimension)
+
+Single-valued dimensions are Choices. Multi-valued ones are one Noul per value, scored here per value with confidence |2p - 1| (the Jev formula for two options).
+
+| Dimension | Held-out acc | acc@0.8 | auto@0.8 | Verdict |
+|---|---|---|---|---|
+| Cuisine | 0.88 | 1.00 | 0.47 | **Applied** at 0.8, suggestion below |
+| Method | 1.00 | 1.00 | 0.47 | **Applied** at 0.8, suggestion below |
+| Effort | 0.59 | 1.00 (1 answer) | 0.06 | **Suggestion only.** One answer cleared 0.8, which is no evidence, and Clef says medium where the label says easy on 7 of 17 recipes |
+| Meal (per value) | 0.98 | 0.99 | 0.75 | **Applied** per value at 0.8 (whole-set accuracy 0.82: pancakes as breakfast, egg-fried rice and naan as dinner) |
+| Protein (per value) | 1.00 | 1.00 | 0.98 | **Applied** per value at 0.8 |
+| Carb (per value) | 0.99 | 1.00 | 0.77 | **Applied** per value at 0.8 |
+| Equipment (per value) | 1.00 | 1.00 | 0.98 | **Applied** per value at 0.8 |
+
+Diet is derived, so it is not asked.
+
+### Verdicts applied (agent-decided, reversible config)
+
+- `auto` at gate 0.8: segment role, classify kind, resolve ingredient, resolve unit system.
+- `review-first`: segment structure and extract. Their framing work goes back to dev lines only, and held-out stays untuned.
+- Tags: cuisine, method, meal, protein, carb and equipment are applied at 0.8 and offered as suggestions below it. Effort is always a suggestion.
+- The extraction gate stays 0.8 in config. It would drop to 0.6 only if extraction passes.
+
+**Effect on review load.** Every quantified or unquantified ingredient line goes through Clef extraction, so with extraction `review-first` nearly every ingredient line is still a check line. The flips mostly clear headers, notes and recipe-level tag chips. Review load per recipe is close to what the review prototype measured for full review-first (about 7 taps for 17 lines).
+
+**For the owner (not acted on).** The pass rule judges a stage on raw accuracy, but extraction's confidence separated right from wrong perfectly on held-out. A rule that judged auto-accept on acc@gate alone would let extraction run `auto` at 0.6, clearing about half of all ingredient lines silently with no wrong line on held-out. Changing the rule after seeing the result is what the rule was written to prevent, so it is the owner's call, not the agent's.
 
 ## Role in the product (agent-decided, reversible)
 

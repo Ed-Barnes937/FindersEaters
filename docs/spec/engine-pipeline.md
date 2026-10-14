@@ -2,7 +2,7 @@
 
 Resolves [Design the engine pipeline](https://github.com/Ed-Barnes937/FindersEaters/issues/10). Feeds the V0.1 spec (`docs/spec/v0.1.md`), [Design the V0.1 data model](https://github.com/Ed-Barnes937/FindersEaters/issues/13) and [Prototype reviewing and correcting a parsed recipe](https://github.com/Ed-Barnes937/FindersEaters/issues/14).
 
-Every decision here was made by the agent under the owner's standing rules and is reversible: the engine is a pure package behind one seam, its output is regenerable from the original text, and a full re-parse of the library costs fractions of a penny. The one input still owed by the owner is [Run hosted Clef 27B on the held-out golden lines](https://github.com/Ed-Barnes937/FindersEaters/issues/19), which only flips configuration (section 4). The switch from Jev to hosted Clef and the canary that replaces the exact model pin are the owner's decision, recorded in `docs/adr/0002-clef-on-workers-ai.md`.
+Every decision here was made by the agent under the owner's standing rules and is reversible: the engine is a pure package behind one seam, its output is regenerable from the original text, and a full re-parse of the library costs fractions of a penny. The held-out run ([Run hosted Clef 27B on the held-out golden lines](https://github.com/Ed-Barnes937/FindersEaters/issues/19), 2026-10-14) set the stage modes in section 4; it only changed configuration. The switch from Jev to hosted Clef and the canary that replaces the exact model pin are the owner's decision, recorded in `docs/adr/0002-clef-on-workers-ai.md`.
 
 ## 1. Shape in one paragraph
 
@@ -55,8 +55,22 @@ No embedding is computed in V0.1: semantic search and similar recipes are out of
 - **Stage modes.** Each Clef-backed stage has a mode in configuration:
   - `review-first`: every Clef decision is applied (or left unknown, for resolution and tags) and flagged, whatever its confidence. Rule and pinned decisions are not flagged.
   - `auto`: Clef decisions at or above the gate are accepted silently; below it they follow the "below gate" column.
-  V0.1 ships every Clef stage in `review-first`. When the held-out rerun lands, each stage that meets the pass rule flips to `auto`, and an extraction gate of 0.6 is adopted only if held-out accuracy at 0.6 is at least 0.95. Tags flip per dimension (acc@0.8 at least 0.9), as the golden-set doc says.
-- **Calls.** One Clef request per ingredient line (all of that line's questions together), plus one for recipe-level questions (unit system and tags). Requests run in parallel, at most 8 at a time. The client keeps connections alive, unwraps the Workers AI envelope (`{result, success, errors, messages}`) and keeps the account ID, which is in the URL, out of logs. Each request has a timeout of about 5 s (hosted Clef measured p50 about 0.5 s, p95 up to 1.4 s from the UK) and up to 2 retries with backoff on rate-limit and transient server errors. At the spike's 3.2k input tokens a line, a 15-line recipe costs about 50k tokens, about 1p at $0.24 per million input tokens.
+  V0.1 ships the modes the held-out run set (2026-10-14, full numbers in `docs/research/golden-set.md`). A stage flips to `auto` only when it meets the pass rule; tags go per dimension (acc@0.8 at least 0.9). An extraction gate of 0.6 is adopted only if extraction passes and its held-out accuracy at 0.6 is at least 0.95.
+
+  | Stage (question) | Mode | Gate | Held-out acc / acc@0.8 / auto@0.8 |
+  |---|---|---|---|
+  | Segment: role | `auto` | 0.8 | 0.99 / 1.00 / 0.89 |
+  | Segment: structure | `review-first` | 0.8 | 0.88 / 0.92 / 0.57 (failed: down 9 points, confident "alternatives" on bracketed "(or ...)" notes) |
+  | Classify line kind | `auto` | 0.8 | 0.95 / 0.99 / 0.85 |
+  | Extract | `review-first` | 0.8 | 0.80 / 1.00 / 0.30 (failed: down 17 points; no line wrong at 0.6 or above) |
+  | Resolve ingredient | `auto` | 0.8 | 0.95 / 1.00 / 0.68 |
+  | Unit system | `auto` | 0.8 | 1.00 / 1.00 / 0.50 |
+  | Tags: cuisine, method (Choice) | applied at gate, suggestion below | 0.8 | cuisine 0.88 / 1.00 / 0.47, method 1.00 / 1.00 / 0.47 |
+  | Tags: meal, protein, carb, equipment (Noul per value) | applied at gate, suggestion below | 0.8 | per value acc@0.8 0.99 to 1.00 |
+  | Tags: effort (Choice) | suggestion only | - | 0.59 / one answer cleared 0.8 |
+
+  Modes are per question, so segment role and structure carry their own. Structure and extraction go back to framing or rule work on dev lines only; a new framing version reruns held-out under the pass rule before any flip.
+- **Calls.** One Clef request per ingredient line (all of that line's questions together), plus one for recipe-level questions (unit system and tags). Requests run in parallel, at most 8 at a time. The client keeps connections alive, unwraps the Workers AI envelope (`{result, success, errors, messages}`) and keeps the account ID, which is in the URL, out of logs. Each request has a timeout of about 5 s (hosted Clef measured p50 about 0.5 s, p95 up to 1.4 s from the UK) and up to 2 retries with backoff on rate-limit and transient server errors. Held-out requests averaged about 4.2k input tokens, so a 15-line recipe costs about 65k tokens, about 1.5p at $0.24 per million input tokens.
 - **Stored answers.** For every Clef decision the engine output keeps the chosen option, its confidence and the top three alternatives. Review shows the alternatives, and a threshold change can be checked against stored answers before any re-parse.
 
 ## 5. Running, failure and review
@@ -94,7 +108,7 @@ No V0.1 stage needs one: the spike found none, and the messy leftovers it was ke
 
 - **[Design the V0.1 data model](https://github.com/Ed-Barnes937/FindersEaters/issues/13)**: the source document as the stored original text; engine output with per-decision source, confidence and alternatives; flags with code, severity and target; corrections keyed by (line index, part index, field, line hash) or recipe field, including confirmations and orphaned state; engine version, KB version, run status and run time per recipe; the needs-review boolean derived from `check` flags without corrections; the `optional` line mark; yield kind (serves or makes).
 - **[Prototype reviewing and correcting a parsed recipe](https://github.com/Ed-Barnes937/FindersEaters/issues/14)**: build from section 5's review contract and the flag codes; under `review-first` most Clef-decided lines are flagged, so the prototype must make confirming many lines fast (a "looks right" per line, and one for all unflagged-by-rule lines in a section is worth testing).
-- **[Run hosted Clef 27B on the held-out golden lines](https://github.com/Ed-Barnes937/FindersEaters/issues/19)**: its result sets each stage's mode and the extraction gate, nothing else.
+- **[Run hosted Clef 27B on the held-out golden lines](https://github.com/Ed-Barnes937/FindersEaters/issues/19)** (done 2026-10-14): set the stage modes in section 4, nothing else.
 - **[Define shopping list merge and regeneration rules](https://github.com/Ed-Barnes937/FindersEaters/issues/23)**: unquantified, not-an-ingredient, optional, unresolved and no-conversion lines as defined here; carbs from "serve with" appear as unquantified lines when the recipe lists them, and otherwise only as a `carb` tag.
 - **Scaling (map fog)**: arithmetic quantities arrive as a two-measure expression; ranges as min and max; yield kind tells servings from counts.
 - **Display of units (map fog)**: the recipe's unit system is a recipe-level fact with a source-domain rule, so the Australian tablespoon is handled at parse time.
