@@ -28,10 +28,18 @@ For development, run `pnpm dev`: Vite serves the web app with hot reload and pro
 
 ## Test
 
+The database tests need a local Postgres (`pgvector/pgvector:pg17`, the same image CI uses). Start it once with Docker Compose:
+
+```sh
+docker compose up -d --wait   # Postgres on localhost:5432, user and password postgres
+```
+
+Each test run creates its own throwaway database in it, applies the migrations once and drops it at the end; each test runs in a transaction that is rolled back. Set `DATABASE_URL` to point the tests at another server. Migrations and their rules: `packages/db/migrations/README.md`.
+
 ```sh
 pnpm lint            # ESLint, every workspace
 pnpm typecheck       # tsc, every workspace
-pnpm test            # Vitest unit tests
+pnpm test            # Vitest unit and database tests
 pnpm e2e             # Playwright against the production build, 390 px viewport
 pnpm format:check    # Prettier
 ```

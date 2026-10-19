@@ -4,5 +4,8 @@ packages:
 
 # Install scripts are opt-in (pnpm 11 fails the install on an unreviewed one).
 # @parcel/watcher (via sass) ships prebuilt binaries, so its build is not needed.
+# esbuild (via drizzle-kit) resolves its platform binary from an optional
+# dependency, so its postinstall is not needed either.
 allowBuilds:
   '@parcel/watcher': false
+  esbuild: false

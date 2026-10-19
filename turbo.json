@@ -11,7 +11,9 @@
     },
     "lint": {},
     "typecheck": {},
-    "test": {},
+    "test": {
+      "env": ["DATABASE_URL"]
+    },
     "e2e": {
       "dependsOn": ["build", "^build"],
       "cache": false,
