@@ -1,6 +1,8 @@
-# PR checks (docs/spec/operations.md section 3, docs/spec/v0.1.md section 17.2):
-# format, lint, typecheck, unit tests, the production build, and the Playwright
-# smoke test against that build on a 390 px viewport. Retries are 0 everywhere:
+# PR checks (docs/spec/operations.md sections 3 and 4, docs/spec/v0.1.md section
+# 17.2): format, the migration checks, lint, typecheck, unit and database tests,
+# the production build, and the Playwright smoke test against that build on a
+# 390 px viewport. Postgres is a service container on the runner; nothing here
+# touches cloud resources. Retries are 0 everywhere:
 # a flaky test is a bug, so nothing here re-runs on failure.
 name: CI
 
@@ -20,8 +22,24 @@ jobs:
     name: lint, typecheck, test, e2e
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: finders_eaters
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d finders_eaters"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
     env:
       CI: true
+      # The service container above: throwaway and local to the runner.
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/finders_eaters
     steps:
       - uses: actions/checkout@v7
 
@@ -37,7 +55,27 @@ jobs:
       - name: Format
         run: pnpm format:check
 
-      - name: Lint, typecheck, unit tests, build
+      # docs/spec/operations.md section 4; packages/db/migrations/README.md.
+      - name: Migrations apply from empty
+        run: pnpm --filter @finders-eaters/db migrate
+
+      - name: drizzle-kit check
+        run: pnpm --filter @finders-eaters/db migrations:check
+
+      - name: Migrations match the schema
+        run: |
+          pnpm --filter @finders-eaters/db migrations:generate
+          changes="$(git status --porcelain -- packages/db/migrations)"
+          if [ -n "$changes" ]; then
+            echo "::error::The schema has changes with no migration. Run 'pnpm --filter @finders-eaters/db migrations:generate' and commit the result."
+            echo "$changes"
+            exit 1
+          fi
+
+      - name: Destructive-statement lint
+        run: pnpm --filter @finders-eaters/db migrations:lint
+
+      - name: Lint, typecheck, unit and database tests, build
         run: pnpm exec turbo run lint typecheck test build
 
       - name: Playwright browser cache
