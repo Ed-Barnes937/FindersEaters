@@ -28,7 +28,7 @@ Route `/recipes/:id/review`, titled "Check this recipe", back arrow to the recip
    - **Clear line** (no `check` flag, including not-an-ingredient lines): muted original text, "not shopped" for not-an-ingredient. Tapping expands it into a card with Edit, so any line can be corrected, flagged or not.
    - **Done line**: muted text with a small tick; tap to expand and edit.
 5. **`info` flags** show as a one-line note inside the card ("No weight for a piece of ginger: kept as written on the shopping list"). They never make a line a check line.
-6. **Sticky footer**: "Looks right - confirm N" while glance lines are open; "Done" (back to the recipe view) after.
+6. **Sticky footer**: "Confirm N" while glance lines are open; "Done" (back to the recipe view) after.
 
 ## 3. Behaviour
 

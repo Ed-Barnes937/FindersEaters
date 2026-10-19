@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap">
+<style>
+body{margin:0;background:#E9E5DE;color:#1E1C19;font-family:'Atkinson Hyperlegible Next','Atkinson Hyperlegible',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#2F5D46}a:hover{color:#1E4231}
+</style>
+</helmet>
+<div style="max-width:1280px;margin:0 auto;padding:56px 32px 96px;display:flex;flex-direction:column;gap:80px">
+
+<header style="display:flex;flex-direction:column;gap:12px;max-width:760px">
+<div style="font:700 13px/18px 'Atkinson Hyperlegible Next',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#5F5A52">Finders Eaters · V0.1 · Round 1</div>
+<h1 style="margin:0;font:600 48px/54px 'Newsreader',Georgia,serif;letter-spacing:-.01em">Design system and the three hardest components</h1>
+<p style="margin:0;font:400 18px/27px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52;text-wrap:pretty">Warm paper and ink, one rosemary-green accent, butter yellow reserved for the uncertain span. Atkinson Hyperlegible Next carries every piece of UI text. Newsreader is used only for screen titles, so the kitchen feels a little warmer without costing legibility. Tokens are in <a href="tokens.css">tokens.css</a>.</p>
+</header>
+
+<section style="display:flex;flex-direction:column;gap:24px">
+<h2 style="margin:0;font:600 30px/36px 'Newsreader',Georgia,serif">Colour roles</h2>
+<p style="margin:0;max-width:680px;font:400 16px/24px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">Semantic names, light and dark. Every text pair is AA or better; ratios shown are against the role's own background.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
+<sc-for list="{{ colors }}" as="c" hint-placeholder-count="20">
+<div style="display:grid;grid-template-columns:1fr 1fr;border-radius:10px;overflow:hidden;border:1px solid #DCD5CA;background:#FFFFFF">
+<div style="grid-column:1 / -1;padding:10px 12px;display:flex;flex-direction:column;gap:2px;border-bottom:1px solid #DCD5CA">
+<span style="font:700 14px/18px 'Atkinson Hyperlegible Next',sans-serif">{{ c.name }}</span>
+<span style="font:400 13px/18px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">{{ c.use }}</span>
+</div>
+<div style="height:56px;background:{{ c.l }};color:{{ c.lt }};display:flex;align-items:flex-end;padding:8px 10px;font:500 13px/16px 'Atkinson Hyperlegible Next',sans-serif;font-variant-numeric:tabular-nums">{{ c.l }}</div>
+<div style="height:56px;background:{{ c.d }};color:{{ c.dt }};display:flex;align-items:flex-end;padding:8px 10px;font:500 13px/16px 'Atkinson Hyperlegible Next',sans-serif;font-variant-numeric:tabular-nums">{{ c.d }}</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:48px">
+<div style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 30px/36px 'Newsreader',Georgia,serif">Type scale</h2>
+<div style="display:flex;flex-direction:column;border-top:1px solid #DCD5CA">
+<div style="display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:baseline;padding:14px 0;border-bottom:1px solid #DCD5CA"><span style="font:400 13px/18px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">title.screen · Newsreader 600 · 30/36</span><span style="font:600 30px/36px 'Newsreader',Georgia,serif">Check this recipe</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:baseline;padding:14px 0;border-bottom:1px solid #DCD5CA"><span style="font:400 13px/18px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">title.sheet · Newsreader 600 · 22/28</span><span style="font:600 22px/28px 'Newsreader',Georgia,serif">Instead of Shakshuka</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:baseline;padding:14px 0;border-bottom:1px solid #DCD5CA"><span style="font:400 13px/18px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">heading · 700 · 18/24</span><span style="font:700 18px/24px 'Atkinson Hyperlegible Next',sans-serif">How much ginger?</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:baseline;padding:14px 0;border-bottom:1px solid #DCD5CA"><span style="font:400 13px/18px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">body · 400 · 17/24</span><span style="font:400 17px/24px 'Atkinson Hyperlegible Next',sans-serif">Chicken, leek and tarragon pie</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:baseline;padding:14px 0;border-bottom:1px solid #DCD5CA"><span style="font:400 13px/18px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">body.sm · 400 · 15/20</span><span style="font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">45 min · Medium · British</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:baseline;padding:14px 0;border-bottom:1px solid #DCD5CA"><span style="font:400 13px/18px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">label · 700 · 13/16 caps</span><span style="font:700 13px/16px 'Atkinson Hyperlegible Next',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#5F5A52">Fruit &amp; veg</span></div>
+<div style="display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:baseline;padding:14px 0;border-bottom:1px solid #DCD5CA"><span style="font:400 13px/18px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">amount · 500 · 17/24 tabular</span><span style="font:500 17px/24px 'Atkinson Hyperlegible Next',sans-serif;font-variant-numeric:tabular-nums">800 g · 2 tins</span></div>
+</div>
+<p style="margin:0;font:400 14px/20px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">Minimum 13 px, used only for caps labels and badges. Body is 17 px because the list is read at arm's length in a shop.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font:600 30px/36px 'Newsreader',Georgia,serif">Spacing</h2>
+<div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:4px;height:4px;background:#2F5D46"></div><span style="font:400 13px/16px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">4</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:8px;height:8px;background:#2F5D46"></div><span style="font:400 13px/16px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">8</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:12px;height:12px;background:#2F5D46"></div><span style="font:400 13px/16px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">12</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:16px;height:16px;background:#2F5D46"></div><span style="font:400 13px/16px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">16</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:24px;height:24px;background:#2F5D46"></div><span style="font:400 13px/16px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">24</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:32px;height:32px;background:#2F5D46"></div><span style="font:400 13px/16px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">32</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:48px;height:48px;background:#2F5D46"></div><span style="font:400 13px/16px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">48</span></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font:600 30px/36px 'Newsreader',Georgia,serif">Radius and elevation</h2>
+<div style="display:flex;gap:16px;flex-wrap:wrap">
+<div style="width:96px;height:72px;background:#FFFFFF;border:1px solid #DCD5CA;border-radius:6px;display:flex;align-items:flex-end;padding:8px;box-sizing:border-box;font:400 13px/16px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">sm 6 · chips</div>
+<div style="width:96px;height:72px;background:#FFFFFF;border:1px solid #DCD5CA;border-radius:10px;display:flex;align-items:flex-end;padding:8px;box-sizing:border-box;font:400 13px/16px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">md 10 · cards</div>
+<div style="width:96px;height:72px;background:#FFFFFF;border:1px solid #DCD5CA;border-radius:18px;display:flex;align-items:flex-end;padding:8px;box-sizing:border-box;font:400 13px/16px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">lg 18 · sheets</div>
+<div style="width:96px;height:72px;background:#FFFFFF;border:1px solid #DCD5CA;border-radius:999px;display:flex;align-items:center;justify-content:center;font:400 13px/16px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">pill</div>
+</div>
+<div style="display:flex;gap:16px;flex-wrap:wrap;padding-top:8px">
+<div style="width:150px;height:72px;background:#FFFFFF;border-radius:10px;box-shadow:0 1px 2px rgba(30,28,25,.08),0 2px 6px rgba(30,28,25,.06);display:flex;align-items:flex-end;padding:8px;box-sizing:border-box;font:400 13px/16px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">elevation.1 · sticky bars</div>
+<div style="width:150px;height:72px;background:#FFFFFF;border-radius:10px;box-shadow:0 -2px 8px rgba(30,28,25,.08),0 8px 28px rgba(30,28,25,.16);display:flex;align-items:flex-end;padding:8px;box-sizing:border-box;font:400 13px/16px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">elevation.2 · sheets, toasts</div>
+</div>
+<p style="margin:0;font:400 14px/20px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">Dark theme drops shadows and uses the raised surface plus a 1 px border. Motion: 150 ms for presses, 240 ms ease-out for sheets, 1.3 s settle on ticked rows; reduced motion makes all of them instant. Touch target 44 px, shopping rows 64 px.</p>
+</div>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:8px;max-width:720px">
+<h2 style="margin:0;font:600 30px/36px 'Newsreader',Georgia,serif">1 · Shopping row</h2>
+<p style="margin:0;font:400 16px/24px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52;text-wrap:pretty">The whole row is the target, 64 px minimum. The tick circle sits on the left where a right thumb lands when the phone is held in the left hand on a trolley handle, and amounts align right in tabular figures so they scan as a column. Badges are words, never colour alone.</p>
+</div>
+<div style="display:flex;gap:32px;flex-wrap:wrap">
+<sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font:700 13px/16px 'Atkinson Hyperlegible Next',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#5F5A52">{{ t.name }}</span>
+<div style="width:390px;background:{{ t.bg }};border-radius:18px;overflow:hidden;padding:0 0 12px;color:{{ t.text }};font-family:'Atkinson Hyperlegible Next',sans-serif">
+<div style="padding:16px 16px 8px;font:700 13px/16px 'Atkinson Hyperlegible Next',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:{{ t.muted }};background:{{ t.bg }}">Fruit &amp; veg</div>
+<div style="background:{{ t.surface }};border-top:1px solid {{ t.border }};border-bottom:1px solid {{ t.border }};display:flex;flex-direction:column">
+<div style="min-height:64px;display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:10px 16px;border-bottom:1px solid {{ t.border }}">
+<div style="width:26px;height:26px;border-radius:999px;border:2px solid {{ t.strong }};box-sizing:border-box"></div>
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font:400 17px/24px 'Atkinson Hyperlegible Next',sans-serif">Onions</span><span style="font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}">Chilli 1 · Dal 1 · Pasta 1</span></div>
+<span style="font:500 17px/24px 'Atkinson Hyperlegible Next',sans-serif;font-variant-numeric:tabular-nums;text-align:right">3 onions</span>
+</div>
+<div style="min-height:64px;display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:10px 16px;border-bottom:1px solid {{ t.border }}">
+<div style="width:26px;height:26px;border-radius:999px;border:2px solid {{ t.strong }};box-sizing:border-box"></div>
+<div style="display:flex;flex-direction:column;gap:4px;min-width:0"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font:400 17px/24px 'Atkinson Hyperlegible Next',sans-serif">Garlic</span><span style="font:700 13px/16px 'Atkinson Hyperlegible Next',sans-serif;padding:2px 8px;border-radius:999px;background:{{ t.warnBg }};color:{{ t.warnText }};border:1px solid {{ t.warnBorder }}">was 6</span></div><span style="font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}">Chilli 2 · Dal 4 · Chicken 3</span></div>
+<span style="font:500 17px/24px 'Atkinson Hyperlegible Next',sans-serif;font-variant-numeric:tabular-nums;text-align:right">9 cloves</span>
+</div>
+<div style="min-height:64px;display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:10px 16px;opacity:.55">
+<div style="width:26px;height:26px;border-radius:999px;background:{{ t.accent }};display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7.5l3 3 6-7" stroke="{{ t.onAccent }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font:400 17px/24px 'Atkinson Hyperlegible Next',sans-serif;text-decoration:line-through">Lemons</span><span style="font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}">Chicken 1 · Pasta 1</span></div>
+<span style="font:500 17px/24px 'Atkinson Hyperlegible Next',sans-serif;font-variant-numeric:tabular-nums;text-align:right;text-decoration:line-through">2 lemons</span>
+</div>
+</div>
+<div style="padding:16px 16px 8px;font:700 13px/16px 'Atkinson Hyperlegible Next',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:{{ t.muted }}">Cupboard</div>
+<div style="background:{{ t.surface }};border-top:1px solid {{ t.border }};border-bottom:1px solid {{ t.border }};display:flex;flex-direction:column">
+<div style="min-height:64px;display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:10px 16px;border-bottom:1px solid {{ t.border }}">
+<div style="width:26px;height:26px;border-radius:999px;border:2px solid {{ t.strong }};box-sizing:border-box"></div>
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font:400 17px/24px 'Atkinson Hyperlegible Next',sans-serif">Chopped tomatoes</span><span style="font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}">Chilli 1 · Pasta 1</span></div>
+<span style="font:500 17px/24px 'Atkinson Hyperlegible Next',sans-serif;font-variant-numeric:tabular-nums;text-align:right">800 g · 2 tins</span>
+</div>
+<div style="min-height:64px;display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:10px 16px">
+<div style="width:26px;height:26px;border-radius:999px;border:2px solid {{ t.strong }};box-sizing:border-box"></div>
+<div style="display:flex;flex-direction:column;gap:4px;min-width:0"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font:400 17px/24px 'Atkinson Hyperlegible Next',sans-serif">Rice</span><span style="font:700 13px/16px 'Atkinson Hyperlegible Next',sans-serif;padding:2px 8px;border-radius:999px;background:{{ t.accentSubtle }};color:{{ t.accentSubtleText }}">serve with</span></div><span style="font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}">Chilli · serve with</span></div>
+<span></span>
+</div>
+</div>
+<div style="margin-top:16px;min-height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:{{ t.surface }};border-top:1px solid {{ t.border }};border-bottom:1px solid {{ t.border }}">
+<div style="display:flex;flex-direction:column"><span style="font:700 15px/20px 'Atkinson Hyperlegible Next',sans-serif">In the basket · 4</span></div>
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="{{ t.muted }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<div style="margin:12px 16px 0;display:flex;flex-direction:column;gap:6px;font:400 13px/18px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}"><span>Rows: default · "was N" returned · ticked, settling (1.3 s, then moves to In the basket) · amount with tins · no amount with "serve with"</span></div>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:8px;max-width:720px">
+<h2 style="margin:0;font:600 30px/36px 'Newsreader',Georgia,serif">2 · Suggestion card and its reasons</h2>
+<p style="margin:0;font:400 16px/24px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52;text-wrap:pretty">Plan items are solid cards on the surface colour. Suggestions have no fill, a dashed edge, and sit under a "Suggested" label, so the difference survives greyscale and colour blindness. Reasons are sentences, strongest first. Why this? opens signed bars with no numbers.</p>
+</div>
+<div style="display:flex;gap:32px;flex-wrap:wrap">
+<sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font:700 13px/16px 'Atkinson Hyperlegible Next',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#5F5A52">{{ t.name }}</span>
+<div style="width:390px;box-sizing:border-box;background:{{ t.bg }};border-radius:18px;padding:16px;color:{{ t.text }};display:flex;flex-direction:column;gap:12px">
+<span style="font:700 13px/16px 'Atkinson Hyperlegible Next',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:{{ t.muted }}">In the plan</span>
+<div style="background:{{ t.surface }};border:1px solid {{ t.border }};border-radius:10px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;gap:12px"><div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 17px/24px 'Atkinson Hyperlegible Next',sans-serif">Fennel and sausage pasta</span><span style="font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}">30 min · Easy</span></div><div style="width:44px;height:44px;margin:-10px -10px 0 0;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12" stroke="{{ t.muted }}" stroke-width="2" stroke-linecap="round"></path></svg></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+<span style="min-height:36px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border-radius:999px;background:{{ t.accentSubtle }};color:{{ t.accentSubtleText }};font:700 15px/20px 'Atkinson Hyperlegible Next',sans-serif">Wed 15 Oct</span>
+<div style="display:flex;align-items:center;border:1px solid {{ t.strong }};border-radius:999px;height:36px"><span style="width:40px;text-align:center;font:500 20px/20px 'Atkinson Hyperlegible Next',sans-serif">−</span><span style="font:500 15px/20px 'Atkinson Hyperlegible Next',sans-serif;font-variant-numeric:tabular-nums">2 servings</span><span style="width:40px;text-align:center;font:500 20px/20px 'Atkinson Hyperlegible Next',sans-serif">+</span></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:2px;padding-top:12px"><span style="font:700 13px/16px 'Atkinson Hyperlegible Next',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:{{ t.muted }}">Suggested</span><span style="font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}">Not in the plan until added</span></div>
+<div style="border:1.5px dashed {{ t.strong }};border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 17px/24px 'Atkinson Hyperlegible Next',sans-serif">Pasta e ceci</span><span style="font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}">35 min · Easy · Favourite</span></div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:grid;grid-template-columns:16px 1fr;gap:8px;font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif"><span style="color:{{ t.pos }};font-weight:700">+</span><span>Uses the rest of the fennel from Fennel and sausage pasta</span></div>
+<div style="display:grid;grid-template-columns:16px 1fr;gap:8px;font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif"><span style="color:{{ t.pos }};font-weight:700">+</span><span>Not had in 7 weeks</span></div>
+<a style="align-self:flex-start;min-height:32px;display:inline-flex;align-items:center;color:{{ t.accent }};font:700 15px/20px 'Atkinson Hyperlegible Next',sans-serif;text-decoration:underline;text-underline-offset:3px">Why this?</a>
+</div>
+<div style="display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px">
+<span style="min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ t.accent }};color:{{ t.onAccent }};font:700 16px/20px 'Atkinson Hyperlegible Next',sans-serif">Add</span>
+<span style="min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ t.strong }};font:700 16px/20px 'Atkinson Hyperlegible Next',sans-serif">Another</span>
+<span style="min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ t.strong }};font:700 16px/20px 'Atkinson Hyperlegible Next',sans-serif">Swap</span>
+</div>
+</div>
+<div style="border:1.5px dashed {{ t.strong }};border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px;background:{{ t.accentSubtle }}">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><span style="font:700 17px/24px 'Atkinson Hyperlegible Next',sans-serif">Fish tacos</span><span style="font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}">25 min · Easy</span></div><span style="font:700 13px/16px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.accentSubtleText }};padding-top:4px;flex-shrink:0">New pick</span></div>
+<div style="display:grid;grid-template-columns:16px 1fr;gap:8px;font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif"><span style="color:{{ t.pos }};font-weight:700">+</span><span>Quick: 25 min</span></div>
+</div>
+<span style="font:400 13px/18px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}">After Another: the card keeps its place, fills with accent-subtle and says "New pick" for 2 s, then fades back. Reasons that refresh without a new recipe only cross-fade the text, no fill.</span>
+</div>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;gap:32px;flex-wrap:wrap">
+<sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+<div style="width:390px;box-sizing:border-box;background:{{ t.raised }};border:1px solid {{ t.border }};border-radius:18px 18px 0 0;box-shadow:{{ t.shadow }};padding:8px 20px 24px;color:{{ t.text }};display:flex;flex-direction:column;gap:16px">
+<div style="align-self:center;width:36px;height:4px;border-radius:999px;background:{{ t.border }}"></div>
+<div style="display:flex;flex-direction:column;gap:2px"><span style="font:600 22px/28px 'Newsreader',Georgia,serif">Why Pasta e ceci?</span><span style="font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}">Longer bars count for more.</span></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;font:700 13px/16px 'Atkinson Hyperlegible Next',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:{{ t.muted }}"><span>← Against</span><span style="text-align:right">For →</span></div>
+<sc-for list="{{ t.reasons }}" as="r" hint-placeholder-count="5">
+<div style="display:flex;flex-direction:column;gap:6px">
+<span style="font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif;text-align:{{ r.align }}">{{ r.label }}</span>
+<div style="position:relative;height:10px;background:{{ t.sunken }};border-radius:999px">
+<div style="position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:{{ t.strong }}"></div>
+<div style="position:absolute;top:0;bottom:0;left:{{ r.left }};width:{{ r.width }};background:{{ r.pos }};border-radius:999px"></div>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:8px;max-width:720px">
+<h2 style="margin:0;font:600 30px/36px 'Newsreader',Georgia,serif">3 · Review: check card, glance line, clear line</h2>
+<p style="margin:0;font:400 16px/24px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52;text-wrap:pretty">Three densities with three weights. A check card is a raised card with a question as its heading and the answers as large buttons. A glance line is a flat row with a tick to confirm. A clear line is muted text only. The original always sits on top, in a well, with the uncertain words highlighted and underlined.</p>
+</div>
+<div style="display:flex;gap:32px;flex-wrap:wrap">
+<sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font:700 13px/16px 'Atkinson Hyperlegible Next',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#5F5A52">{{ t.name }}</span>
+<div style="width:390px;box-sizing:border-box;background:{{ t.bg }};border-radius:18px;overflow:hidden;color:{{ t.text }};display:flex;flex-direction:column">
+<div style="padding:16px 16px 8px;font:700 13px/16px 'Atkinson Hyperlegible Next',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:{{ t.muted }}">For the marinade</div>
+<div style="margin:0 12px 12px;background:{{ t.raised }};border:1.5px solid {{ t.strong }};border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px;box-shadow:{{ t.shadow }}">
+<span style="font:700 18px/24px 'Atkinson Hyperlegible Next',sans-serif">How much ginger?</span>
+<div style="background:{{ t.sunken }};border-radius:6px;padding:10px 12px;font:400 17px/24px 'Atkinson Hyperlegible Next',sans-serif">a <mark style="background:{{ t.hl }};color:{{ t.hlText }};padding:1px 3px;border-radius:3px;text-decoration:underline;text-decoration-style:wavy;text-decoration-thickness:1px;text-underline-offset:4px">thumb-sized piece</mark> of ginger</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="min-height:48px;display:flex;align-items:center;padding:0 14px;border-radius:6px;border:1px solid {{ t.strong }};font:500 16px/20px 'Atkinson Hyperlegible Next',sans-serif;font-variant-numeric:tabular-nums">5 cm piece</span>
+<span style="min-height:48px;display:flex;align-items:center;padding:0 14px;border-radius:6px;border:1px solid {{ t.strong }};font:500 16px/20px 'Atkinson Hyperlegible Next',sans-serif;font-variant-numeric:tabular-nums">1 tbsp grated</span>
+<span style="min-height:48px;display:flex;align-items:center;padding:0 14px;border-radius:6px;border:1px solid {{ t.strong }};font:500 16px/20px 'Atkinson Hyperlegible Next',sans-serif;font-variant-numeric:tabular-nums">20 g</span>
+</div>
+<a style="align-self:flex-start;min-height:32px;display:inline-flex;align-items:center;color:{{ t.accent }};font:700 15px/20px 'Atkinson Hyperlegible Next',sans-serif;text-decoration:underline;text-underline-offset:3px">Edit</a>
+</div>
+<div style="background:{{ t.surface }};border-top:1px solid {{ t.border }};border-bottom:1px solid {{ t.border }};display:flex;flex-direction:column">
+<div style="min-height:44px;display:flex;align-items:center;padding:10px 16px;border-bottom:1px solid {{ t.border }};font:400 16px/22px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}">1 tbsp garam masala</div>
+<div style="min-height:44px;display:flex;align-items:center;padding:10px 16px;border-bottom:1px solid {{ t.border }};font:400 16px/22px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}">150g natural yoghurt</div>
+<div style="display:grid;grid-template-columns:1fr 44px;gap:12px;align-items:center;padding:10px 8px 10px 16px;border-bottom:1px solid {{ t.border }}">
+<div style="display:flex;flex-direction:column;gap:4px"><span style="font:400 17px/24px 'Atkinson Hyperlegible Next',sans-serif">salt and pepper, to taste</span><span style="font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}">Two ingredients: Salt · Black pepper</span></div>
+<div style="width:44px;height:44px;border-radius:999px;border:2px solid {{ t.strong }};box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M2.5 7.5l3 3 6-7" stroke="{{ t.muted }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:10px 16px">
+<div style="display:flex;flex-direction:column;gap:4px"><span style="font:400 17px/24px 'Atkinson Hyperlegible Next',sans-serif">25g butter</span><span style="font:400 15px/20px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.muted }}">25 g · Unsalted butter</span></div>
+<span style="display:inline-flex;align-items:center;gap:6px;font:700 13px/16px 'Atkinson Hyperlegible Next',sans-serif;color:{{ t.okText }};background:{{ t.okBg }};padding:4px 10px;border-radius:999px"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M2.5 7.5l3 3 6-7" stroke="{{ t.okText }}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>Checked</span>
+</div>
+</div>
+<div style="padding:12px 16px 16px;background:{{ t.raised }};border-top:1px solid {{ t.border }};margin-top:16px;display:flex;gap:8px">
+<span style="flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid {{ t.strong }};font:700 16px/20px 'Atkinson Hyperlegible Next',sans-serif">Looks right - confirm 1</span>
+<span style="min-height:48px;padding:0 24px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:{{ t.accent }};color:{{ t.onAccent }};font:700 16px/20px 'Atkinson Hyperlegible Next',sans-serif">Done</span>
+</div>
+</div>
+<span style="max-width:390px;font:400 13px/18px 'Atkinson Hyperlegible Next',sans-serif;color:#5F5A52">Top to bottom: check card · two clear lines · glance line · done line · sticky footer.</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px;max-width:760px">
+<h2 style="margin:0;font:600 30px/36px 'Newsreader',Georgia,serif">Notes for round 1</h2>
+<ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;font:400 16px/24px 'Atkinson Hyperlegible Next',sans-serif;text-wrap:pretty">
+<li>Suggestions vs plan items: no fill and a dashed edge, plus the "Suggested" heading. Works in greyscale.</li>
+<li>Refreshed reasons cross-fade text only; a replaced recipe (Another) gets a 2 s fill and "New pick". Reduced motion: no fade, the "New pick" label stays until the next change.</li>
+<li>Check card answers are stacked full-width buttons, not chips, because "5 cm piece" and "Buy it, or optional garnish" vary a lot in length and need 48 px targets.</li>
+<li>Copy suggestion: "Looks right - confirm 1" reads better as "Confirm 1 that looks right" or simply "Confirm 1". The hyphen looks like a typo on a button.</li>
+<li>Next round: Recipes and Shopping screens at 390 × 844, then the rest. Remaining section 9 items (exclude-tap learning, sample-check entry, pool message) will be answered alongside those screens.</li>
+</ul>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const L = '#1E1C19', W = '#FFFFFF', D = '#EEEAE3', K = '#121110';
+    const colors = [
+      ['color.bg', 'App background', '#F6F3EE', L, '#161513', D],
+      ['color.surface', 'Rows, cards', '#FFFFFF', L, '#1F1D1A', D],
+      ['color.surface.raised', 'Sheets, toasts', '#FFFFFF', L, '#2A2723', D],
+      ['color.surface.sunken', 'Tracks, wells, original text', '#EEEAE3', L, '#121110', D],
+      ['color.text', 'Body text', '#1E1C19', W, '#EEEAE3', K],
+      ['color.text.muted', 'Facts, source lines · 6.6:1 / 7.1:1', '#5F5A52', W, '#ADA69B', K],
+      ['color.border', 'Dividers', '#DCD5CA', L, '#3A3631', D],
+      ['color.border.strong', 'Inputs, dashed suggestion edge', '#8F8678', W, '#7A7368', K],
+      ['color.accent', 'Primary buttons, ticks', '#2F5D46', W, '#8CC4A2', '#10241A'],
+      ['color.accent.subtle', 'Selected chips, plan items', '#E2ECE5', '#1E4231', '#213A2C', '#BFE3CC'],
+      ['color.focus', 'Focus ring, 3 px', '#2C5FD8', W, '#8DB0FF', K],
+      ['color.info.bg', 'Status banners', '#E5ECF5', '#213F6B', '#1E2A3B', '#B9CDEB'],
+      ['color.warning.bg', 'Offline, amber', '#FBEBC6', '#5C3B00', '#3B2D10', '#F4D18A'],
+      ['color.success.bg', 'Synced, all checked', '#E0EEE4', '#1E5132', '#1B3325', '#A9DBBB'],
+      ['color.danger', 'Delete, inline errors', '#A3302A', W, '#F0918A', K],
+      ['color.highlight', 'Uncertain span in original text', '#F9DE8C', L, '#5A4712', '#FFF3CF'],
+      ['color.reason.positive', 'Bar pulling right', '#3F7A5A', W, '#7DBE97', K],
+      ['color.reason.negative', 'Bar pushing left', '#B0582F', W, '#E09468', K],
+      ['color.scrim', 'Behind sheets', 'rgba(30,28,25,.45)', W, 'rgba(0,0,0,.6)', D],
+    ].map(([name, use, l, lt, d, dt]) => ({ name, use, l, lt, d, dt }));
+    const themes = [
+      { name: 'Light', bg: '#F6F3EE', surface: '#FFFFFF', raised: '#FFFFFF', sunken: '#EEEAE3', text: '#1E1C19', muted: '#5F5A52', border: '#DCD5CA', strong: '#8F8678', accent: '#2F5D46', onAccent: '#FFFFFF', accentSubtle: '#E2ECE5', accentSubtleText: '#1E4231', warnBg: '#FBEBC6', warnText: '#5C3B00', warnBorder: '#D9A441', hl: '#F9DE8C', hlText: '#1E1C19', infoBg: '#E5ECF5', infoText: '#213F6B', okBg: '#E0EEE4', okText: '#1E5132', pos: '#3F7A5A', neg: '#B0582F', shadow: '0 -2px 8px rgba(30,28,25,.08),0 8px 28px rgba(30,28,25,.16)' },
+      { name: 'Dark', bg: '#161513', surface: '#1F1D1A', raised: '#2A2723', sunken: '#121110', text: '#EEEAE3', muted: '#ADA69B', border: '#3A3631', strong: '#7A7368', accent: '#8CC4A2', onAccent: '#10241A', accentSubtle: '#213A2C', accentSubtleText: '#BFE3CC', warnBg: '#3B2D10', warnText: '#F4D18A', warnBorder: '#7A5A1C', hl: '#5A4712', hlText: '#FFF3CF', infoBg: '#1E2A3B', infoText: '#B9CDEB', okBg: '#1B3325', okText: '#A9DBBB', pos: '#7DBE97', neg: '#E09468', shadow: 'none' },
+    ];
+    const rs = [['Uses the rest of the fennel from Fennel and sausage pasta', 0.85], ['Not had in 7 weeks', 0.55], ['A favourite', 0.4], ['Second pasta this week', -0.45], ['Cooked 10 days ago', -0.2]];
+    themes.forEach(t => {
+      t.reasons = rs.map(([label, v]) => ({
+        label, align: v > 0 ? 'right' : 'left',
+        left: v > 0 ? '50%' : (50 + v * 50) + '%', width: Math.abs(v) * 50 + '%',
+        pos: v > 0 ? t.pos : t.neg,
+      }));
+    });
+    return { colors, themes };
+  }
+}
+</script>
+</body>
+</html>

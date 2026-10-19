@@ -70,7 +70,7 @@ If you have seen `docs/spec/design-brief.md`, these are the differences. Newcome
   - **Check card** (expanded): a real question, such as a low-confidence amount ("How much ginger?"), an ambiguous ingredient ("Which butter?"), or whether to buy something ("Buy this, or is it optional garnish?"). Up to three one-tap answers plus Edit.
   - **Glance line** (compact, original over reading, round tick): the engine's reading is probably right but its mode still asks for a look. Today that is mostly **split questions** on lines containing "and", "or", "," or "/" ("salt and pepper, to taste": one line or two ingredients?), since that one stage stays review-first.
   - **Clear line** (muted original text, tap to expand and edit) is now the majority.
-  - "Looks right - confirm N" covers glance lines only, so N is usually small.
+  - "Confirm N" covers glance lines only, so N is usually small.
 - **Tags**: meal, cuisine, main protein, carb, method and equipment are applied automatically when confident, so "Tags we think fit" holds fewer chips. **Effort is always a suggestion**, so its small segmented choice (Easy / Medium / Hard, engine's pick outlined) appears on nearly every review.
 - **A new screen: the sample-check view.** After the household's library is imported (in bulk, nobody reads every line), the app draws **150 automatically read lines at random** across the library. The owner checks them in a sample-check view: each line shows its recipe, its original text over the reading, and **Right** or **Correct it** (the same Edit sheet as review); progress "38 of 150"; about 15 minutes; resumable; the drawn lines never change. Corrections are saved to the recipes like any correction. The verdict (keep reading lines automatically, or go back to asking) is computed by an admin command, so the app shows counts, not a verdict. It may be used again (a second sample of 150) if the first is borderline. Wireframes [43](screenshots/43-wf-sample-check-intro.png) to [46](screenshots/46-wf-sample-check-done.png). Its entry point is open (section 9).
 - **Plan, suggestions and shop decisions** were already in the first brief and are unchanged: inline suggestions with Add all, Another and Swap, Why this? as signed bars; plans never end on their own; New plan carries over recipes not cooked yet with their ticks; the shopping list moves ticked rows away, with At home and In the basket sections.
@@ -139,7 +139,7 @@ Lets the household check the app's reading quickly **without ever losing sight o
 2. **Recipe facts**: servings, total time, unit system and its source ("UK, from bbcgoodfood.com"). A recipe-level question ("How many does this serve?") shows here as a card.
 3. **Tags block** "Tags we think fit": suggested tags as dashed chips with remove, effort as a small segmented choice with the engine's pick outlined, one button "Add these N tags".
 4. **Lines in recipe order**, section headers kept ("For the marinade"): check card, glance line, clear line or done line (section 5 defines each).
-5. **Sticky footer**: "Looks right - confirm N" (glance lines only, 4 s undo), then "Done".
+5. **Sticky footer**: "Confirm N" (glance lines only, 4 s undo), then "Done".
 
 **Edit sheet**: kind (Shop for it / No amount / Not shopped), amount, unit, ingredient (autocomplete over known ingredients only, with "Leave unresolved" as the escape), prep, Save.
 
