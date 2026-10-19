@@ -1,0 +1,91 @@
+/* The web app's one source of design tokens, copied from docs/design-reference/tokens.css
+   (Claude Design round 1). A restyle replaces this file and nothing else. */
+/* Finders Eaters V0.1 design tokens. Fonts: https://fonts.google.com/specimen/Atkinson+Hyperlegible+Next, https://fonts.google.com/specimen/Newsreader */
+:root {
+  --color-bg: #F6F3EE;
+  --color-surface: #FFFFFF;
+  --color-surface-raised: #FFFFFF;
+  --color-surface-sunken: #EEEAE3;
+  --color-text: #1E1C19;
+  --color-text-muted: #5F5A52;
+  --color-border: #DCD5CA;
+  --color-border-strong: #8F8678;
+  --color-accent: #2F5D46;
+  --color-on-accent: #FFFFFF;
+  --color-accent-subtle: #E2ECE5;
+  --color-on-accent-subtle: #1E4231;
+  --color-focus: #2C5FD8;
+  --color-info-bg: #E5ECF5;
+  --color-info-text: #213F6B;
+  --color-warning-bg: #FBEBC6;
+  --color-warning-text: #5C3B00;
+  --color-warning-border: #D9A441;
+  --color-success-bg: #E0EEE4;
+  --color-success-text: #1E5132;
+  --color-danger: #A3302A;
+  --color-highlight: #F9DE8C;
+  --color-on-highlight: #1E1C19;
+  --color-reason-positive: #3F7A5A;
+  --color-reason-negative: #B0582F;
+  --color-reason-track: #EEEAE3;
+  --color-scrim: rgba(30, 28, 25, .45);
+
+  --font-ui: 'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-title: 'Newsreader', Georgia, serif;
+  --type-title-screen: 600 30px/36px var(--font-title);
+  --type-title-sheet: 600 22px/28px var(--font-title);
+  --type-heading: 700 18px/24px var(--font-ui);
+  --type-body: 400 17px/24px var(--font-ui);
+  --type-body-sm: 400 15px/20px var(--font-ui);
+  --type-label: 700 13px/16px var(--font-ui); /* uppercase, letter-spacing .06em */
+  --type-amount: 500 17px/24px var(--font-ui); /* font-variant-numeric: tabular-nums */
+
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px;
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 18px; --radius-pill: 999px;
+  --elevation-1: 0 1px 2px rgba(30,28,25,.08), 0 2px 6px rgba(30,28,25,.06);
+  --elevation-2: 0 -2px 8px rgba(30,28,25,.08), 0 8px 28px rgba(30,28,25,.16);
+
+  --motion-press: 150ms ease-out;
+  --motion-sheet: 240ms cubic-bezier(.2,.8,.2,1);
+  --motion-settle: 1300ms;
+  --target-min: 44px;
+  --target-shopping-row: 64px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #161513;
+    --color-surface: #1F1D1A;
+    --color-surface-raised: #2A2723;
+    --color-surface-sunken: #121110;
+    --color-text: #EEEAE3;
+    --color-text-muted: #ADA69B;
+    --color-border: #3A3631;
+    --color-border-strong: #7A7368;
+    --color-accent: #8CC4A2;
+    --color-on-accent: #10241A;
+    --color-accent-subtle: #213A2C;
+    --color-on-accent-subtle: #BFE3CC;
+    --color-focus: #8DB0FF;
+    --color-info-bg: #1E2A3B;
+    --color-info-text: #B9CDEB;
+    --color-warning-bg: #3B2D10;
+    --color-warning-text: #F4D18A;
+    --color-warning-border: #7A5A1C;
+    --color-success-bg: #1B3325;
+    --color-success-text: #A9DBBB;
+    --color-danger: #F0918A;
+    --color-highlight: #5A4712;
+    --color-on-highlight: #FFF3CF;
+    --color-reason-positive: #7DBE97;
+    --color-reason-negative: #E09468;
+    --color-reason-track: #121110;
+    --color-scrim: rgba(0, 0, 0, .6);
+    --elevation-1: none;
+    --elevation-2: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --motion-press: 0ms; --motion-sheet: 0ms; --motion-settle: 0ms; }
+}
