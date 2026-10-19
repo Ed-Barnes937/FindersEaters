@@ -9,12 +9,7 @@ import { randomBytes } from 'node:crypto'
 import pg from 'pg'
 import type { TestProject } from 'vitest/node'
 import { migrateDatabase } from '../migrate.ts'
-
-declare module 'vitest' {
-  export interface ProvidedContext {
-    databaseUrl: string
-  }
-}
+import './provided-context.ts'
 
 export const defaultServerUrl = 'postgres://postgres:postgres@localhost:5432/finders_eaters'
 

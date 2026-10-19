@@ -5,6 +5,20 @@ import { defineConfig, devices } from '@playwright/test'
 
 const PORT = 4173
 
+/**
+ * The server's environment, shared with tests that run the admin CLI. The
+ * database is the local Compose one (or CI's service container); the auth
+ * secret is a fixed test value.
+ */
+export const serverEnv = {
+  PORT: String(PORT),
+  STATIC_DIR: 'dist',
+  DATABASE_URL:
+    process.env.DATABASE_URL ?? 'postgres://postgres:postgres@localhost:5432/finders_eaters',
+  BETTER_AUTH_SECRET: 'e2e-only-secret-that-is-long-enough-for-better-auth',
+  BETTER_AUTH_URL: `http://localhost:${PORT}`,
+}
+
 export default defineConfig({
   testDir: 'e2e',
   forbidOnly: !!process.env.CI,
@@ -27,9 +41,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'node ../server/src/main.ts',
+    // Migrations first, as the release step does (docs/spec/operations.md).
+    command: 'node ../../packages/db/src/bin/migrate.ts && node ../server/src/main.ts',
     url: `http://localhost:${PORT}/health`,
-    env: { PORT: String(PORT), STATIC_DIR: 'dist' },
+    env: serverEnv,
     reuseExistingServer: false,
   },
 })

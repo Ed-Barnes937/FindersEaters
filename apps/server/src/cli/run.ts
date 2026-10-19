@@ -6,7 +6,7 @@
 import { randomBytes } from 'node:crypto'
 import { parseArgs } from 'node:util'
 
-import { household, householdUser, type Db } from '@finders-eaters/db'
+import { getHousehold, household, householdUser, type Db } from '@finders-eaters/db'
 
 import { createAuth, type AuthConfig } from '../auth/auth.ts'
 
@@ -18,7 +18,11 @@ export interface CliDeps {
 }
 
 const USAGE = `Usage:
-  household create --name <name> --email <email> --user-name <name> [--timezone <IANA zone>]`
+  household create --name <name> --email <email> --user-name <name> [--timezone <IANA zone>]
+  user add --household <id> --email <email> --name <name>
+  user set-password --email <email>
+  user sign-out-all --email <email>
+  user remove --email <email>`
 
 /** A failure the admin can fix: printed without a stack, exit code 1. */
 class CliError extends Error {}
@@ -71,6 +75,88 @@ const commands: Record<string, Command> = {
     out(`Created user ${created.person.email} (id ${created.person.id}).`)
     out(`First password (shown once): ${password}`)
   },
+
+  'user add': async (args, { db, auth, out }) => {
+    const opts = options(args, {
+      household: { required: true },
+      email: { required: true },
+      name: { required: true },
+    })
+    const password = generatePassword()
+
+    const person = await db.transaction(async (tx) => {
+      const home = UUID.test(opts.household) ? await getHousehold(tx, opts.household) : undefined
+      if (!home) throw new CliError(`No household with id ${opts.household}.`)
+      const created = await createCredentialUser(tx, auth, {
+        email: opts.email,
+        name: opts.name,
+        password,
+      })
+      await tx.insert(householdUser).values({ householdId: home.id, userId: created.id })
+      return created
+    })
+
+    out(`Created user ${person.email} (id ${person.id}) in household ${opts.household}.`)
+    out(`First password (shown once): ${password}`)
+  },
+
+  'user set-password': async (args, { db, auth, out }) => {
+    const { email } = options(args, { email: { required: true } })
+    const password = generatePassword()
+
+    await db.transaction(async (tx) => {
+      const ctx = await authContext(tx, auth)
+      const person = await findUser(ctx, email)
+      await ctx.internalAdapter.updatePassword(person.id, await ctx.password.hash(password))
+      await ctx.internalAdapter.deleteUserSessions(person.id)
+    })
+
+    out(`Set a new password for ${normalEmail(email)} and signed out all of their devices.`)
+    out(`New password (shown once): ${password}`)
+  },
+
+  'user sign-out-all': async (args, { db, auth, out }) => {
+    const { email } = options(args, { email: { required: true } })
+
+    await db.transaction(async (tx) => {
+      const ctx = await authContext(tx, auth)
+      await ctx.internalAdapter.deleteUserSessions((await findUser(ctx, email)).id)
+    })
+
+    out(`Signed out all devices of ${normalEmail(email)}.`)
+  },
+
+  'user remove': async (args, { db, auth, out }) => {
+    const { email } = options(args, { email: { required: true } })
+
+    await db.transaction(async (tx) => {
+      const ctx = await authContext(tx, auth)
+      // Sessions, credentials and household membership go with the user; rows
+      // they created keep existing with `created_by` set to null.
+      await ctx.internalAdapter.deleteUser((await findUser(ctx, email)).id)
+    })
+
+    out(`Removed user ${normalEmail(email)}.`)
+  },
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+type AuthContext = Awaited<ReturnType<typeof createAuth>['$context']>
+
+/** Better Auth's internals bound to the command's transaction. */
+function authContext(db: Db, config: AuthConfig): Promise<AuthContext> {
+  return createAuth(db, config).$context
+}
+
+function normalEmail(email: string): string {
+  return email.trim().toLowerCase()
+}
+
+async function findUser(ctx: AuthContext, email: string): Promise<{ id: string }> {
+  const found = await ctx.internalAdapter.findUserByEmail(normalEmail(email))
+  if (!found) throw new CliError(`No user with email ${normalEmail(email)}.`)
+  return found.user
 }
 
 async function createCredentialUser(
@@ -78,16 +164,15 @@ async function createCredentialUser(
   config: AuthConfig,
   values: { email: string; name: string; password: string },
 ): Promise<{ id: string; email: string }> {
-  const ctx = await createAuth(db, config).$context
-  const email = values.email.trim().toLowerCase()
-  if (await ctx.internalAdapter.findUserByEmail(email)) {
+  const ctx = await authContext(db, config)
+  const email = normalEmail(values.email)
+  if (await ctx.internalAdapter.findUserByEmail(email, { includeAccounts: false })) {
     throw new CliError(`A user with email ${email} already exists.`)
   }
-  const person = await ctx.internalAdapter.createUser({
-    email,
-    name: values.name,
-    emailVerified: false,
-  })
+  const person = await ctx.internalAdapter.createUser(
+    { email, name: values.name, emailVerified: false },
+    { method: 'admin' },
+  )
   await ctx.internalAdapter.linkAccount({
     userId: person.id,
     providerId: 'credential',

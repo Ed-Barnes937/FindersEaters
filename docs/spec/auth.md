@@ -13,7 +13,8 @@ People sign in with **email and password** through **Better Auth**, mounted in F
 - **Better Auth**, as sprout uses it in HomeOfEd (HomeOfEd ADR 0012): Fastify handler at `/api/auth/*`, Drizzle adapter, its `user`, `session`, `account` and `verification` tables in the app's single Drizzle schema and migration journal (generated with the rest, not by Better Auth's own migrator). `household_user.user_id` and the `created_by` columns are real foreign keys to `user.id`.
 - **Ids**: Better Auth's `advanced.database.generateId` is set to the app's UUIDv7 generator, so auth tables follow the data model's id rule.
 - **Copy the pattern, not the package**: the composition root resolves identity once and handlers only see a typed principal (section 5). Swapping Better Auth later, or adopting a HomeOfEd central identity service if one ever exists, changes that one seam.
-- **Built-in rate limiting on** for the auth routes, with memory storage (one Fly Machine).
+- **Built-in rate limiting on** for the auth routes, with memory storage (one Fly Machine). Sign-in allows **5 attempts a minute per client address**; other auth routes keep Better Auth's defaults. The client address is the one the Fly proxy appended to `X-Forwarded-For` (Fastify trusts exactly one proxy hop), handed to Better Auth in a header the server always overwrites, so a client cannot choose its own bucket.
+- **Telemetry off** (`telemetry.enabled: false`): Better Auth sends nothing anywhere.
 - **Secrets**: `BETTER_AUTH_SECRET` (the "auth secret" ADR 0001 already lists) and `BETTER_AUTH_URL` per environment, via `fly secrets`. Staging has its own database and therefore its own users.
 
 Considered: a hand-rolled session table (rejected: password hashing, session rotation and rate limiting are exactly what a maintained library should own), and Lucia-style DIY (deprecated as a library).
@@ -43,11 +44,13 @@ The app runs on a public URL and every import spends Clef calls, so open registr
 
 | Command | Does |
 | --- | --- |
-| `household create --name <name> --email <email> --user-name <name>` | In one transaction: creates the household, the first user (through Better Auth's server API, so the hash format is the library's) and the `household_user` row. Prints a generated first password once. |
+| `household create --name <name> --email <email> --user-name <name> [--timezone <zone>]` | Timezone defaults to `Europe/London` and must be an IANA zone. In one transaction: creates the household, the first user (through Better Auth's server API, so the hash format is the library's) and the `household_user` row. Prints a generated first password once. |
 | `user add --household <id> --email <email> --name <name>` | A second user in an existing household (Ed's partner, for shared shopping). No sharing UX needed. |
 | `user set-password --email <email>` | Recovery. Prints a generated password once and revokes that user's sessions. |
 | `user sign-out-all --email <email>` | Revokes every session of one user (lost phone). |
 | `user remove --email <email>` | Deletes the user, their sessions and their import tokens. Their `created_by` references are set to null. |
+
+The CLI is `apps/server/src/cli.ts` (`pnpm --filter @finders-eaters/server cli ...`; no arguments prints usage). Emails are stored in lower case. Generated passwords are 24 base64url characters.
 
 Users never land in a state with no household: creation is transactional, and the one-household-per-user unique index in `household_user` stays.
 
@@ -64,6 +67,7 @@ type Principal =
 ```
 
 - **tRPC (`/trpc/*`)**: the context factory calls Better Auth `getSession` with the request headers, then looks up `household_user` by `user_id` (unique index, one row). The result is `ctx.principal` with `kind: "user"`, or none.
+- **First procedure**: `account.me` returns the signed-in user (id, name, email) and their household (id, name, default servings), so the app can tell whether it is signed in and who as.
 - **Procedures**: `householdProcedure` requires a user principal and passes `householdId` down; there is no public tRPC procedure in V0.1 (sign-in is Better Auth's own route, `/health` is plain HTTP). A session whose user has no household returns `FORBIDDEN` ("account not set up"), which only a half-run CLI could cause.
 - **Import route (`POST /api/v1/import`)**: resolves the bearer import token (section 6) to `kind: "importToken"`. It ignores cookies entirely.
 - **Handlers and the data-access layer never read a household id, user id or token from input.** Every data-access function takes `householdId` from the principal as its first argument; the data model's test that every household-owned table is filtered covers the rest.
@@ -74,7 +78,7 @@ No session cookie cache: every request reads the session row, so sign-out and re
 ## 6. Sessions and cookies
 
 - Database-backed Better Auth sessions, **90-day expiry, sliding** (renewed when older than one day). A phone that is used weekly never sees the sign-in screen again; one forgotten for three months does.
-- Cookie: `HttpOnly`, `Secure`, `SameSite=Lax`, host-only on the app's origin (Fastify serves the PWA and API from one origin, per ADR 0001).
+- Cookie: `HttpOnly`, `Secure`, `SameSite=Lax`, host-only on the app's origin (Fastify serves the PWA and API from one origin, per ADR 0001). `Secure` (and Better Auth's `__Secure-` cookie prefix) follows the scheme of `BETTER_AUTH_URL`, which is https in every deployed environment; local runs on `http://localhost` get the same cookie without it.
 - **CSRF**: tRPC mutations are JSON `POST`s, the cookie is `SameSite=Lax`, and Better Auth checks `Origin` against `trustedOrigins` (the app's own origin). The import route is the only CORS route and it takes no cookies, so cross-origin calls cannot ride a session.
 - **Settings > Account**: change password, Sign out (this device), Sign out of all other devices.
 - **Risk to watch**: Safari caps some cookies at 7 days (script-set cookies, and CNAME-cloaked third-party responses). The session cookie is server-set and first-party, so it should not be capped. If iPhones sign out weekly in practice, check the Cloudflare DNS record for the subdomain first.

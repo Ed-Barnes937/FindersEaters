@@ -2,11 +2,15 @@
 // Fastify hands Better Auth the raw body untouched and a Web `Request`, and the
 // client address Fastify resolved (behind the Fly proxy) in a header no client
 // can set.
-import type { FastifyInstance, FastifyRequest } from 'fastify'
+import type { FastifyPluginCallback, FastifyRequest } from 'fastify'
 
 import { CLIENT_IP_HEADER, type Auth } from './auth.ts'
 
-export async function authRoutes(app: FastifyInstance, opts: { auth: Auth; baseURL: string }) {
+export const authRoutes: FastifyPluginCallback<{ auth: Auth; baseURL: string }> = (
+  app,
+  opts,
+  done,
+) => {
   // Encapsulated to this plugin: the body reaches Better Auth as sent.
   app.removeAllContentTypeParsers()
   app.addContentTypeParser('*', { parseAs: 'buffer' }, (_req, body, done) => done(null, body))
@@ -25,6 +29,7 @@ export async function authRoutes(app: FastifyInstance, opts: { auth: Auth; baseU
       return reply.send(response.body ? Buffer.from(await response.arrayBuffer()) : null)
     },
   })
+  done()
 }
 
 function toWebRequest(req: FastifyRequest, baseURL: string): Request {
