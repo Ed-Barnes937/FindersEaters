@@ -1,22 +1,33 @@
-// The one Fastify process: the built web SPA, `/health`, and (later) the tRPC
-// API and the versioned import route. Built without listening so tests drive it
-// through `inject()`; `main.ts` listens.
+// The one Fastify process: the built web SPA, `/health`, Better Auth at
+// `/api/auth/*`, the tRPC API and (later) the versioned import route. Built
+// without listening so tests drive it through `inject()`; `main.ts` listens.
+import type { Db } from '@finders-eaters/db'
 import fastifyStatic from '@fastify/static'
 import Fastify, { type FastifyInstance } from 'fastify'
+
+import { createAuth, type AuthConfig } from './auth/auth.ts'
+import { authRoutes } from './auth/routes.ts'
 
 const API_PREFIX = '/api'
 
 export interface ServerOptions {
   /** Directory holding the built web SPA (`apps/web/dist`). */
   staticDir: string
+  db: Db
+  auth: AuthConfig
 }
 
 export async function buildServer(opts: ServerOptions): Promise<FastifyInstance> {
-  const app = Fastify({ logger: false })
+  // One proxy hop: in every deployed environment the Fly proxy is the only
+  // thing in front of the app, and it appends the real client address.
+  const app = Fastify({ logger: false, trustProxy: 1 })
+  const auth = createAuth(opts.db, opts.auth)
 
-  // Shallow liveness for now; becomes a database round-trip when `db` lands
+  // Shallow liveness for now; becomes a database round-trip later
   // (docs/spec/operations.md section 3).
   app.get('/health', () => ({ ok: true }))
+
+  await app.register(authRoutes, { auth, baseURL: opts.auth.baseURL })
 
   await app.register(fastifyStatic, { root: opts.staticDir })
 
