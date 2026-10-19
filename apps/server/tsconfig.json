@@ -1,0 +1,7 @@
+{
+  "extends": "@finders-eaters/config/tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["src", "*.ts", "eslint.config.js"]
+}

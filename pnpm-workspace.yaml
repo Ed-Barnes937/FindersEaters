@@ -1,0 +1,8 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Install scripts are opt-in (pnpm 11 fails the install on an unreviewed one).
+# @parcel/watcher (via sass) ships prebuilt binaries, so its build is not needed.
+allowBuilds:
+  '@parcel/watcher': false

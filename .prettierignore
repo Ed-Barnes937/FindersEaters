@@ -1,0 +1,10 @@
+docs/
+pnpm-lock.yaml
+dist/
+coverage/
+playwright-report/
+test-results/
+.turbo/
+CLAUDE.md
+CONTEXT.md
+apps/web/src/styles/tokens.css

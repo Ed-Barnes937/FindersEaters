@@ -1,0 +1,61 @@
+# PR checks (docs/spec/operations.md section 3, docs/spec/v0.1.md section 17.2):
+# format, lint, typecheck, unit tests, the production build, and the Playwright
+# smoke test against that build on a 390 px viewport. Retries are 0 everywhere:
+# a flaky test is a bug, so nothing here re-runs on failure.
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: lint, typecheck, test, e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CI: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6 # version comes from package.json packageManager
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Format
+        run: pnpm format:check
+
+      - name: Lint, typecheck, unit tests, build
+        run: pnpm exec turbo run lint typecheck test build
+
+      - name: Playwright browser cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @finders-eaters/web exec playwright install --with-deps chromium
+
+      - name: Playwright smoke (production build, 390 px)
+        run: pnpm exec turbo run e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+          retention-days: 7
