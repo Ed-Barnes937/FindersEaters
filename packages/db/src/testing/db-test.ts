@@ -5,6 +5,7 @@
 import { TransactionRollbackError } from 'drizzle-orm'
 import { inject, test } from 'vitest'
 import { connect, type Database, type Db } from '../client.ts'
+import './provided-context.ts'
 
 let database: Database | undefined
 
