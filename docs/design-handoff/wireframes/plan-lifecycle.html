@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><title>Wireframe: plan lifecycle and list edge states</title><link rel="stylesheet" href="wf.css"></head><body>
+
+<section class="s" data-shot="plan-menu"><span class="note">wireframe</span>
+  <div class="top"><h1>Plan<span class="sub">13-19 Oct &middot; 5 recipes &middot; 3 on a day</span></h1><span class="ico">&#8942;</span></div>
+  <div class="body"><div class="muted">(plan items as in the prototype)</div></div>
+  <div class="card" style="position:absolute;right:16px;top:96px;background:#fff;width:180px;padding:0;z-index:12;box-shadow:0 4px 14px rgba(0,0,0,.2)">
+    <div class="list-item" style="padding:12px">New plan</div><div class="list-item" style="padding:12px;border:0">Past plans</div></div>
+  <div class="nav"><span>Recipes</span><span class="on">Plan</span><span>Shopping</span></div>
+</section>
+
+<section class="s" data-shot="plan-new-plan-sheet"><span class="note">wireframe</span>
+  <div class="top"><h1>Plan<span class="sub">13-19 Oct &middot; 5 recipes</span></h1></div>
+  <div class="scrim"></div>
+  <div class="sheet">
+    <h2>New plan</h2>
+    <div class="label">Dates</div>
+    <div class="chips"><span class="chip">This week</span><span class="chip on">Next 7 days</span><span class="chip">Pick dates</span><span class="chip">No dates</span></div>
+    <div class="muted">Mon 20 - Sun 26 Oct</div>
+    <div class="list-item"><span>&#9745; Bring over 3 recipes not cooked yet</span></div>
+    <div class="muted" style="font-size:12px;margin-top:-6px">Tarka dal (Any day), Pasta e ceci (Sun 19 Oct), Shakshuka (Any day). Their ticks come too, as "Bought for last plan".</div>
+    <div class="muted">Ticks on the shopping list start fresh.</div>
+    <span class="btn pri">Start new plan</span>
+  </div>
+</section>
+
+<section class="s" data-shot="plan-finished-banner-ranged"><span class="note">wireframe</span>
+  <div class="top"><h1>Plan<span class="sub">13-19 Oct &middot; 5 recipes &middot; 5 on a day</span></h1><span class="ico">&#8942;</span></div>
+  <div class="body">
+    <div class="banner" style="display:flex;justify-content:space-between"><span>This plan ended on Sun 19 Oct &middot; <span class="link">Start a new plan</span></span><span>&#10005;</span></div>
+    <div class="sec">Fri 17 Oct</div><div class="card"><b>Chilli con carne</b><div class="muted">1 hr 30 min &middot; Easy</div></div>
+    <div class="sec">Sat 18 Oct</div><div class="card"><b>Lemon roast chicken</b><div class="muted">1 hr 30 min &middot; Easy</div></div>
+    <div class="sec">Sun 19 Oct</div><div class="card"><b>Pasta e ceci</b><div class="muted">35 min &middot; Easy</div></div>
+    <div class="muted">A plan never ends on its own; this only nudges. Unranged variant: "Everything in this plan has had its day &middot; Start a new plan".</div>
+  </div>
+  <div class="nav"><span>Recipes</span><span class="on">Plan</span><span>Shopping</span></div>
+</section>
+
+<section class="s" data-shot="plan-past-plans-list"><span class="note">wireframe</span>
+  <div class="top"><div style="flex:1"><span class="back">&lsaquo; Plan</span><h1>Past plans</h1></div></div>
+  <div class="body" style="gap:0">
+    <div class="list-item"><div><div>6-12 Oct</div><div class="muted">6 recipes</div></div><span>&rsaquo;</span></div>
+    <div class="list-item"><div><div>29 Sept - 5 Oct</div><div class="muted">5 recipes</div></div><span>&rsaquo;</span></div>
+    <div class="list-item"><div><div>No dates &middot; started 24 Sept</div><div class="muted">4 recipes</div></div><span>&rsaquo;</span></div>
+    <div class="list-item"><div><div>15-21 Sept</div><div class="muted">7 recipes</div></div><span>&rsaquo;</span></div>
+  </div>
+  <div class="nav"><span>Recipes</span><span class="on">Plan</span><span>Shopping</span></div>
+</section>
+
+<section class="s" data-shot="plan-past-plan-open"><span class="note">wireframe</span>
+  <div class="top"><h1>Plan<span class="sub">6-12 Oct &middot; 6 recipes</span></h1></div>
+  <div class="body">
+    <div class="banner dark">Past plan &middot; <span class="link" style="color:#fff">Go to current plan</span></div>
+    <div class="sec">Mon 6 Oct</div><div class="card"><b>Thai green curry</b><div class="muted">35 min &middot; Medium</div><div class="chips" style="margin-top:6px"><span class="chip">Mon 6 Oct</span><span class="step" style="font-size:13px"><span>&minus;</span><span>2 servings</span><span>+</span></span></div></div>
+    <div class="sec">Wed 8 Oct</div><div class="card"><b>Fish tacos</b><div class="muted">25 min &middot; Easy</div></div>
+    <div class="muted">Still editable (days, servings, remove): it's cooking history. No suggest bar, no + Add recipes.</div>
+  </div>
+  <div class="nav"><span>Recipes</span><span class="on">Plan</span><span>Shopping</span></div>
+</section>
+
+<section class="s" data-shot="shop-nothing-to-buy"><span class="note">wireframe</span>
+  <div class="top"><h1>Shopping</h1></div>
+  <div class="body" style="justify-content:center;text-align:center">
+    <div style="font-size:18px;font-weight:600">Nothing to buy yet</div>
+    <div class="muted">Add recipes to your plan and the list fills itself.</div>
+    <span class="link">Go to Plan</span>
+  </div>
+  <div class="nav"><span>Recipes</span><span>Plan</span><span class="on">Shopping</span></div>
+</section>
+
+<section class="s" data-shot="shop-past-plan-read-only"><span class="note">wireframe</span>
+  <div class="top"><h1>Shopping<span class="sub">6-12 Oct &middot; 6 recipes</span></h1></div>
+  <div class="body" style="gap:0">
+    <div class="banner dark" style="margin-bottom:8px">Past plan &middot; <span class="link" style="color:#fff">Go to current plan</span></div>
+    <div class="sec">Fruit &amp; veg</div>
+    <div class="list-item"><div><div>Limes</div><div class="muted">Tacos 2 &middot; Curry 1</div></div><span>3 limes</span></div>
+    <div class="list-item"><div><div>Coriander</div><div class="muted">Tacos &middot; Curry</div></div><span>1 bunch</span></div>
+    <div class="sec" style="margin-top:8px">Meat &amp; fish</div>
+    <div class="list-item"><div><div>White fish fillets</div><div class="muted">Tacos 4</div></div><span>500 g</span></div>
+    <div class="muted" style="margin-top:8px">Read-only: no tick targets, no progress footer.</div>
+  </div>
+  <div class="nav"><span>Recipes</span><span>Plan</span><span class="on">Shopping</span></div>
+</section>
+
+<section class="s" data-shot="shop-carried-over-at-home"><span class="note">wireframe</span>
+  <div class="top"><h1>Shopping<span class="sub">20-26 Oct &middot; 5 recipes</span></h1></div>
+  <div class="body" style="gap:0">
+    <div class="sec">Fruit &amp; veg</div>
+    <div class="list-item"><div><div>Onions</div><div class="muted">Dal 1 &middot; Risotto 1</div></div><span>2 onions &#9675;</span></div>
+    <div class="sec" style="margin-top:8px">At home</div>
+    <div class="muted">6 always-have &middot; tap one if you are out</div>
+    <div class="list-item" style="opacity:.6"><div><div><s>Red lentils</s></div><div class="muted">Dal 250 g &middot; Bought for last plan</div></div><span>&#10003;</span></div>
+    <div class="list-item" style="opacity:.6"><div><div><s>Chickpeas</s></div><div class="muted">Pasta e ceci 1 tin &middot; Bought for last plan</div></div><span>&#10003;</span></div>
+    <div class="list-item" style="opacity:.6"><div><div><s>Olive oil</s></div><div class="muted">Always have</div></div><span>&#10003;</span></div>
+  </div>
+  <div class="foot-bar" style="margin-bottom:0"><div class="muted">12 of 19 to get</div><div class="progress"><i style="width:37%"></i></div></div>
+  <div class="nav"><span>Recipes</span><span>Plan</span><span class="on">Shopping</span></div>
+</section>
+</body></html>

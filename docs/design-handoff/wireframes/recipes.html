@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><title>Wireframe: recipes, search and filters</title><link rel="stylesheet" href="wf.css"></head><body>
+
+<!-- reusable bits are copy-pasted on purpose: throwaway -->
+
+<section class="s" data-shot="recipes-library"><span class="note">wireframe</span>
+  <div class="top"><h1>Recipes<span class="sub">124 recipes</span></h1><span class="ico">+</span><span class="ico">&#9881;</span></div>
+  <div class="body">
+    <div class="field">Search recipes</div>
+    <div style="display:flex;gap:8px;align-items:center"><span class="btn sm">Filters</span><span style="flex:1"></span><span class="btn sm">Recently added &#9662;</span></div>
+    <div>
+      <div class="row"><div class="main"><div class="t">Chicken tikka masala</div><div class="m">1 hr 10 min &middot; Medium &middot; Indian</div><div class="m">BBC Good Food &middot; Not cooked yet</div></div><div style="display:flex;flex-direction:column;justify-content:space-between"><span class="heart">&#9825;</span><span class="marker">Review</span></div></div>
+      <div class="row"><div class="main"><div class="t">Chicken, leek and tarragon pie</div><div class="m">45 min &middot; Medium &middot; British</div><div class="m">BBC Good Food &middot; Cooked 3 weeks ago</div></div><span class="heart">&#9829;</span></div>
+      <div class="row"><div class="main"><div class="t">Fennel and sausage pasta</div><div class="m">30 min &middot; Easy &middot; Italian</div><div class="m">Weeknight Kitchen, page 112 &middot; Cooked 2 weeks ago</div></div><span class="heart">&#9829;</span></div>
+      <div class="row"><div class="main"><div class="t">Tarka dal</div><div class="m">40 min &middot; Easy &middot; Indian</div><div class="m">RecipeTin Eats &middot; Cooked 10 days ago</div></div><span class="heart">&#9825;</span></div>
+      <div class="row"><div class="main"><div class="t">Lemon roast chicken</div><div class="m">1 hr 30 min &middot; Easy &middot; British</div><div class="m">Our recipe &middot; Cooked 6 weeks ago</div></div><span class="heart">&#9829;</span></div>
+      <div class="row"><div class="main"><div class="t">Pasta e ceci</div><div class="m">35 min &middot; Easy</div><div class="m">Jamie Oliver &middot; Not cooked yet</div></div><span class="heart">&#9825;</span></div>
+      <div class="row"><div class="main"><div class="t">Shakshuka</div><div class="m">30 min &middot; Easy &middot; Middle Eastern</div><div class="m">BBC Good Food &middot; Cooked 9 weeks ago</div></div><span class="heart">&#9825;</span></div>
+    </div>
+  </div>
+  <div class="nav"><span class="on">Recipes</span><span>Plan</span><span>Shopping</span></div>
+</section>
+
+<section class="s" data-shot="recipes-typeahead"><span class="note">wireframe</span>
+  <div class="top"><h1>Recipes<span class="sub">124 recipes</span></h1><span class="ico">+</span><span class="ico">&#9881;</span></div>
+  <div class="body">
+    <div class="field filled">chick|</div>
+    <div class="card" style="padding:0">
+      <div class="list-item" style="padding:12px;background:#eee">Title contains <b>&nbsp;chick&nbsp;</b><span class="muted">default</span></div>
+      <div class="list-item" style="padding:12px">Main protein: Chicken</div>
+      <div class="list-item" style="padding:12px">Ingredient: chicken</div>
+      <div class="list-item" style="padding:12px">Ingredient: chickpeas</div>
+      <div class="list-item" style="padding:12px;border:0">Tag: chicken nights</div>
+    </div>
+    <div class="muted">Picking one turns it into a chip. Enter keeps the default (title words).</div>
+  </div>
+  <div class="nav"><span class="on">Recipes</span><span>Plan</span><span>Shopping</span></div>
+</section>
+
+<section class="s" data-shot="recipes-filtered-chips"><span class="note">wireframe</span>
+  <div class="top"><h1>Recipes<span class="sub">12 of 124</span></h1><span class="ico">+</span><span class="ico">&#9881;</span></div>
+  <div class="body">
+    <div class="field">Search recipes</div>
+    <div class="chips"><span class="chip x">Italian or Thai</span><span class="chip x">Not pork</span><span class="chip x">Under 30 min</span><span class="chip x">With fennel</span><span class="chip">Clear</span></div>
+    <div style="display:flex;gap:8px;align-items:center"><span class="btn sm">Filters &middot; 4</span><span style="flex:1"></span><span class="btn sm">Quickest &#9662;</span></div>
+    <div>
+      <div class="row"><div class="main"><div class="t">Fennel and sausage pasta</div><div class="m">30 min &middot; Easy &middot; Italian</div><div class="m">Weeknight Kitchen, page 112 &middot; Cooked 2 weeks ago</div></div><span class="heart">&#9829;</span></div>
+      <div class="row"><div class="main"><div class="t">Fennel, orange and chicken traybake</div><div class="m">25 min &middot; Easy &middot; Italian</div><div class="m">BBC Good Food &middot; Not cooked yet</div></div><span class="heart">&#9825;</span></div>
+      <div class="row"><div class="main"><div class="t">Thai fennel slaw with prawns</div><div class="m">20 min &middot; Easy &middot; Thai</div><div class="m">RecipeTin Eats &middot; Cooked 5 weeks ago</div></div><span class="heart">&#9825;</span></div>
+    </div>
+    <div class="muted">Tapping a chip opens the filter sheet at its row.</div>
+  </div>
+  <div class="nav"><span class="on">Recipes</span><span>Plan</span><span>Shopping</span></div>
+</section>
+
+<section class="s" data-shot="recipes-no-matches"><span class="note">wireframe</span>
+  <div class="top"><h1>Recipes<span class="sub">0 of 124</span></h1><span class="ico">+</span><span class="ico">&#9881;</span></div>
+  <div class="body">
+    <div class="field">Search recipes</div>
+    <div class="chips"><span class="chip x">Thai</span><span class="chip x">Without dairy</span><span class="chip x">Under 15 min</span><span class="chip">Clear</span></div>
+    <div style="text-align:center;padding:40px 0 10px;font-weight:600">No recipes match these filters</div>
+    <div class="muted" style="text-align:center">Remove one to see more.</div>
+    <div class="chips" style="justify-content:center"><span class="btn sm">Remove "Thai"</span><span class="btn sm">Remove "Without dairy"</span><span class="btn sm">Remove "Under 15 min"</span></div>
+    <span class="btn">Clear all</span>
+  </div>
+  <div class="nav"><span class="on">Recipes</span><span>Plan</span><span>Shopping</span></div>
+</section>
+
+<section class="s" data-shot="recipes-query-error"><span class="note">wireframe</span>
+  <div class="top"><h1>Recipes<span class="sub">124 recipes</span></h1><span class="ico">+</span><span class="ico">&#9881;</span></div>
+  <div class="body">
+    <div class="field filled err">cuisine:<u class="bad">itallian</u> fennel</div>
+    <div style="font-size:13px">&#9888; There's no cuisine called "itallian". Did you mean <span class="link"><b>Italian</b></span>?</div>
+    <div class="muted" style="padding-top:30px;text-align:center">No results shown until the search makes sense.</div>
+  </div>
+  <div class="nav"><span class="on">Recipes</span><span>Plan</span><span>Shopping</span></div>
+</section>
+
+<section class="s" data-shot="recipes-first-load"><span class="note">wireframe</span>
+  <div class="top"><h1>Recipes<span class="sub">&nbsp;</span></h1><span class="ico">+</span><span class="ico">&#9881;</span></div>
+  <div class="body">
+    <div class="field">Search recipes</div>
+    <div style="display:flex;gap:8px"><span class="btn sm">Filters</span><span style="flex:1"></span><span class="btn sm">Recently added &#9662;</span></div>
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+    <div class="muted">First load: skeleton rows. Later loads dim the previous results, never flash empty.</div>
+  </div>
+  <div class="nav"><span class="on">Recipes</span><span>Plan</span><span>Shopping</span></div>
+</section>
+
+<section class="s" data-shot="recipes-offline"><span class="note">wireframe</span>
+  <div class="top"><h1>Recipes<span class="sub">124 recipes</span></h1><span class="ico" style="opacity:.4">+</span><span class="ico">&#9881;</span></div>
+  <div class="body">
+    <div class="banner dark">You're offline. Recipes need a connection.</div>
+    <div class="field" style="background:#eee">Search recipes</div>
+    <div style="display:flex;gap:8px;opacity:.5"><span class="btn sm">Filters</span><span style="flex:1"></span><span class="btn sm">Recently added &#9662;</span></div>
+    <div>
+      <div class="row"><div class="main"><div class="t">Chicken, leek and tarragon pie</div><div class="m">45 min &middot; Medium &middot; British</div><div class="m">BBC Good Food &middot; Cooked 3 weeks ago</div></div><span class="heart">&#9829;</span></div>
+      <div class="row"><div class="main"><div class="t">Fennel and sausage pasta</div><div class="m">30 min &middot; Easy &middot; Italian</div><div class="m">Weeknight Kitchen, page 112 &middot; Cooked 2 weeks ago</div></div><span class="heart">&#9829;</span></div>
+      <div class="row"><div class="main"><div class="t">Tarka dal</div><div class="m">40 min &middot; Easy &middot; Indian</div><div class="m">RecipeTin Eats &middot; Cooked 10 days ago</div></div><span class="heart">&#9825;</span></div>
+    </div>
+    <div class="muted">Loaded results stay openable; filtering is disabled.</div>
+  </div>
+  <div class="nav"><span class="on">Recipes</span><span>Plan</span><span>Shopping</span></div>
+</section>
+
+<section class="s" data-shot="recipes-empty-library"><span class="note">wireframe</span>
+  <div class="top"><h1>Recipes<span class="sub">&nbsp;</span></h1><span class="ico">&#9881;</span></div>
+  <div class="body" style="justify-content:center;text-align:center;gap:14px">
+    <div style="font-size:20px;font-weight:700">No recipes yet</div>
+    <div class="muted">Bring in the recipes you already cook. Each one is saved straight away and read for you.</div>
+    <span class="btn pri">Paste a link</span>
+    <span class="btn">Share from your phone</span>
+    <span class="btn">Type one in</span>
+  </div>
+  <div class="nav"><span class="on">Recipes</span><span>Plan</span><span>Shopping</span></div>
+</section>
+
+<section class="s" data-shot="recipes-pick-mode"><span class="note">wireframe</span>
+  <div class="top"><div style="flex:1"><span class="back">&#10005; Cancel</span><h1>Add to plan<span class="sub">124 recipes &middot; 2 added</span></h1></div><span class="btn sm pri">Done</span></div>
+  <div class="body">
+    <div class="field">Search recipes</div>
+    <div style="display:flex;gap:8px"><span class="btn sm">Filters</span><span style="flex:1"></span><span class="btn sm">Recently added &#9662;</span></div>
+    <div>
+      <div class="row"><div class="main"><div class="t">Chicken tikka masala</div><div class="m">1 hr 10 min &middot; Medium &middot; Indian</div><div class="m">BBC Good Food &middot; Not cooked yet</div></div><span class="btn sm">Add</span></div>
+      <div class="row"><div class="main"><div class="t">Fennel and sausage pasta</div><div class="m">30 min &middot; Easy &middot; Italian</div><div class="m">Weeknight Kitchen, page 112</div></div><span class="btn sm pri">&#10003; Added</span></div>
+      <div class="row"><div class="main"><div class="t">Tarka dal</div><div class="m">40 min &middot; Easy &middot; Indian</div><div class="m">RecipeTin Eats &middot; Cooked 10 days ago</div></div><span class="btn sm pri">&#10003; Added</span></div>
+      <div class="row"><div class="main"><div class="t">Fish tacos</div><div class="m">25 min &middot; Easy &middot; Mexican</div><div class="m">RecipeTin Eats &middot; Cooked 7 weeks ago</div></div><span class="btn sm">Add</span></div>
+      <div class="row"><div class="main"><div class="t">Mushroom risotto</div><div class="m">45 min &middot; Medium &middot; Italian</div><div class="m">Jamie Oliver &middot; Not cooked yet</div></div><span class="btn sm">Add</span></div>
+    </div>
+    <div class="muted">Tapping the row body still opens the recipe.</div>
+  </div>
+</section>
+
+<section class="s" data-shot="filters-sheet-top"><span class="note">wireframe</span>
+  <div class="top"><h1>Recipes<span class="sub">18 of 124</span></h1></div>
+  <div class="scrim"></div>
+  <div class="sheet full">
+    <div style="display:flex;align-items:center"><h2 style="flex:1">Filters</h2><span class="link">Clear all</span></div>
+    <div class="sec">Quick</div><div class="chips"><span class="chip">Favourites</span><span class="chip">Not cooked in 2 weeks</span><span class="chip">Not cooked in 4 weeks</span></div>
+    <div class="sec">Meal</div><div class="chips"><span class="chip on">Dinner</span><span class="chip">Lunch</span><span class="chip">Breakfast</span><span class="chip">Side</span></div>
+    <div class="sec">Time</div><div class="chips"><span class="chip">15 min</span><span class="chip on">30 min</span><span class="chip">45 min</span><span class="chip">1 hour</span><span class="chip">Any</span></div>
+    <div class="sec">Main protein</div><div class="chips"><span class="chip">Chicken</span><span class="chip">Beef</span><span class="chip ex">&minus; Pork</span><span class="chip">Fish</span><span class="chip">Prawns</span><span class="chip">Lentils</span><span class="chip">Chickpeas</span><span class="chip">Eggs</span></div>
+    <div class="muted" style="font-size:12px">Tap once to include, again to exclude (&minus;), again to clear.</div>
+    <div class="sec">Carb</div><div class="chips"><span class="chip">Pasta</span><span class="chip">Rice</span><span class="chip">Potatoes</span><span class="chip">Bread</span><span class="chip">Noodles</span></div>
+    <div class="sec">Cuisine</div><div class="chips"><span class="chip on">Italian</span><span class="chip on">Thai</span><span class="chip">Indian</span><span class="chip">British</span><span class="chip">Mexican</span><span class="chip">More</span></div>
+    <div class="foot"><span class="btn pri">Show 18 recipes</span></div>
+  </div>
+</section>
+
+<section class="s" data-shot="filters-sheet-diet-ingredients"><span class="note">wireframe</span>
+  <div class="top"><h1>Recipes<span class="sub">9 of 124</span></h1></div>
+  <div class="scrim"></div>
+  <div class="sheet full">
+    <div style="display:flex;align-items:center"><h2 style="flex:1">Filters</h2><span class="link">Clear all</span></div>
+    <div class="sec">Diet</div>
+    <div class="muted" style="font-size:12px;margin-top:-6px">A guide, not allergen safety. Check packaged ingredients like stock and soy sauce.</div>
+    <div class="chips"><span class="chip on">Vegetarian</span><span class="chip">Vegan</span><span class="chip">Gluten-free</span><span class="chip">Dairy-free</span></div>
+    <div class="sec">Ingredients</div>
+    <div><div class="label">With</div><div class="field filled">crea|</div>
+      <div class="card" style="padding:0;margin-top:4px"><div class="list-item" style="padding:10px">Cream <span class="muted">dairy</span></div><div class="list-item" style="padding:10px">Cr&egrave;me fra&icirc;che <span class="muted">cream</span></div><div class="list-item" style="padding:10px;border:0">Cream cheese <span class="muted">cheese</span></div></div></div>
+    <div><div class="label">Without</div><div class="chips"><span class="chip x">Mushrooms</span></div></div>
+    <div class="sec">Effort</div><div class="chips"><span class="chip">Easy</span><span class="chip">Medium</span><span class="chip">Hard</span></div>
+    <div class="sec">Method</div><div class="chips"><span class="chip">Roast</span><span class="chip">Simmer</span><span class="chip">Stir-fry</span><span class="chip">Bake</span></div>
+    <div class="foot"><span class="btn pri">Show 9 recipes</span></div>
+  </div>
+</section>
+</body></html>

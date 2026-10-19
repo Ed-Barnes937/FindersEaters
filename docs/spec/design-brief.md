@@ -1,5 +1,7 @@
 # Design brief: Finders Eaters V0.1
 
+> Superseded for the design pass by `docs/design-handoff/BRIEF.md` (2026-10-19), which carries the decisions made since this brief: the hosted engine's "Still being read" state, Extract running automatically, the narrower role of glance lines and the new sample-check view.
+
 The brief for the first app designs, to be taken to Claude Design. It is self-contained: everything a designer needs is on this page, plus the three prototype files listed under [Reference prototypes](#reference-prototypes), which should be attached alongside it.
 
 Resolves [Write the Claude Design brief](https://github.com/Ed-Barnes937/FindersEaters/issues/17). Sources: `docs/spec/search-and-library.md`, `docs/spec/recipe-review.md`, `docs/spec/planner-screen.md`, `docs/spec/shopping-list.md`, the feature cut on [Agree the V0.1 feature cut](https://github.com/Ed-Barnes937/FindersEaters/issues/2), and the glossary in `CONTEXT.md`. Where this brief and a spec disagree, the spec wins and this brief should be corrected.
