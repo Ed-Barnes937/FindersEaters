@@ -20,6 +20,12 @@ import type { BackupManifest } from './verify.ts'
 
 const cli = fileURLToPath(new URL('../cli.ts', import.meta.url))
 
+// Each test starts a Node process that loads the server from TypeScript
+// source, and the verify tests then run the release step against Postgres.
+// That takes about 2 s on a laptop and more on a 2-core CI runner with other
+// test files in parallel, past Vitest's 5 s default.
+const subprocess = { timeout: 30_000 }
+
 interface Run {
   code: number
   stdout: string
@@ -61,7 +67,7 @@ function manifest(values: Partial<BackupManifest> = {}): BackupManifest {
   }
 }
 
-describe('cli.ts backup verify', () => {
+describe('cli.ts backup verify', subprocess, () => {
   let source: EmptyDatabase
   let restored: EmptyDatabase
 
@@ -139,7 +145,7 @@ describe('cli.ts backup verify', () => {
   })
 })
 
-describe('cli.ts backup fresh', () => {
+describe('cli.ts backup fresh', subprocess, () => {
   async function fresh(createdAt: string, now: string): Promise<Run> {
     const file = join(dir, 'latest.json')
     await writeFile(file, JSON.stringify(manifest({ createdAt })))
