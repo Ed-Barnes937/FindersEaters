@@ -1,9 +1,10 @@
 # PR checks (docs/spec/operations.md sections 3 and 4, docs/spec/v0.1.md section
 # 17.2): format, the migration checks, lint, typecheck, unit and database tests,
 # the production build, the Playwright smoke test against that build on a
-# 390 px viewport, and the deploy image with its release step. Postgres is a
-# container on the runner; nothing here touches cloud resources. Retries are 0 everywhere:
-# a flaky test is a bug, so nothing here re-runs on failure.
+# 390 px viewport, the deploy image with its release step, and actionlint over
+# every workflow. Postgres is a container on the runner; nothing here touches
+# cloud resources. Retries are 0 everywhere: a flaky test is a bug, so nothing
+# here re-runs on failure.
 name: CI
 
 on:
@@ -111,6 +112,11 @@ jobs:
 
       - name: Fly configs agree with the spec and each other
         run: python3 scripts/check-fly-configs.py
+
+      # Static checks of every workflow, including the deploy ones that never
+      # run on a PR. The image is pinned by digest.
+      - name: actionlint
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 -color
 
       - uses: docker/setup-buildx-action@v4
 
