@@ -146,32 +146,25 @@ write_env() {
   printf '  %s✓ wrote%s %s → %s\n' "$GREEN" "$RESET" "$key" "$ENV_FILE"
 }
 
-# set_secret NAME VALUE sets a GitHub Actions repo secret via gh. Falls back
-# to a warning (and records it) if gh is unavailable or unauthenticated.
+# set_secret NAME VALUE sets a GitHub Actions repo secret via gh, then checks
+# GitHub holds it. Departs from the stock library, which warned and carried on:
+# stage 1 checks gh is signed in, so a failure here is real and stops the
+# wizard (die and until_ok are defined with the stages).
 set_secret() {
   local name="$1" value="$2"
-  if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-    if printf '%s' "$value" | gh secret set "$name" >/dev/null 2>&1; then
-      WRITTEN_SECRET+=("$name")
-      printf '  %s✓ set%s GitHub secret %s\n' "$GREEN" "$RESET" "$name"
-      return
-    fi
-  fi
-  SKIPPED+=("GitHub secret $name (set it manually: gh secret set $name)")
-  warn "skipped GitHub secret $name: gh not ready; set it later"
+  printf '%s' "$value" | gh secret set "$name" >/dev/null ||
+    die "Setting GitHub secret $name failed (see the error above)."
+  until_ok "GitHub secret $name is set" gh_has_secret "$name"
+  WRITTEN_SECRET+=("$name")
 }
 
-# set_var NAME VALUE sets a GitHub Actions repo variable (non-secret).
+# set_var NAME VALUE sets a GitHub Actions repo variable (non-secret), then
+# checks GitHub holds that value. Stops on failure, like set_secret.
 set_var() {
   local name="$1" value="$2"
-  if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-    if gh variable set "$name" --body "$value" >/dev/null 2>&1; then
-      printf '  %s✓ set%s GitHub variable %s\n' "$GREEN" "$RESET" "$name"
-      return
-    fi
-  fi
-  SKIPPED+=("GitHub variable $name")
-  warn "skipped GitHub variable $name, gh not ready; set it later"
+  gh variable set "$name" --body "$value" >/dev/null ||
+    die "Setting GitHub variable $name failed (see the error above)."
+  until_ok "GitHub variable $name is $value" gh_var_is "$name" "$value"
 }
 
 # finish clears, then shows a closing summary of everything configured.
@@ -301,23 +294,6 @@ has_command() { command -v "$1" >/dev/null 2>&1; }
 
 gh_has_secret() { gh secret list --json name | jq -e --arg n "$1" 'any(.[]; .name == $n)' >/dev/null; }
 
-# set_secret NAME VALUE and set_var NAME VALUE replace the library's versions,
-# which carry on past a gh failure. Stage 1 has checked gh is signed in, so a
-# failure here is real: it stops the wizard. Each value is then checked in
-# GitHub before moving on.
-set_secret() {
-  local name="$1" value="$2"
-  printf '%s' "$value" | gh secret set "$name" >/dev/null ||
-    die "Setting GitHub secret $name failed (see the error above)."
-  until_ok "GitHub secret $name is set" gh_has_secret "$name"
-  WRITTEN_SECRET+=("$name")
-}
-set_var() {
-  local name="$1" value="$2"
-  gh variable set "$name" --body "$value" >/dev/null ||
-    die "Setting GitHub variable $name failed (see the error above)."
-  until_ok "GitHub variable $name is $value" gh_var_is "$name" "$value"
-}
 gh_var_is() { # NAME VALUE
   gh variable list --json name,value |
     jq -e --arg n "$1" --arg v "$2" 'any(.[]; .name == $n and .value == $v)' >/dev/null
