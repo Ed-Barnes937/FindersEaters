@@ -17,7 +17,7 @@
     "e2e": {
       "dependsOn": ["build", "^build"],
       "cache": false,
-      "passThroughEnv": ["CI"]
+      "passThroughEnv": ["CI", "DATABASE_URL"]
     }
   }
 }

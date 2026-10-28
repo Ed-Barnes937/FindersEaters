@@ -1,0 +1,32 @@
+# A push to `main` (the owner merging a release PR) deploys `finders-eaters`
+# (docs/spec/operations.md section 3), with the Clef canary first. A no-op with
+# a notice until the owner sets DEPLOY_PRODUCTION_ENABLED=true and the
+# FLY_API_TOKEN_PRODUCTION secret (docs/runbooks/deploy.md).
+name: Deploy production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# One production deploy at a time; a newer push waits rather than cancelling a
+# deploy mid-release.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  production:
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: production
+      app: finders-eaters
+      config: fly.toml
+      branch: main
+      enabled: ${{ vars.DEPLOY_PRODUCTION_ENABLED == 'true' }}
+      canary: true
+    secrets:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_PRODUCTION }}

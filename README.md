@@ -18,13 +18,21 @@ A pnpm + Turborepo monorepo (`docs/adr/0001-stack-and-hosting.md`):
 
 Needs Node 24 (`.nvmrc`) and pnpm (`corepack enable` picks the version in `package.json`).
 
+The server needs Postgres: start it with `docker compose up -d --wait` (see Test).
+
 ```sh
 pnpm install
 pnpm build                                   # builds the web app into apps/web/dist
+export DATABASE_URL=postgres://postgres:postgres@localhost:5432/finders_eaters
+DATABASE_URL_DIRECT=$DATABASE_URL node apps/server/src/cli.ts release   # migrate, as a deploy does
 pnpm --filter @finders-eaters/server start   # serves it on http://localhost:8080
 ```
 
-For development, run `pnpm dev`: Vite serves the web app with hot reload and proxies `/api` and `/health` to the server on port 8080.
+For development, run `pnpm dev`: Vite serves the web app with hot reload and proxies `/api` and `/health` to the server on port 8080 (which defaults `DATABASE_URL` to the Compose Postgres).
+
+## Deploy
+
+One Docker image, two Fly apps (`fly.toml` production from `main`, `fly.staging.toml` staging from `develop`), deployed by GitHub Actions after the release step. Deploys stay off until the owner provisions and switches them on. Runbook, switch-on checklist and rollback: `docs/runbooks/deploy.md`. Check an image locally with `docker build -t finders-eaters:local . && scripts/image-smoke.sh finders-eaters:local`.
 
 ## Test
 

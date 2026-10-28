@@ -1,0 +1,123 @@
+# The deploy both environments share (docs/spec/operations.md section 3),
+# called by deploy-staging.yml and deploy-production.yml. It never runs on a
+# PR.
+#
+# Inert until the owner switches it on. The `gate` job only reads a repository
+# variable and checks a secret is present; it touches nothing outside GitHub.
+# Unless the environment's DEPLOY_<ENV>_ENABLED variable is `true` and its Fly
+# deploy token secret is set, it stops there with a notice and the run passes.
+# Provisioning and the switch: docs/runbooks/deploy.md.
+name: Deploy (shared)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: GitHub environment, `staging` or `production`
+        type: string
+        required: true
+      app:
+        description: Fly app name
+        type: string
+        required: true
+      config:
+        description: Fly config file
+        type: string
+        required: true
+      branch:
+        description: The only branch this environment deploys from
+        type: string
+        required: true
+      enabled:
+        description: The owner's switch, from the environment's DEPLOY_<ENV>_ENABLED variable
+        type: boolean
+        required: true
+      canary:
+        description: Run the Clef canary before deploying (production)
+        type: boolean
+        default: false
+    secrets:
+      FLY_API_TOKEN:
+        description: App-scoped deploy token (`fly tokens create deploy -a <app>`)
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: deploys switched on?
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      go: ${{ steps.check.outputs.go }}
+    steps:
+      - id: check
+        env:
+          ENABLED: ${{ inputs.enabled }}
+          HAS_TOKEN: ${{ secrets.FLY_API_TOKEN != '' }}
+          ENVIRONMENT: ${{ inputs.environment }}
+          BRANCH: ${{ inputs.branch }}
+          REF: ${{ github.ref }}
+        run: |
+          var="DEPLOY_$(echo "$ENVIRONMENT" | tr '[:lower:]' '[:upper:]')_ENABLED"
+          if [ "$REF" != "refs/heads/$BRANCH" ]; then
+            echo "::error::$ENVIRONMENT deploys only from $BRANCH, not $REF."
+            exit 1
+          fi
+          if [ "$ENABLED" != "true" ]; then
+            echo "::notice::$ENVIRONMENT deploy skipped: deploys are off. The owner turns them on by setting the repository variable $var=true after provisioning (docs/runbooks/deploy.md)."
+            echo "go=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$HAS_TOKEN" != "true" ]; then
+            echo "::notice::$ENVIRONMENT deploy skipped: $var is on but the Fly deploy token secret is missing (docs/runbooks/deploy.md)."
+            echo "go=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "go=true" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    name: deploy ${{ inputs.app }}
+    needs: gate
+    if: needs.gate.outputs.go == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: ${{ inputs.environment }}
+      url: https://${{ inputs.app }}.fly.dev
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # Before every production deploy the Clef canary sends the dev golden
+      # requests to hosted Clef, and a fingerprint mismatch fails here, so
+      # `fly deploy` never runs (docs/adr/0002-clef-on-workers-ai.md). #66
+      # replaces this step's body with the canary job.
+      - name: Clef canary
+        if: inputs.canary
+        run: echo "::notice::The Clef canary is not built yet (#66); production deploys proceed without it until then."
+
+      - uses: superfly/flyctl-actions/setup-flyctl@1.6
+
+      # Builds on this runner's Docker (no Fly remote builder) and pushes to
+      # Fly's registry. Fly runs the release step before starting the new
+      # Machine; if it fails, this step fails and the old Machine keeps serving.
+      - name: fly deploy
+        env:
+          CONFIG: ${{ inputs.config }}
+          APP: ${{ inputs.app }}
+        run: flyctl deploy --config "$CONFIG" --app "$APP" --local-only
+
+      - name: Smoke test /health
+        env:
+          URL: https://${{ inputs.app }}.fly.dev/health
+        run: |
+          # A cold start wakes the Machine and Neon's compute, so allow retries.
+          body="$(curl -fsS --retry 10 --retry-all-errors --retry-delay 3 --max-time 30 "$URL")"
+          echo "$body"
+          case "$body" in
+            *'"status":"ok"'*) ;;
+            *) echo "::error::$URL did not report a healthy database round-trip"; exit 1 ;;
+          esac

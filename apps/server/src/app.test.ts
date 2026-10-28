@@ -2,36 +2,65 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
+import { connect, type Database } from '@finders-eaters/db'
 import type { FastifyInstance } from 'fastify'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, inject, it } from 'vitest'
 
 import { buildServer } from './app.ts'
 
 const INDEX_HTML = '<!doctype html><title>Finders Eaters</title><div id="root"></div>'
 
 let staticDir: string
+let database: Database
 let app: FastifyInstance
 
 beforeEach(async () => {
   staticDir = await mkdtemp(join(tmpdir(), 'fe-static-'))
   await writeFile(join(staticDir, 'index.html'), INDEX_HTML)
   await writeFile(join(staticDir, 'app.js'), 'console.log("app")')
-  app = await buildServer({ staticDir })
+  database = connect(inject('databaseUrl'))
+  app = await buildServer({ staticDir, db: database.db })
 })
 
 afterEach(async () => {
   await app.close()
+  await database.close()
   await rm(staticDir, { recursive: true, force: true })
 })
 
-describe('server', () => {
-  it('reports health on /health', async () => {
+describe('/health', () => {
+  it('reports a database round-trip with the applied migration count', async () => {
     const res = await app.inject({ method: 'GET', url: '/health' })
 
     expect(res.statusCode).toBe(200)
-    expect(res.json()).toEqual({ ok: true })
+    const body = res.json<{ status: string; database: Record<string, unknown> }>()
+    expect(body).toEqual({
+      status: 'ok',
+      database: { ok: true, latencyMs: body.database.latencyMs, migrationsApplied: 1 },
+    })
+    expect(body.database.latencyMs).toBeTypeOf('number')
   })
 
+  it('answers 503 with the failure when the database is unreachable', async () => {
+    // Port 1 refuses connections at once, so the round-trip fails fast.
+    const unreachable = connect('postgres://postgres:postgres@127.0.0.1:1/none')
+    const down = await buildServer({ staticDir, db: unreachable.db })
+    try {
+      const res = await down.inject({ method: 'GET', url: '/health' })
+
+      expect(res.statusCode).toBe(503)
+      expect(res.json()).toEqual({
+        status: 'error',
+        database: { ok: false, error: 'ECONNREFUSED' },
+      })
+    } finally {
+      await down.close()
+      await unreachable.close()
+    }
+  })
+})
+
+describe('server', () => {
   it('serves the SPA shell at the root', async () => {
     const res = await app.inject({ method: 'GET', url: '/' })
 

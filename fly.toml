@@ -1,0 +1,45 @@
+# Production: Fly app `finders-eaters`, deployed from `main`
+# (docs/spec/operations.md section 2). Staging is fly.staging.toml; keep the two
+# identical apart from `app`. Deploys run from .github/workflows/deploy-*.yml,
+# inert until the owner provisions (docs/runbooks/deploy.md).
+#
+# Secrets (`fly secrets set -a finders-eaters ...`, never in this file):
+#   DATABASE_URL           Neon pooled URL (the server)
+#   DATABASE_URL_DIRECT    Neon direct URL (the release step and batch commands)
+#   CLOUDFLARE_ACCOUNT_ID  Workers AI account for hosted Clef (ADR 0002)
+#   CLOUDFLARE_API_TOKEN   token scoped to Workers AI
+#   BETTER_AUTH_SECRET     per app
+#   BETTER_AUTH_URL        this app's public URL
+app = "finders-eaters"
+primary_region = "lhr"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[deploy]
+  # Migrate under the advisory lock, load the KB, rebuild projections, report
+  # staleness. A non-zero exit aborts the deploy and the old Machine keeps
+  # serving (operations.md section 3.1).
+  release_command = "node apps/server/src/cli.ts release"
+  release_command_timeout = "10m"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  # Gates a new Machine during a deploy. Checks run only while a Machine is
+  # up, and autostop goes by proxied requests, not checks, so these do not keep
+  # the Machine (or Neon's compute) awake on their own.
+  [[http_service.checks]]
+    method = "GET"
+    path = "/health"
+    grace_period = "10s"
+    interval = "60s"
+    timeout = "15s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

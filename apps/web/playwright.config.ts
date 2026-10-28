@@ -4,6 +4,9 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const PORT = 4173
+// The CI service container, or Docker Compose locally (README "Test").
+const DATABASE_URL =
+  process.env.DATABASE_URL ?? 'postgres://postgres:postgres@localhost:5432/finders_eaters'
 
 export default defineConfig({
   testDir: 'e2e',
@@ -26,10 +29,17 @@ export default defineConfig({
       },
     },
   ],
+  // Started the way a deploy starts it: the release step, then the server.
+  // Ready when `/health` makes its database round-trip.
   webServer: {
-    command: 'node ../server/src/main.ts',
+    command: 'node ../server/src/cli.ts release && node ../server/src/main.ts',
     url: `http://localhost:${PORT}/health`,
-    env: { PORT: String(PORT), STATIC_DIR: 'dist' },
+    env: {
+      PORT: String(PORT),
+      STATIC_DIR: 'dist',
+      DATABASE_URL,
+      DATABASE_URL_DIRECT: DATABASE_URL,
+    },
     reuseExistingServer: false,
   },
 })

@@ -1,8 +1,8 @@
 # PR checks (docs/spec/operations.md sections 3 and 4, docs/spec/v0.1.md section
 # 17.2): format, the migration checks, lint, typecheck, unit and database tests,
-# the production build, and the Playwright smoke test against that build on a
-# 390 px viewport. Postgres is a service container on the runner; nothing here
-# touches cloud resources. Retries are 0 everywhere:
+# the production build, the Playwright smoke test against that build on a
+# 390 px viewport, and the deploy image with its release step. Postgres is a
+# container on the runner; nothing here touches cloud resources. Retries are 0 everywhere:
 # a flaky test is a bug, so nothing here re-runs on failure.
 name: CI
 
@@ -97,3 +97,32 @@ jobs:
           name: playwright-report
           path: apps/web/playwright-report
           retention-days: 7
+
+  # The deploy image, built and exercised on the runner's own Docker: the
+  # release step against a fresh Postgres container (from empty, then again),
+  # a release that must fail, and the server's /health
+  # (docs/spec/operations.md section 3.1). Nothing is pushed anywhere.
+  image:
+    name: image and release step
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Fly configs agree with the spec and each other
+        run: python3 scripts/check-fly-configs.py
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          push: false
+          tags: finders-eaters:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Release step and /health against a fresh container
+        run: scripts/image-smoke.sh finders-eaters:ci
