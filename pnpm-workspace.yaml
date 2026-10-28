@@ -1,6 +1,8 @@
 packages:
   - apps/*
   - packages/*
+  # Operator scripts (the provisioning wizard) and their tests.
+  - scripts
 
 # Install scripts are opt-in (pnpm 11 fails the install on an unreviewed one).
 # @parcel/watcher (via sass) ships prebuilt binaries, so its build is not needed.

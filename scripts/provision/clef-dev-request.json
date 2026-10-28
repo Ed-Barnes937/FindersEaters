@@ -1,0 +1,115 @@
+{
+  "state": {
+    "line": "200g basmati rice"
+  },
+  "questions": {
+    "role": {
+      "type": "choice",
+      "instructions": "What kind of line is `line` in a recipe's ingredient list?",
+      "criteria": {
+        "header": "A section heading inside the ingredient list, such as 'For the dressing:'. Names no ingredient to buy.",
+        "ingredient": "Names a food or drink item used in the recipe, with or without an amount.",
+        "note": "A remark, tip, serving count or instruction that names no ingredient to buy."
+      }
+    },
+    "compound": {
+      "type": "choice",
+      "instructions": "How many separate ingredients does `line` name?",
+      "criteria": {
+        "single": "Exactly one ingredient, even if its name contains 'and' (e.g. 'sweet and sour sauce', 'fish and chip seasoning').",
+        "compound": "Two or more separate ingredients on one line that would be bought or fetched separately (e.g. 'oil and vinegar').",
+        "alternatives": "One ingredient slot with interchangeable options (e.g. 'lard or dripping')."
+      }
+    },
+    "kind": {
+      "type": "choice",
+      "instructions": "Would you buy or get out the item in `line`, and does it state an amount?",
+      "criteria": {
+        "quantified": "An ingredient with an amount, even a vague one ('150g pasta', 'a dash of soy sauce'). It scales and goes on the shopping list.",
+        "unquantified": "An ingredient you would buy or get out, but with no amount ('sea salt', 'vegetable oil, for deep-frying').",
+        "not_ingredient": "Not something you would buy or get out; it belongs in the method ('a little hot water to loosen')."
+      }
+    },
+    "tok_0": {
+      "type": "choice",
+      "instructions": "In the ingredient line \"«200»g basmati rice\", which part is the marked word «200»?",
+      "criteria": {
+        "quantity": "The main amount only: a number, fraction, range, or a word like 'a' in 'a dash'. Not a number inside a pack size, a conversion or a note.",
+        "unit": "Unit or container of the main amount: g, ml, tsp, cup, pint, tin, pack, clove, knob, pinch, handful. Not the unit of a pack size or a conversion.",
+        "size": "Size of each item or container: 'medium', 'small', or both the '227' and the 'g' in '1 x 227g tin'.",
+        "ingredient": "Part of the shopping name of the food, including words that pick out the product ('smoked paprika', 'frozen spinach', 'salted butter', 'caster sugar').",
+        "prep": "How to prepare it before use: 'diced', 'grated', 'rinsed', or the part used, as in 'zest of' or 'juice of'.",
+        "note": "Serving, usage or alternative info: 'to season', 'plus more to serve', 'such as Bramley', or a conversion or second amount with its number and unit (the '8' and 'oz' in '225g/8oz', '(1 cup)'), or liquid to dissolve it in.",
+        "filler": "A connecting word with no meaning of its own, such as 'x' or 'of' between amount and ingredient."
+      }
+    },
+    "tok_1": {
+      "type": "choice",
+      "instructions": "In the ingredient line \"200«g» basmati rice\", which part is the marked word «g»?",
+      "criteria": {
+        "quantity": "The main amount only: a number, fraction, range, or a word like 'a' in 'a dash'. Not a number inside a pack size, a conversion or a note.",
+        "unit": "Unit or container of the main amount: g, ml, tsp, cup, pint, tin, pack, clove, knob, pinch, handful. Not the unit of a pack size or a conversion.",
+        "size": "Size of each item or container: 'medium', 'small', or both the '227' and the 'g' in '1 x 227g tin'.",
+        "ingredient": "Part of the shopping name of the food, including words that pick out the product ('smoked paprika', 'frozen spinach', 'salted butter', 'caster sugar').",
+        "prep": "How to prepare it before use: 'diced', 'grated', 'rinsed', or the part used, as in 'zest of' or 'juice of'.",
+        "note": "Serving, usage or alternative info: 'to season', 'plus more to serve', 'such as Bramley', or a conversion or second amount with its number and unit (the '8' and 'oz' in '225g/8oz', '(1 cup)'), or liquid to dissolve it in.",
+        "filler": "A connecting word with no meaning of its own, such as 'x' or 'of' between amount and ingredient."
+      }
+    },
+    "tok_2": {
+      "type": "choice",
+      "instructions": "In the ingredient line \"200g «basmati» rice\", which part is the marked word «basmati»?",
+      "criteria": {
+        "quantity": "The main amount only: a number, fraction, range, or a word like 'a' in 'a dash'. Not a number inside a pack size, a conversion or a note.",
+        "unit": "Unit or container of the main amount: g, ml, tsp, cup, pint, tin, pack, clove, knob, pinch, handful. Not the unit of a pack size or a conversion.",
+        "size": "Size of each item or container: 'medium', 'small', or both the '227' and the 'g' in '1 x 227g tin'.",
+        "ingredient": "Part of the shopping name of the food, including words that pick out the product ('smoked paprika', 'frozen spinach', 'salted butter', 'caster sugar').",
+        "prep": "How to prepare it before use: 'diced', 'grated', 'rinsed', or the part used, as in 'zest of' or 'juice of'.",
+        "note": "Serving, usage or alternative info: 'to season', 'plus more to serve', 'such as Bramley', or a conversion or second amount with its number and unit (the '8' and 'oz' in '225g/8oz', '(1 cup)'), or liquid to dissolve it in.",
+        "filler": "A connecting word with no meaning of its own, such as 'x' or 'of' between amount and ingredient."
+      }
+    },
+    "tok_3": {
+      "type": "choice",
+      "instructions": "In the ingredient line \"200g basmati «rice»\", which part is the marked word «rice»?",
+      "criteria": {
+        "quantity": "The main amount only: a number, fraction, range, or a word like 'a' in 'a dash'. Not a number inside a pack size, a conversion or a note.",
+        "unit": "Unit or container of the main amount: g, ml, tsp, cup, pint, tin, pack, clove, knob, pinch, handful. Not the unit of a pack size or a conversion.",
+        "size": "Size of each item or container: 'medium', 'small', or both the '227' and the 'g' in '1 x 227g tin'.",
+        "ingredient": "Part of the shopping name of the food, including words that pick out the product ('smoked paprika', 'frozen spinach', 'salted butter', 'caster sugar').",
+        "prep": "How to prepare it before use: 'diced', 'grated', 'rinsed', or the part used, as in 'zest of' or 'juice of'.",
+        "note": "Serving, usage or alternative info: 'to season', 'plus more to serve', 'such as Bramley', or a conversion or second amount with its number and unit (the '8' and 'oz' in '225g/8oz', '(1 cup)'), or liquid to dissolve it in.",
+        "filler": "A connecting word with no meaning of its own, such as 'x' or 'of' between amount and ingredient."
+      }
+    },
+    "ingredient_span": {
+      "type": "choice",
+      "instructions": "Which span of `line` is the shopping name of the ingredient, without amount, unit, pack size, preparation or notes? Keep words that pick out the product, as in 'smoked paprika', 'frozen spinach' or 'caster sugar'.",
+      "criteria": {
+        "200": null,
+        "200g": null,
+        "200g basmati": null,
+        "200g basmati rice": null,
+        "g": null,
+        "g basmati": null,
+        "g basmati rice": null,
+        "basmati": null,
+        "basmati rice": null,
+        "rice": null,
+        "none": "The line names no ingredient."
+      }
+    },
+    "resolve": {
+      "type": "choice",
+      "instructions": "Which knowledge-base entry is the ingredient named in `line`?",
+      "criteria": {
+        "rice_basmati": "basmati rice",
+        "rice_long_grain": "long-grain white rice",
+        "rice_jasmine": "jasmine rice",
+        "rice_brown": "brown rice",
+        "none": "None of these entries is the ingredient in the line."
+      }
+    }
+  },
+  "model": "clef"
+}

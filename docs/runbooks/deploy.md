@@ -26,7 +26,7 @@ Nothing creates, changes or pays for infrastructure until the owner does the ste
 
 ### Owner checklist (real infrastructure, costs money)
 
-Each of these is a human step. Most belong to the provisioning wizard ticket; they are listed here so the deploy can be switched on in order.
+Each of these is a human step. `scripts/provision.sh staging`, then `scripts/provision.sh production`, walks through all of them except the optional step 5, in order, verifying each (`docs/runbooks/provisioning.md`). They are listed here so it is clear what the deploy needs.
 
 1. Neon: project in AWS London, root branch `main`, branch `staging`, restore window 7 days.
 2. Fly: create both apps (`fly apps create finders-eaters`, `fly apps create finders-eaters-staging`) in the right org.

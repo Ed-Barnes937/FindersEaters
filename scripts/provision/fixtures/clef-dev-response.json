@@ -1,0 +1,130 @@
+{
+  "result": {
+    "model": "clef",
+    "answers": {
+      "role": {
+        "type": "choice",
+        "choice": "ingredient",
+        "probabilities": {
+          "header": 0.0115,
+          "ingredient": 0.9762,
+          "note": 0.0123
+        },
+        "confidence": 0.93
+      },
+      "compound": {
+        "type": "choice",
+        "choice": "single",
+        "probabilities": {
+          "single": 0.9158,
+          "compound": 0.0117,
+          "alternatives": 0.0725
+        },
+        "confidence": 0.7663
+      },
+      "kind": {
+        "type": "choice",
+        "choice": "quantified",
+        "probabilities": {
+          "quantified": 0.9829,
+          "unquantified": 0.0113,
+          "not_ingredient": 0.0058
+        },
+        "confidence": 0.9493
+      },
+      "tok_0": {
+        "type": "choice",
+        "choice": "quantity",
+        "probabilities": {
+          "quantity": 0.8704,
+          "unit": 0.1001,
+          "size": 0.0068,
+          "ingredient": 0.0065,
+          "prep": 0.0054,
+          "note": 0.006,
+          "filler": 0.0048
+        },
+        "confidence": 0.729
+      },
+      "tok_1": {
+        "type": "choice",
+        "choice": "unit",
+        "probabilities": {
+          "quantity": 0.0035,
+          "unit": 0.9744,
+          "size": 0.0049,
+          "ingredient": 0.0041,
+          "prep": 0.0036,
+          "note": 0.0043,
+          "filler": 0.0052
+        },
+        "confidence": 0.9411
+      },
+      "tok_2": {
+        "type": "choice",
+        "choice": "ingredient",
+        "probabilities": {
+          "quantity": 0.0048,
+          "unit": 0.0082,
+          "size": 0.0082,
+          "ingredient": 0.9603,
+          "prep": 0.0061,
+          "note": 0.0067,
+          "filler": 0.0057
+        },
+        "confidence": 0.9095
+      },
+      "tok_3": {
+        "type": "choice",
+        "choice": "ingredient",
+        "probabilities": {
+          "quantity": 0.0053,
+          "unit": 0.0117,
+          "size": 0.0072,
+          "ingredient": 0.9555,
+          "prep": 0.0072,
+          "note": 0.0064,
+          "filler": 0.0067
+        },
+        "confidence": 0.8988
+      },
+      "ingredient_span": {
+        "type": "choice",
+        "choice": "basmati rice",
+        "probabilities": {
+          "200": 0.002,
+          "200g": 0.0024,
+          "200g basmati": 0.0039,
+          "200g basmati rice": 0.0052,
+          "g": 0.0024,
+          "g basmati": 0.0034,
+          "g basmati rice": 0.0043,
+          "basmati": 0.0072,
+          "basmati rice": 0.9616,
+          "rice": 0.0037,
+          "none": 0.0039
+        },
+        "confidence": 0.9173
+      },
+      "resolve": {
+        "type": "choice",
+        "choice": "rice_basmati",
+        "probabilities": {
+          "rice_basmati": 0.9605,
+          "rice_long_grain": 0.0117,
+          "rice_jasmine": 0.0095,
+          "rice_brown": 0.0096,
+          "none": 0.0087
+        },
+        "confidence": 0.9036
+      }
+    },
+    "usage": {
+      "input_tokens": 2666,
+      "output_tokens": 0
+    }
+  },
+  "success": true,
+  "errors": [],
+  "messages": []
+}

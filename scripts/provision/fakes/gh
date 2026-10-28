@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Fake GitHub CLI for provision.sh --dry-run (see _fake.sh). A dispatched
+# deploy workflow succeeds the way the real one would: only when its switch
+# variable is on, its Fly token secret is set and the app has every secret the
+# server needs.
+# shellcheck source=_fake.sh
+. "$(dirname "$0")/_fake.sh"
+
+case "${1:-} ${2:-}" in
+  'auth status') echo 'Logged in to github.com as owner' ;;
+  'secret set')
+    value="$(cat)"
+    [[ -n "$value" ]] || die "empty value for $3"
+    put "gh/secrets/$3" "$value"
+    ;;
+  'secret list') names gh/secrets ;;
+  'variable set') put "gh/variables/$3" "$(opt --body "$@")" ;;
+  'workflow run')
+    case "$3" in
+      deploy-staging.yml) env=STAGING app=finders-eaters-staging ;;
+      deploy-production.yml) env=PRODUCTION app=finders-eaters ;;
+      *) die "unknown workflow $3" ;;
+    esac
+    mkdir -p "$F/gh/runs"
+    run=$(($(find "$F/gh/runs" -type f | wc -l) + 1))
+    result=success
+    [[ "$(get "gh/variables/DEPLOY_${env}_ENABLED" 2>/dev/null)" == true ]] || result=failure
+    has "gh/secrets/FLY_API_TOKEN_${env}" || result=failure
+    for name in DATABASE_URL DATABASE_URL_DIRECT CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_API_TOKEN \
+      BETTER_AUTH_SECRET BETTER_AUTH_URL; do
+      has "fly/secrets/$app/$name" || result=failure
+    done
+    put "gh/runs/$run" "$result $3"
+    [[ "$result" == success ]] && put "fly/deployed/$app" "run $run"
+    echo "Created workflow_dispatch event for $3 at ${5:-}"
+    ;;
+  'run list')
+    workflow="$(opt --workflow "$@")"
+    for id in $(find "$F/gh/runs" -type f -exec basename {} \; 2>/dev/null | sort -rn); do
+      if [[ "$(cut -d' ' -f2 "$F/gh/runs/$id")" == "$workflow" ]]; then
+        jq -n --argjson id "$id" '[{databaseId: $id}]'
+        exit 0
+      fi
+    done
+    echo '[]'
+    ;;
+  'run watch')
+    [[ "$(cut -d' ' -f1 "$F/gh/runs/$3")" == success ]] || {
+      echo "run $3 failed"
+      exit 1
+    }
+    echo "run $3 completed successfully"
+    ;;
+  *) die "unexpected: $*" ;;
+esac

@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Fake flyctl for provision.sh --dry-run (see _fake.sh).
+# shellcheck source=_fake.sh
+. "$(dirname "$0")/_fake.sh"
+
+app="$(opt -a "$@" || true)"
+
+case "${1:-} ${2:-}" in
+  'auth whoami') echo 'owner@example.com' ;;
+  'apps list') names fly/apps | jq '[.[] | {Name: .name}]' ;;
+  'apps create')
+    has "fly/apps/$3" && die "app $3 already exists"
+    put "fly/apps/$3" "$(opt --org "$@")"
+    echo "New app created: $3"
+    ;;
+  'secrets import')
+    has "fly/apps/$app" || die "no app $app"
+    while IFS= read -r line; do
+      [[ -n "$line" ]] && put "fly/secrets/$app/${line%%=*}" "${line#*=}"
+    done
+    echo "Secrets are staged for the first deployment"
+    ;;
+  'secrets list') names "fly/secrets/$app" ;;
+  'tokens create')
+    has "fly/apps/$app" || die "no app $app"
+    echo "FlyV1 fm2_fake-deploy-token-for-$app"
+    ;;
+  'certs show') has "fly/certs/$app/$3" || die "certificate not found" ;;
+  'certs add')
+    has "fly/apps/$app" || die "no app $app"
+    put "fly/certs/$app/$3" 'added'
+    echo "Your certificate for $3 is being issued."
+    ;;
+  'storage create')
+    bucket="$(opt --name "$@")"
+    has "tigris/buckets/$bucket" && die "bucket $bucket already exists"
+    put "tigris/buckets/$bucket/created" 'yes'
+    printf 'Your Tigris project (%s) is ready.\n\n' "$bucket"
+    printf 'AWS_ACCESS_KEY_ID: tid_fake_key\nAWS_SECRET_ACCESS_KEY: tsec_fake_secret\n'
+    printf 'AWS_ENDPOINT_URL_S3: https://fly.storage.tigris.dev\nBUCKET_NAME: %s\n' "$bucket"
+    ;;
+  'ssh console')
+    has "fly/deployed/$app" || die "app $app has no running machines"
+    cmd="$(opt -C "$@")"
+    case "$cmd" in
+      *'household create'*)
+        email="$(sed -E 's/.*--email ([^ ]+).*/\1/' <<<"$cmd")"
+        has "household/users/$email" && die "A user with email $email already exists."
+        put "household/users/$email" 'owner'
+        put household/id 'hh_fake_01'
+        echo 'Created household "The Household" (id hh_fake_01, timezone Europe/London).'
+        echo "Created user $email (id u_fake_01)."
+        echo 'First password (shown once): fake-first-password-1'
+        ;;
+      *'user add'*)
+        email="$(sed -E 's/.*--email ([^ ]+).*/\1/' <<<"$cmd")"
+        if has "household/users/$email"; then
+          echo "A user with email $email already exists." >&2
+          exit 1
+        fi
+        put "household/users/$email" 'member'
+        echo "Created user $email (id u_fake_02) in household hh_fake_01."
+        echo 'First password (shown once): fake-first-password-2'
+        ;;
+      *) die "unexpected command: $cmd" ;;
+    esac
+    ;;
+  *) die "unexpected: $*" ;;
+esac
