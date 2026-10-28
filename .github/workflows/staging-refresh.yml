@@ -1,0 +1,100 @@
+# The staging data refresh (docs/spec/operations.md section 6), dispatched by
+# hand on `develop` before every release PR to `main`:
+#   1. fail if the latest verified backup is older than 36 hours;
+#   2. replace staging's app schemas with it, in one transaction;
+#   3. redeploy staging from develop, so the release step applies develop's
+#      migrations and KB load to production-shaped data;
+#   4. the release step prints the staleness report in the deploy log.
+# A production deploy refuses to run unless a successful run of this workflow
+# was on the same tree it is deploying (deploy.yml, "Staging refreshed").
+#
+# Inert until the owner switches it on: unless STAGING_REFRESH_ENABLED and
+# DEPLOY_STAGING_ENABLED are both `true` and STAGING_DATABASE_URL_DIRECT and
+# the TIGRIS_BACKUP_* secrets are set, the `gate` job stops with a notice.
+name: Staging refresh
+
+on:
+  workflow_dispatch:
+
+# Shares the staging deploy's group, so a refresh and a deploy never overlap.
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  # deploy.yml reads workflow runs for the staging refresh precondition.
+  actions: read
+
+jobs:
+  gate:
+    name: staging refresh switched on?
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      go: ${{ steps.check.outputs.go }}
+    steps:
+      - id: check
+        env:
+          ENABLED: ${{ vars.STAGING_REFRESH_ENABLED }}
+          DEPLOYS: ${{ vars.DEPLOY_STAGING_ENABLED }}
+          HAS_SECRETS: ${{ secrets.STAGING_DATABASE_URL_DIRECT != '' && secrets.TIGRIS_BACKUP_ACCESS_KEY_ID != '' && secrets.TIGRIS_BACKUP_SECRET_ACCESS_KEY != '' }}
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$REF" != "refs/heads/develop" ]; then
+            echo "::error::Run the staging refresh on develop, which is what staging deploys, not $REF."
+            exit 1
+          fi
+          if [ "$ENABLED" != "true" ] || [ "$DEPLOYS" != "true" ]; then
+            echo "::notice::Staging refresh skipped: it needs the repository variables STAGING_REFRESH_ENABLED=true and DEPLOY_STAGING_ENABLED=true (docs/runbooks/backup-and-restore.md)."
+            echo "go=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$HAS_SECRETS" != "true" ]; then
+            echo "::error::STAGING_REFRESH_ENABLED is on but STAGING_DATABASE_URL_DIRECT or a TIGRIS_BACKUP_* secret is missing (docs/runbooks/backup-and-restore.md)."
+            exit 1
+          fi
+          echo "go=true" >> "$GITHUB_OUTPUT"
+
+  refresh:
+    name: restore the latest backup into staging
+    needs: gate
+    if: needs.gate.outputs.go == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          push: false
+          tags: finders-eaters:refresh
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Staging refresh
+        env:
+          STAGING_DATABASE_URL_DIRECT: ${{ secrets.STAGING_DATABASE_URL_DIRECT }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.TIGRIS_BACKUP_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TIGRIS_BACKUP_SECRET_ACCESS_KEY }}
+          AWS_ENDPOINT_URL_S3: https://fly.storage.tigris.dev
+          AWS_REGION: auto
+        run: scripts/backup/staging-refresh.sh finders-eaters:refresh
+
+  redeploy:
+    name: redeploy staging
+    needs: refresh
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: staging
+      app: finders-eaters-staging
+      config: fly.staging.toml
+      branch: develop
+      enabled: ${{ vars.DEPLOY_STAGING_ENABLED == 'true' }}
+    secrets:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_STAGING }}

@@ -18,7 +18,7 @@ Two Fly apps, one image each: `finders-eaters` (production, from `main`) and `fi
 
 - **Staging holds real household data.** That is the point: `develop`'s migrations, KB loads and re-parses are rehearsed on the real library before `main` gets them. It is acceptable for one household whose owner is the operator. Before any second household exists this needs revisiting (anonymised refresh or synthetic data).
 - **Fly secrets** per app: `DATABASE_URL` (pooled), `DATABASE_URL_DIRECT` (migrations, KB load, batch commands), `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` (a token scoped to Workers AI, for hosted Clef per `docs/adr/0002-clef-on-workers-ai.md`), `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`. Staging gets its own auth secret; the Cloudflare account and token may be shared.
-- **GitHub secrets**: one app-scoped Fly deploy token per app (`fly tokens create deploy -a <app>`), not an org token: `FLY_API_TOKEN_STAGING` and `FLY_API_TOKEN_PRODUCTION`. `BACKUP_DATABASE_URL` (production, direct, a dedicated read-only `backup` role with `pg_read_all_data`), `STAGING_DATABASE_URL_DIRECT`, Tigris keys scoped to the backup bucket, and `CLOUDFLARE_ACCOUNT_ID` plus `CLOUDFLARE_API_TOKEN` for the Clef canary and the manual live golden-set workflow.
+- **GitHub secrets**: one app-scoped Fly deploy token per app (`fly tokens create deploy -a <app>`), not an org token: `FLY_API_TOKEN_STAGING` and `FLY_API_TOKEN_PRODUCTION`. `BACKUP_DATABASE_URL` (production, direct, a dedicated read-only `backup` role with `pg_read_all_data`), `STAGING_DATABASE_URL_DIRECT`, Tigris keys scoped to the backup bucket (`TIGRIS_BACKUP_ACCESS_KEY_ID`, `TIGRIS_BACKUP_SECRET_ACCESS_KEY`), and `CLOUDFLARE_ACCOUNT_ID` plus `CLOUDFLARE_API_TOKEN` for the Clef canary and the manual live golden-set workflow.
 
 ## 3. The deploy pipeline
 
@@ -106,11 +106,21 @@ A scheduled GitHub Actions workflow at 03:15 UTC. GitHub runs it, so it depends 
 
 A dump that fails verification still stays in the bucket for diagnosis, but the job fails and the manifest is not advanced.
 
+Implementation details (decided in [#36](https://github.com/Ed-Barnes937/FindersEaters/issues/36); the runbook is `docs/runbooks/backup-and-restore.md`):
+
+- **The verify runs `main`'s app image.** The job checks out `main` (scheduled runs start from the default branch, `develop`), builds the image and runs `cli.ts backup verify` in it, so "the current `main` release step" is literally the code production runs. All tools run in pinned containers (`pgvector/pgvector:pg17`, `amazon/aws-cli`).
+- **"Migration history match"** in step 3 is two checks: the restored `drizzle.__drizzle_migrations` equals production's (read over `BACKUP_DATABASE_URL`), and it is a prefix of the migrations `main` ships (hash and timestamp each).
+- **Which tables count.** `BACKUP_TABLES` in `packages/db/src/backup.ts` classifies every table as `never-shrinks`, `counted` or `not-durable`; a test fails when a migration adds an unclassified table. `household` is `never-shrinks` (nothing deletes households); `recipe` joins it when it exists. The recipe half of the deep read (one engine output parsed with its zod schema) lands with the recipe table.
+- **Monthly copies and the manifest are written only after verification**, so `monthly/` holds only verified dumps. Each night's manifest is also kept as `daily/<date>.json`, so the bucket says which dumps verified.
+- **The switch.** The workflow is inert until the owner sets the repository variable `BACKUP_ENABLED=true`. CI proves the scripts on every PR with `scripts/backup/e2e.sh` against local stand-ins (RustFS for Tigris).
+
 - **Retention** by Tigris lifecycle rules: `daily/` expires after 35 days, `monthly/` after 400 days.
 - **Access**: the bucket is private; the CI key can read and write only this bucket. Dumps are not client-side encrypted in V0.1 (they hold one household's recipes, plans, emails and password hashes). Encrypting them with a key held outside CI is the upgrade if the threat model grows.
 - **Cost**: a nightly dump wakes Neon's compute for a few minutes and stores a few MB a night, pennies a month.
 
 ### 5.3 Restore runbooks
+
+Step by step, with commands: `docs/runbooks/backup-and-restore.md`.
 
 **Undo something recent (within 7 days).**
 1. In Neon, create a branch from production at a timestamp just before the damage. Inspect it with `psql`.
@@ -129,11 +139,13 @@ Expected time: under an hour. Expected loss: at most a day.
 A manually dispatched workflow, run at least once before every release PR from `develop` to `main`:
 
 1. Fail if the latest verified backup is older than 36 hours (this doubles as a backup freshness alarm).
-2. Drop every app schema on the staging branch (`public`, `kb`, `drizzle`, `ops`) and `pg_restore` the latest verified dump into it.
+2. Drop every app schema on the staging branch (`public`, `kb`, `drizzle`, `ops`) and `pg_restore` the latest verified dump into it. The drop and the restore run as one transaction (`pg_restore` writes the script, `psql --single-transaction` runs it), so a failed refresh leaves staging as it was.
 3. Redeploy staging from `develop`, so the release step applies `develop`'s pending migrations and KB load to production-shaped data.
 4. Print the staleness report.
 
 This is the restore drill on the real provider: if a production backup cannot be restored into Neon and migrated by the next release, the release is blocked before it reaches `main`. Resetting the Neon branch to its parent would be faster but would test nothing, and would not survive a move off Neon.
+
+**The refresh is a precondition of the production deploy**, enforced, not only a checklist item: the production deploy job stops unless a successful run of the staging refresh workflow on `develop` had the same git tree as the `main` commit being deployed. The workflow is inert until the owner sets `STAGING_REFRESH_ENABLED=true` (and staging deploys are on).
 
 **Release checklist** (in the release PR template): CI green; staging refreshed and deployed; the staging batch re-parse report (section 7) reviewed if the release changes the engine or KB version; then the owner merges.
 

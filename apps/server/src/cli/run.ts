@@ -9,6 +9,7 @@ import { parseArgs } from 'node:util'
 import { getHousehold, household, householdUser, type Db } from '@finders-eaters/db'
 
 import { createAuth, type AuthConfig } from '../auth/auth.ts'
+import { BACKUP_USAGE } from '../backup/cli.ts'
 
 export interface CliDeps {
   db: Db
@@ -19,6 +20,7 @@ export interface CliDeps {
 
 const USAGE = `Usage:
   release   (the deploy's release step; reads only DATABASE_URL_DIRECT)
+${BACKUP_USAGE}
   household create --name <name> --email <email> --user-name <name> [--timezone <IANA zone>]
   user add --household <id> --email <email> --name <name>
   user set-password --email <email>

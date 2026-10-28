@@ -101,11 +101,12 @@ jobs:
   # The deploy image, built and exercised on the runner's own Docker: the
   # release step against a fresh Postgres container (from empty, then again),
   # a release that must fail, and the server's /health
-  # (docs/spec/operations.md section 3.1). Nothing is pushed anywhere.
+  # (docs/spec/operations.md section 3.1), then the backup scripts against
+  # it. Nothing is pushed anywhere.
   image:
-    name: image and release step
+    name: image, release step and backup
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
 
@@ -126,3 +127,9 @@ jobs:
 
       - name: Release step and /health against a fresh container
         run: scripts/image-smoke.sh finders-eaters:ci
+
+      # The nightly backup and the staging refresh, end to end against local
+      # stand-ins: Postgres containers for production and staging, RustFS for
+      # the Tigris bucket (docs/spec/operations.md sections 5.2 and 6).
+      - name: Backup, restore-verify and staging refresh against a local S3 store
+        run: scripts/backup/e2e.sh finders-eaters:ci

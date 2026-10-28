@@ -1,0 +1,87 @@
+# The nightly backup (docs/spec/operations.md section 5.2): pg_dump production
+# to the Tigris bucket, restore it into a throwaway pg17 and verify it with this
+# commit's app image, then advance manifest/latest.json. A failure fails the
+# run, and GitHub emails the repo owner. Restore runbooks:
+# docs/runbooks/backup-and-restore.md.
+#
+# Scheduled runs start from the default branch (`develop`), but the job checks
+# out `main`, so the verify runs the code production runs. It never runs on a
+# PR; scripts/backup/e2e.sh is the PR check for the same scripts.
+#
+# Inert until the owner switches it on: the `gate` job only reads a repository
+# variable and checks secrets are present. Unless BACKUP_ENABLED is `true` and
+# BACKUP_DATABASE_URL, TIGRIS_BACKUP_ACCESS_KEY_ID and
+# TIGRIS_BACKUP_SECRET_ACCESS_KEY are set, it stops with a notice and passes.
+name: Nightly backup
+
+on:
+  schedule:
+    - cron: '15 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: backups switched on?
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      go: ${{ steps.check.outputs.go }}
+    steps:
+      - id: check
+        env:
+          ENABLED: ${{ vars.BACKUP_ENABLED }}
+          HAS_SECRETS: ${{ secrets.BACKUP_DATABASE_URL != '' && secrets.TIGRIS_BACKUP_ACCESS_KEY_ID != '' && secrets.TIGRIS_BACKUP_SECRET_ACCESS_KEY != '' }}
+        run: |
+          if [ "$ENABLED" != "true" ]; then
+            echo "::notice::Backup skipped: backups are off. The owner turns them on by setting the repository variable BACKUP_ENABLED=true after provisioning (docs/runbooks/backup-and-restore.md)."
+            echo "go=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$HAS_SECRETS" != "true" ]; then
+            echo "::error::BACKUP_ENABLED is on but BACKUP_DATABASE_URL or a TIGRIS_BACKUP_* secret is missing (docs/runbooks/backup-and-restore.md)."
+            exit 1
+          fi
+          echo "go=true" >> "$GITHUB_OUTPUT"
+
+  backup:
+    name: dump, upload, restore and verify
+    needs: gate
+    if: needs.gate.outputs.go == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # Always main, whichever branch triggered the run: the verify must run
+      # the release step production runs.
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - uses: docker/setup-buildx-action@v4
+
+      # The verify runs main's release step and checks, from the same image a
+      # production deploy of main runs.
+      - name: Build image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          push: false
+          tags: finders-eaters:backup
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Nightly backup
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.TIGRIS_BACKUP_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TIGRIS_BACKUP_SECRET_ACCESS_KEY }}
+          AWS_ENDPOINT_URL_S3: https://fly.storage.tigris.dev
+          AWS_REGION: auto
+        run: scripts/backup/nightly.sh finders-eaters:backup

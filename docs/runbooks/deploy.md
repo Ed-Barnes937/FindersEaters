@@ -11,7 +11,7 @@ How the two Fly apps are deployed, how the owner turns deploys on, and how to ro
 | `apps/server/src/cli.ts release` | The release step: migrate under the advisory lock (`lock_timeout` 5s, `statement_timeout` 60s), then the KB load, projection rebuild and staleness report (placeholders until those tickets land). Exit 0 done, 1 failed, 2 misconfigured. |
 | `/health` | Deep database round-trip: `200 {"status":"ok","database":{"ok":true,"latencyMs":..,"migrationsApplied":..}}`, or `503` with a short error code. |
 | `.github/workflows/deploy-staging.yml` | Push to `develop` deploys staging. |
-| `.github/workflows/deploy-production.yml` | Push to `main` deploys production, with the Clef canary step first (a placeholder until #66). |
+| `.github/workflows/deploy-production.yml` | Push to `main` deploys production, with the Clef canary step first (a placeholder until #66), then the staging refresh precondition (`docs/runbooks/backup-and-restore.md`). |
 | `.github/workflows/deploy.yml` | The shared job: gate, `fly deploy --local-only`, `/health` smoke test. One concurrency group per environment. |
 | `scripts/image-smoke.sh` | Proves a built image deploys from empty: a fresh Postgres container, the release step twice, a release that must fail, then `/health`. Local Docker only; CI runs it on every PR. |
 
@@ -42,7 +42,7 @@ To turn deploys off again, delete the variable or set it to anything but `true`.
 ## A deploy, step by step
 
 1. The gate checks the switch and the token.
-2. Production only: the Clef canary runs; a mismatch fails the job before anything deploys.
+2. Production only: the Clef canary runs; a mismatch fails the job before anything deploys. Then "Staging refreshed" checks a successful staging refresh ran on `develop` with this commit's tree; without one, nothing deploys (`docs/runbooks/backup-and-restore.md`, "Before every release").
 3. `flyctl deploy --local-only` builds the image on the runner and pushes it to Fly's registry.
 4. Fly runs `node apps/server/src/cli.ts release` on a temporary Machine with the app's secrets. A non-zero exit aborts the deploy: the new Machine never starts and the previous release keeps serving.
 5. Fly starts the new Machine and waits for its `/health` check.
