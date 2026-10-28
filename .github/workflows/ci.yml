@@ -113,6 +113,11 @@ jobs:
       - name: Fly configs agree with the spec and each other
         run: python3 scripts/check-fly-configs.py
 
+      # The production deploy's staging refresh precondition, against a local
+      # git repository and recorded run JSON.
+      - name: Staging refresh precondition
+        run: scripts/backup/staging-refreshed.test.sh
+
       - uses: docker/setup-buildx-action@v4
 
       - name: Build image

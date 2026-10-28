@@ -5,8 +5,11 @@
 #   3. redeploy staging from develop, so the release step applies develop's
 #      migrations and KB load to production-shaped data;
 #   4. the release step prints the staleness report in the deploy log.
-# A production deploy refuses to run unless a successful run of this workflow
-# was on the same tree it is deploying (deploy.yml, "Staging refreshed").
+# A production deploy refuses to run unless a run of this workflow on the same
+# tree it is deploying had its `refresh` and redeploy jobs both succeed
+# (deploy.yml, "Staging refreshed"; scripts/backup/staging-refreshed.sh). A run
+# that stops at the gate passes but does not count. Job names here are read by
+# that script: rename them in both places.
 #
 # Inert until the owner switches it on: unless STAGING_REFRESH_ENABLED and
 # DEPLOY_STAGING_ENABLED are both `true` and STAGING_DATABASE_URL_DIRECT and

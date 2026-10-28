@@ -106,27 +106,17 @@ jobs:
         run: echo "::notice::The Clef canary is not built yet (#66); production deploys proceed without it until then."
 
       # The staging refresh is a precondition of every production release
-      # (docs/spec/operations.md section 6): a successful run of
-      # staging-refresh.yml on develop whose commit has exactly this commit's
-      # tree, so the code being released was deployed onto a restore of the
-      # latest production backup first. Otherwise nothing deploys.
+      # (docs/spec/operations.md section 6): a run of staging-refresh.yml on
+      # develop, at a commit with exactly this commit's tree, whose restore
+      # and redeploy jobs both succeeded, so the code being released was
+      # deployed onto a restore of the latest production backup first. A run
+      # that was switched off or skipped the redeploy does not count.
+      # Otherwise nothing deploys.
       - name: Staging refreshed
         if: inputs.require_staging_refresh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          tree="$(git rev-parse 'HEAD^{tree}')"
-          shas="$(gh run list --workflow staging-refresh.yml --branch develop --status success \
-            --limit 20 --json headSha --jq '.[].headSha')"
-          for sha in $shas; do
-            git fetch --quiet --no-tags --depth=1 origin "$sha"
-            if [ "$(git rev-parse "$sha^{tree}")" = "$tree" ]; then
-              echo "Staging was refreshed and deployed at $sha, the same tree as $GITHUB_SHA."
-              exit 0
-            fi
-          done
-          echo "::error::No successful staging refresh ran on this tree. Run 'Staging refresh' on develop at the commit being released, check staging, then re-run this deploy (docs/runbooks/backup-and-restore.md)."
-          exit 1
+        run: scripts/backup/staging-refreshed.sh
 
       - uses: superfly/flyctl-actions/setup-flyctl@1.6
 

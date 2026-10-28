@@ -8,12 +8,13 @@ How production's data is backed up, how to get it back, and how staging is refre
 | --- | --- |
 | `.github/workflows/backup.yml` | **Nightly backup**, 03:15 UTC (and by hand): builds `main`'s image, then runs `scripts/backup/nightly.sh`. |
 | `.github/workflows/staging-refresh.yml` | **Staging refresh**, by hand on `develop`: `scripts/backup/staging-refresh.sh`, then redeploys staging through `deploy.yml`. |
-| `.github/workflows/deploy.yml`, "Staging refreshed" step | Production deploys stop unless a successful staging refresh ran on a `develop` commit with the same tree as the `main` commit being deployed. |
+| `.github/workflows/deploy.yml`, "Staging refreshed" step | Runs `scripts/backup/staging-refreshed.sh`: production deploys stop unless a staging refresh run on a `develop` commit with the same tree as the `main` commit being deployed both restored the backup and redeployed staging. A run that was switched off, or whose redeploy was skipped, does not count. |
 | `scripts/backup/nightly.sh` | `pg_dump` production, upload, restore into a throwaway `pgvector/pgvector:pg17`, verify with the app image, advance the manifest. |
 | `scripts/backup/staging-refresh.sh` | Freshness check (36 hours), then drop staging's app schemas and restore the latest verified dump, in one transaction. |
 | `node apps/server/src/cli.ts backup verify` / `backup fresh` | The checks both scripts call, in the app image (`apps/server/src/backup/`). |
 | `scripts/backup/lifecycle.json` | The bucket's lifecycle rules: `daily/` 35 days, `monthly/` 400 days. |
 | `scripts/backup/e2e.sh` | Everything above end to end on local Docker, with RustFS standing in for Tigris. CI runs it on every PR. |
+| `scripts/backup/staging-refreshed.test.sh` | The production precondition against a local git repository and recorded run JSON. CI runs it on every PR. |
 
 Every tool runs in a pinned container (`pgvector/pgvector:pg17` for the Postgres 17 client tools, `amazon/aws-cli` for S3), so a runner and a laptop behave the same.
 
@@ -44,7 +45,7 @@ A failure fails the workflow (GitHub emails the owner), leaves the dump in `dail
 
 ## Off until the owner turns it on
 
-Both workflows run, but their `gate` job stops with a notice (the run passes) until the owner sets the switches. The production precondition only runs once production deploys are on. Nothing creates, changes or pays for infrastructure until the owner does the steps below.
+Both workflows run, but their `gate` job stops with a notice (the run passes) until the owner sets the switches. The production precondition only runs once production deploys are on, and a staging refresh run that stopped at its gate, or whose redeploy was skipped, never satisfies it. Nothing creates, changes or pays for infrastructure until the owner does the steps below.
 
 ### Owner checklist (real infrastructure, costs money)
 
@@ -59,9 +60,10 @@ To turn either off, delete the variable or set it to anything but `true`.
 
 ## Before every release
 
-1. Run **Staging refresh** on `develop` at the commit you are about to release. It fails if the last verified backup is more than 36 hours old: then the nightly backup is broken, and that comes first.
-2. Check staging: the redeploy's log has `release: done` and the staleness report; open the app on staging.
-3. Merge the release PR. The production deploy's "Staging refreshed" step finds that refresh run by tree and lets the deploy go on. If `develop` moved since, refresh again.
+1. If `main` has commits `develop` lacks (docs committed straight to `main`), merge `main` into `develop` first. Otherwise no `develop` commit has the release merge's tree, and the production deploy's precondition stops it.
+2. Run **Staging refresh** on `develop` at the commit you are about to release. It fails if the last verified backup is more than 36 hours old: then the nightly backup is broken, and that comes first.
+3. Check staging: the redeploy's log has `release: done` and the staleness report; open the app on staging.
+4. Merge the release PR. The production deploy's "Staging refreshed" step finds that refresh run by tree, checks its restore and redeploy jobs both succeeded, and lets the deploy go on. If `develop` moved since, refresh again.
 
 ## Restore runbooks
 

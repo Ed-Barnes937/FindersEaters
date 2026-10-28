@@ -145,7 +145,7 @@ A manually dispatched workflow, run at least once before every release PR from `
 
 This is the restore drill on the real provider: if a production backup cannot be restored into Neon and migrated by the next release, the release is blocked before it reaches `main`. Resetting the Neon branch to its parent would be faster but would test nothing, and would not survive a move off Neon.
 
-**The refresh is a precondition of the production deploy**, enforced, not only a checklist item: the production deploy job stops unless a successful run of the staging refresh workflow on `develop` had the same git tree as the `main` commit being deployed. The workflow is inert until the owner sets `STAGING_REFRESH_ENABLED=true` (and staging deploys are on).
+**The refresh is a precondition of the production deploy**, enforced, not only a checklist item: the production deploy job stops unless a run of the staging refresh workflow on `develop`, at a commit with the same git tree as the `main` commit being deployed, both restored the backup and redeployed staging (a run that was switched off or skipped the redeploy does not count). Docs committed straight to `main` must be merged into `develop` before the refresh, or no `develop` commit has the release's tree. The workflow is inert until the owner sets `STAGING_REFRESH_ENABLED=true` (and staging deploys are on).
 
 **Release checklist** (in the release PR template): CI green; staging refreshed and deployed; the staging batch re-parse report (section 7) reviewed if the release changes the engine or KB version; then the owner merges.
 

@@ -44,8 +44,7 @@ expect_eq() {
 }
 manifest_field() {
   fe_aws s3 cp --only-show-errors "s3://$BACKUP_BUCKET/manifest/latest.json" /work/check.json
-  python3 -c "import json,sys; m=json.load(open(sys.argv[1])); print(eval(sys.argv[2], {}, {'m': m}))" \
-    "$fe_work/check.json" "$1"
+  jq -r "$1" "$fe_work/check.json"
 }
 release_on() {
   fe_app "$image" -e DATABASE_URL_DIRECT="$1" -- release
@@ -65,10 +64,12 @@ docker run -d --name "$s3" --network "$fe_net" \
 fe_containers+=("$s3")
 fe_throwaway_postgres "$prod"
 fe_throwaway_postgres "$staging"
+s3_up=false
 for _ in $(seq 30); do
-  fe_aws s3 ls >/dev/null 2>&1 && break
+  fe_aws s3 ls >/dev/null 2>&1 && s3_up=true && break
   sleep 1
 done
+[ "$s3_up" = true ] || fail "the RustFS S3 store did not answer within 30 seconds"
 fe_aws s3 mb "s3://$BACKUP_BUCKET"
 cp "$here/lifecycle.json" "$fe_work/lifecycle.json"
 fe_aws s3api put-bucket-lifecycle-configuration --bucket "$BACKUP_BUCKET" \
@@ -84,16 +85,16 @@ add_household "$prod_url" "Prod one" one@example.test
 
 step "first backup, on the 1st of the month"
 nightly 2026-10-01
-expect_eq "manifest date" "$(manifest_field "m['date']")" 2026-10-01
-expect_eq "manifest households" "$(manifest_field "m['rowCounts']['public.household']")" 1
+expect_eq "manifest date" "$(manifest_field .date)" 2026-10-01
+expect_eq "manifest households" "$(manifest_field '.rowCounts["public.household"]')" 1
 expect_eq "monthly copy kept" \
   "$(fe_aws s3 ls "s3://$BACKUP_BUCKET/monthly/" | awk '{print $4}')" 2026-10.dump
 
 step "second backup, a household more"
 add_household "$prod_url" "Prod two" two@example.test
 nightly 2026-10-02
-expect_eq "manifest date" "$(manifest_field "m['date']")" 2026-10-02
-expect_eq "manifest households" "$(manifest_field "m['rowCounts']['public.household']")" 2
+expect_eq "manifest date" "$(manifest_field .date)" 2026-10-02
+expect_eq "manifest households" "$(manifest_field '.rowCounts["public.household"]')" 2
 expect_eq "no monthly copy on the 2nd" \
   "$(fe_aws s3 ls "s3://$BACKUP_BUCKET/monthly/" | awk '{print $4}')" 2026-10.dump
 
@@ -105,7 +106,7 @@ if nightly 2026-10-03 >"$fe_work/fewer.log" 2>&1; then
 fi
 grep -q 'public.household has 1 row, fewer than the 2 in the previous backup' "$fe_work/fewer.log" ||
   { cat "$fe_work/fewer.log"; fail "the failure did not name the shrunken table"; }
-expect_eq "manifest not advanced" "$(manifest_field "m['date']")" 2026-10-02
+expect_eq "manifest not advanced" "$(manifest_field .date)" 2026-10-02
 fe_object_exists daily/2026-10-03.dump || fail "the failed dump was not kept for diagnosis"
 echo "ok: failed dump kept for diagnosis"
 
@@ -118,7 +119,7 @@ if nightly 2026-10-04 >"$fe_work/history.log" 2>&1; then
 fi
 grep -q 'is not one this build ships' "$fe_work/history.log" ||
   { cat "$fe_work/history.log"; fail "the failure did not name the migration history"; }
-expect_eq "manifest not advanced" "$(manifest_field "m['date']")" 2026-10-02
+expect_eq "manifest not advanced" "$(manifest_field .date)" 2026-10-02
 sql "$prod_url" "delete from drizzle.__drizzle_migrations where hash = repeat('e', 64)"
 
 step "staging: migrated, holding its own junk"
