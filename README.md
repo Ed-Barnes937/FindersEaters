@@ -6,13 +6,14 @@ A household recipe, meal-planning and shopping app. Product and design docs live
 
 A pnpm + Turborepo monorepo (`docs/adr/0001-stack-and-hosting.md`):
 
-| Path                   | What                                                                             |
-| ---------------------- | -------------------------------------------------------------------------------- |
-| `apps/server`          | Fastify server: serves the built web app, `/health`, and later the API           |
-| `apps/web`             | React SPA (Vite, TanStack Router and Query, SCSS modules, Base UI)               |
-| `apps/web/src/styles/` | `tokens.css`, the app's one set of design tokens (from `docs/design-reference/`) |
-| `packages/*`           | `engine`, `kb`, `query`, `scale`, `suggest`, `shopping`, `db` (spec section 4)   |
-| `packages/config`      | Shared TypeScript, ESLint and Prettier config                                    |
+| Path                   | What                                                                              |
+| ---------------------- | --------------------------------------------------------------------------------- |
+| `apps/server`          | Fastify server: serves the built web app, `/health`, and later the API            |
+| `apps/web`             | React SPA (Vite, TanStack Router and Query, SCSS modules, Base UI)                |
+| `apps/web/src/styles/` | `tokens.css`, the app's one set of design tokens (from `docs/design-reference/`)  |
+| `packages/*`           | `engine`, `kb`, `query`, `scale`, `suggest`, `shopping`, `db` (spec section 4)    |
+| `packages/config`      | Shared TypeScript, ESLint and Prettier config                                     |
+| `scripts`              | Operator scripts: the provisioning wizard, the image smoke test, Fly config check |
 
 ## Run
 
@@ -33,7 +34,7 @@ For development, run `pnpm dev` with the same environment: Vite serves the web a
 
 ## Deploy
 
-One Docker image, two Fly apps (`fly.toml` production from `main`, `fly.staging.toml` staging from `develop`), deployed by GitHub Actions after the release step. Deploys stay off until the owner provisions and switches them on. Runbook, switch-on checklist and rollback: `docs/runbooks/deploy.md`. Check an image locally with `docker build -t finders-eaters:local . && scripts/image-smoke.sh finders-eaters:local`.
+One Docker image, two Fly apps (`fly.toml` production from `main`, `fly.staging.toml` staging from `develop`), deployed by GitHub Actions after the release step. Deploys stay off until the owner provisions and switches them on with the wizard, `scripts/provision.sh staging` then `production` (`docs/runbooks/provisioning.md`; `--dry-run` rehearses it against fakes). Runbook, switch-on checklist and rollback: `docs/runbooks/deploy.md`. Check an image locally with `docker build -t finders-eaters:local . && scripts/image-smoke.sh finders-eaters:local`.
 
 ## Test
 
@@ -46,7 +47,7 @@ docker compose up -d --wait   # Postgres on localhost:5432, user and password po
 Each test run creates its own throwaway database in it, applies the migrations once and drops it at the end; each test runs in a transaction that is rolled back. Set `DATABASE_URL` to point the tests at another server. Migrations and their rules: `packages/db/migrations/README.md`.
 
 ```sh
-pnpm lint            # ESLint, every workspace
+pnpm lint            # ESLint, every workspace, and shellcheck over scripts/
 pnpm typecheck       # tsc, every workspace
 pnpm test            # Vitest unit and database tests
 pnpm e2e             # Playwright against the production build, 390 px viewport
