@@ -2,9 +2,9 @@
 # 17.2): format, the migration checks, lint, typecheck, unit and database tests,
 # the production build, the Playwright smoke test against that build on a
 # 390 px viewport, the deploy image with its release step, and actionlint over
-# every workflow. Postgres is a
-# container on the runner; nothing here touches cloud resources. Retries are 0 everywhere:
-# a flaky test is a bug, so nothing here re-runs on failure.
+# every workflow. Postgres is a container on the runner; nothing here touches
+# cloud resources. Retries are 0 everywhere: a flaky test is a bug, so nothing
+# here re-runs on failure.
 name: CI
 
 on:
