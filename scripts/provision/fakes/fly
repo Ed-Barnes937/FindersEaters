@@ -90,6 +90,7 @@ case "${1:-} ${2:-}" in
     cmd="$(opt -C "$@")"
     words "$cmd"
     [[ "${WORDS[0]:-} ${WORDS[1]:-}" == 'node apps/server/src/cli.ts' ]] || die "unexpected command: $cmd"
+    # shellcheck disable=SC2154 # flags sets the F_* variables
     case "${WORDS[2]:-} ${WORDS[3]:-}" in
       'household create')
         flags --name --email --user-name -- "${WORDS[@]:4}"
