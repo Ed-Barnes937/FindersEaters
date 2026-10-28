@@ -10,7 +10,14 @@ set -euo pipefail
 F="$PROVISION_FAKE_STATE/fake"
 mkdir -p "$F"
 args="$*"
-printf '%s %s\n' "$(basename "$0")" "${args//$'\n'/ }" >>"$PROVISION_FAKE_STATE/calls.log"
+call="$(basename "$0") ${args//$'\n'/ }"
+printf '%s\n' "$call" >>"$PROVISION_FAKE_STATE/calls.log"
+
+# PROVISION_FAKE_FAIL: a regex; a call matching it fails, as a real CLI might.
+if [[ -n "${PROVISION_FAKE_FAIL:-}" && "$call" =~ $PROVISION_FAKE_FAIL ]]; then
+  printf 'fake %s: failing on request\n' "$(basename "$0")" >&2
+  exit 1
+fi
 
 # put PATH VALUE / get PATH / has PATH: the fake world's files.
 put() {

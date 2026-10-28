@@ -301,6 +301,28 @@ has_command() { command -v "$1" >/dev/null 2>&1; }
 
 gh_has_secret() { gh secret list --json name | jq -e --arg n "$1" 'any(.[]; .name == $n)' >/dev/null; }
 
+# set_secret NAME VALUE and set_var NAME VALUE replace the library's versions,
+# which carry on past a gh failure. Stage 1 has checked gh is signed in, so a
+# failure here is real: it stops the wizard. Each value is then checked in
+# GitHub before moving on.
+set_secret() {
+  local name="$1" value="$2"
+  printf '%s' "$value" | gh secret set "$name" >/dev/null ||
+    die "Setting GitHub secret $name failed (see the error above)."
+  until_ok "GitHub secret $name is set" gh_has_secret "$name"
+  WRITTEN_SECRET+=("$name")
+}
+set_var() {
+  local name="$1" value="$2"
+  gh variable set "$name" --body "$value" >/dev/null ||
+    die "Setting GitHub variable $name failed (see the error above)."
+  until_ok "GitHub variable $name is $value" gh_var_is "$name" "$value"
+}
+gh_var_is() { # NAME VALUE
+  gh variable list --json name,value |
+    jq -e --arg n "$1" --arg v "$2" 'any(.[]; .name == $n and .value == $v)' >/dev/null
+}
+
 fly_app_exists() { fly apps list --json | jq -e --arg a "$1" 'any(.[]; (.Name // .name) == $a)' >/dev/null; }
 
 fly_secret_names() { fly secrets list -a "$APP" --json | jq -r '.[] | (.Name // .name)' | sort | tr '\n' ' '; }
@@ -581,7 +603,6 @@ fi
 until_ok "GitHub secret $token_secret is set" gh_has_secret "$token_secret"
 if [[ "$ENVIRONMENT" == staging ]]; then
   set_secret STAGING_DATABASE_URL_DIRECT "$DATABASE_URL_DIRECT"
-  until_ok "GitHub secret STAGING_DATABASE_URL_DIRECT is set" gh_has_secret STAGING_DATABASE_URL_DIRECT
 fi
 
 stage "Switch $ENVIRONMENT deploys on and deploy"

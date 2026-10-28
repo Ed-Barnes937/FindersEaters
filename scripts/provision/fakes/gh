@@ -6,15 +6,24 @@
 # shellcheck source=_fake.sh
 . "$(dirname "$0")/_fake.sh"
 
+# dropped NAME: PROVISION_FAKE_DROP names a secret or variable that gh reports
+# as set but GitHub never holds.
+dropped() { [[ "$1" == "${PROVISION_FAKE_DROP:-}" ]]; }
+
 case "${1:-} ${2:-}" in
   'auth status') echo 'Logged in to github.com as owner' ;;
   'secret set')
     value="$(cat)"
     [[ -n "$value" ]] || die "empty value for $3"
-    put "gh/secrets/$3" "$value"
+    dropped "$3" || put "gh/secrets/$3" "$value"
     ;;
   'secret list') names gh/secrets ;;
-  'variable set') put "gh/variables/$3" "$(opt --body "$@")" ;;
+  'variable set') dropped "$3" || put "gh/variables/$3" "$(opt --body "$@")" ;;
+  'variable list')
+    for name in $(names gh/variables | jq -r '.[].name'); do
+      jq -n --arg n "$name" --arg v "$(get "gh/variables/$name")" '{name: $n, value: $v}'
+    done | jq -s .
+    ;;
   'workflow run')
     case "$3" in
       deploy-staging.yml) env=STAGING app=finders-eaters-staging ;;
