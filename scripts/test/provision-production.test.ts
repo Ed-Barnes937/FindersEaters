@@ -85,6 +85,23 @@ describe('provision.sh production --dry-run', () => {
     )
   })
 
+  it('passes names with spaces and quotes to the admin CLI as single arguments', async () => {
+    const state = await stagingDone()
+    const replies = production(true).map((r) =>
+      r.prompt.source.startsWith('Household name')
+        ? { ...r, reply: `Ed & Sam's "place"` }
+        : r.prompt.source.startsWith("Second user's first name")
+          ? { ...r, reply: 'Sam Jo' }
+          : r,
+    )
+
+    const run = await runWizard(['production', '--dry-run'], replies, { state })
+
+    expect(run.code).toBe(0)
+    expect(fake(state, 'household/name')).toBe(`Ed & Sam's "place"`)
+    expect(fake(state, 'household/users/partner@example.com')).toBe('member Sam Jo')
+  })
+
   it('leaves production deploys off until the Clef canary lands, and says what is left', async () => {
     const state = await stagingDone()
 

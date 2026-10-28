@@ -658,8 +658,21 @@ if [[ "$ENVIRONMENT" == production ]]; then
   else
     say "Accounts are made with the admin CLI on the running app"
     say "(docs/spec/auth.md section 4). Each first password is shown once: keep it."
+    # fly_word ARG: ARG as one word for fly ssh console -C. -C runs no shell:
+    # the machine splits the command on whitespace, honouring '...' and "...".
+    # So a plain word goes as it is, and anything else is single-quoted, with
+    # each ' inside it written as "'" (backslashes are not escapes there).
+    fly_word() {
+      if [[ "$1" =~ ^[A-Za-z0-9@._/:=+-]+$ ]]; then
+        printf '%s' "$1"
+      else
+        printf "'%s'" "${1//\'/\'\"\'\"\'}"
+      fi
+    }
     admin() { # ARGS...: run the admin CLI on the app over fly ssh
-      fly ssh console -a "$APP" -C "node apps/server/src/cli.ts$(printf ' %q' "$@")"
+      local command="node apps/server/src/cli.ts" arg
+      for arg in "$@"; do command+=" $(fly_word "$arg")"; done
+      fly ssh console -a "$APP" -C "$command"
     }
     HOUSEHOLD_ID="$(remembered HOUSEHOLD_ID)"
     if [[ -z "$HOUSEHOLD_ID" ]]; then

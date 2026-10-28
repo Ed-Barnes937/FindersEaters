@@ -5,6 +5,52 @@
 
 app="$(opt -a "$@" || true)"
 
+# words TEXT: sets WORDS to TEXT split the way fly ssh console -C splits its
+# command: on whitespace, with '...' and "..." quoting. No shell runs, so a
+# backslash, $ or glob stays as it is.
+words() {
+  local text="$1" word="" quote="" c i inword=false
+  WORDS=()
+  for ((i = 0; i < ${#text}; i++)); do
+    c="${text:i:1}"
+    if [[ -n "$quote" ]]; then
+      if [[ "$c" == "$quote" ]]; then quote=""; else word+="$c"; fi
+    elif [[ "$c" == "'" || "$c" == '"' ]]; then
+      quote="$c" inword=true
+    elif [[ "$c" == [[:space:]] ]]; then
+      if $inword; then WORDS+=("$word"); fi
+      word="" inword=false
+    else
+      word+="$c" inword=true
+    fi
+  done
+  [[ -z "$quote" ]] || die "unterminated quote in: $text"
+  if $inword; then WORDS+=("$word"); fi
+}
+
+# flags NAMES... -- ARGS...: for each "--some-flag value" pair in ARGS, sets
+# F_some_flag. Every NAME is required and anything else is refused, as the
+# admin CLI would.
+flags() {
+  local names=() name var
+  while [[ "$1" != -- ]]; do
+    names+=("$1")
+    shift
+  done
+  shift
+  while (($#)); do
+    [[ " ${names[*]} " == *" $1 "* && $# -ge 2 ]] || die "admin CLI: unexpected argument '$1'"
+    var="${1#--}"
+    printf -v "F_${var//-/_}" '%s' "$2"
+    shift 2
+  done
+  for name in "${names[@]}"; do
+    var="${name#--}"
+    var="F_${var//-/_}"
+    [[ -n "${!var+set}" ]] || die "admin CLI: missing $name"
+  done
+}
+
 case "${1:-} ${2:-}" in
   'auth whoami') echo 'owner@example.com' ;;
   'apps list') names fly/apps | jq '[.[] | {Name: .name}]' ;;
@@ -42,24 +88,27 @@ case "${1:-} ${2:-}" in
   'ssh console')
     has "fly/deployed/$app" || die "app $app has no running machines"
     cmd="$(opt -C "$@")"
-    case "$cmd" in
-      *'household create'*)
-        email="$(sed -E 's/.*--email ([^ ]+).*/\1/' <<<"$cmd")"
-        has "household/users/$email" && die "A user with email $email already exists."
-        put "household/users/$email" 'owner'
+    words "$cmd"
+    [[ "${WORDS[0]:-} ${WORDS[1]:-}" == 'node apps/server/src/cli.ts' ]] || die "unexpected command: $cmd"
+    case "${WORDS[2]:-} ${WORDS[3]:-}" in
+      'household create')
+        flags --name --email --user-name -- "${WORDS[@]:4}"
+        has "household/users/$F_email" && die "A user with email $F_email already exists."
+        put "household/users/$F_email" "owner $F_user_name"
+        put household/name "$F_name"
         put household/id 'hh_fake_01'
-        echo 'Created household "The Household" (id hh_fake_01, timezone Europe/London).'
-        echo "Created user $email (id u_fake_01)."
+        echo "Created household \"$F_name\" (id hh_fake_01, timezone Europe/London)."
+        echo "Created user $F_email (id u_fake_01)."
         echo 'First password (shown once): fake-first-password-1'
         ;;
-      *'user add'*)
-        email="$(sed -E 's/.*--email ([^ ]+).*/\1/' <<<"$cmd")"
-        if has "household/users/$email"; then
-          echo "A user with email $email already exists." >&2
+      'user add')
+        flags --household --email --name -- "${WORDS[@]:4}"
+        if has "household/users/$F_email"; then
+          echo "A user with email $F_email already exists." >&2
           exit 1
         fi
-        put "household/users/$email" 'member'
-        echo "Created user $email (id u_fake_02) in household hh_fake_01."
+        put "household/users/$F_email" "member $F_name"
+        echo "Created user $F_email (id u_fake_02) in household $F_household."
         echo 'First password (shown once): fake-first-password-2'
         ;;
       *) die "unexpected command: $cmd" ;;
