@@ -1,6 +1,9 @@
 // The staging half of the provisioning wizard, rehearsed with --dry-run: every
 // CLI it calls (fly, gh, neonctl, psql, aws, curl, the browser) is a fake from
 // scripts/provision/fakes, so nothing outside this machine is touched.
+import { writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
 import { calls, creates, fake, fakeNames, newState, runWizard, type Reply } from './drive.ts'
@@ -81,5 +84,18 @@ describe('provision.sh staging --dry-run', () => {
     expect(fake(state, 'fly/secrets/finders-eaters-staging/BETTER_AUTH_SECRET')).toBe(authSecret)
     expect(fake(state, 'gh/secrets/FLY_API_TOKEN_STAGING')).toBe(deployToken)
     expect(fake(state, 'gh/secrets/CLOUDFLARE_API_TOKEN')).toBe(token)
+  })
+
+  it('reruns cleanly when the app has a secret beyond the six it needs', async () => {
+    const state = newState()
+    await runWizard(['staging', '--dry-run'], firstRun, { state })
+    writeFileSync(join(state, 'fake/fly/secrets/finders-eaters-staging/SENTRY_DSN'), 'https://x')
+
+    const rerun = await runWizard(['staging', '--dry-run'], [{ prompt: /\[y\/N\]/, reply: 'n' }], {
+      state,
+    })
+
+    expect(rerun.output).toContain('finders-eaters-staging has its six secrets')
+    expect(rerun.code).toBe(0)
   })
 })

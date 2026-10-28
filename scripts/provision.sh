@@ -587,8 +587,13 @@ printf '%s\n' \
   "BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET" \
   "BETTER_AUTH_URL=https://$HOST" |
   fly secrets import -a "$APP" --stage >/dev/null || die "fly secrets import failed."
-secrets_ok() {
-  [[ "$(fly_secret_names)" == "BETTER_AUTH_SECRET BETTER_AUTH_URL CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_API_TOKEN DATABASE_URL DATABASE_URL_DIRECT " ]]
+secrets_ok() { # the app holds all six (others it may also have are left alone)
+  local names name
+  names=" $(fly_secret_names)"
+  for name in BETTER_AUTH_SECRET BETTER_AUTH_URL CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_API_TOKEN \
+    DATABASE_URL DATABASE_URL_DIRECT; do
+    [[ "$names" == *" $name "* ]] || return 1
+  done
 }
 until_ok "$APP has its six secrets" secrets_ok
 

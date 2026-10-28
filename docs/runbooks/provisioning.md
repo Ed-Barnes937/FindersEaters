@@ -21,7 +21,7 @@ scripts/provision.sh staging      # first: everything staging needs, ending with
 scripts/provision.sh production   # then: backups, production, the household and users
 ```
 
-Values worth keeping between runs (the Neon project id, the Cloudflare account ID and token, the generated `BETTER_AUTH_SECRET`s, the `backup` role password, the Tigris key, the household id) are saved to `~/.config/finderseaters/provision.env`, readable only by you. On a rerun, Enter keeps each one. Database URLs are read from Neon each time and not saved.
+Values worth keeping between runs (the Neon project id, the Cloudflare account ID and token, the generated `BETTER_AUTH_SECRET`s, the `backup` role password, the Tigris key, the household id) are saved to `~/.config/finderseaters/provision.env` (under `$XDG_CONFIG_HOME` instead when that is set, or wherever `PROVISION_ENV_FILE` points), readable only by you. On a rerun, Enter keeps each one. Database URLs are read from Neon each time and not saved.
 
 ## Stages
 
@@ -40,7 +40,7 @@ Values worth keeping between runs (the Neon project id, the Cloudflare account I
 | 11 | Custom domain: `fly certs add`, then a DNS-only CNAME in Cloudflare | `<sub>-staging.homeofed.com` | `<sub>.homeofed.com` | `https://<host>/health` says ok |
 | 12 | Household and both users with the admin CLI over `fly ssh console` | | yes | the CLI's output; the household id is kept so a rerun never makes a second one |
 
-Secrets go to Fly with `fly secrets import` and to GitHub with `gh secret set`, both over stdin. The Fly secrets are staged (`--stage`) and apply on the next deploy, which stage 10 runs.
+Secrets go to Fly with `fly secrets import` and to GitHub with `gh secret set`, both over stdin. Every GitHub secret and variable the wizard sets is then read back with `gh secret list` or `gh variable list` before it moves on, and a `gh` failure stops it. The Fly secrets are staged (`--stage`) and apply on the next deploy, which stage 10 runs.
 
 ## When a stage fails
 
@@ -56,7 +56,8 @@ These are the parts the dry run cannot prove against the real services:
 - **`backup` role grant.** The role is made in SQL, so it does not join `neon_superuser`. If Neon refuses `grant pg_read_all_data`, stop and tell the agent; do not give the role more than read access.
 - **Tigris lifecycle rules.** If Tigris rejects prefix-filtered expiration rules, stop and tell the agent, rather than letting backups pile up or expire everything.
 - **Cloudflare DNS.** Proxy status must be "DNS only" (grey cloud) for Fly to issue the certificate.
+- **Household and user names.** They reach the admin CLI over `fly ssh console -C`, which splits words itself rather than through a shell; the wizard single-quotes any name with spaces or quotes for it. Check the name in the CLI's output is exactly what you typed. If it is not, stop and tell the agent before adding the second user.
 
 ## Tests
 
-`pnpm --filter @finders-eaters/scripts test` drives the wizard over stdin and stdout in dry-run mode for both halves, including reruns and a rejected Cloudflare token, and runs the `backup` role SQL against the test Postgres. The fakes are in `scripts/provision/fakes/`.
+`pnpm --filter @finders-eaters/scripts test` drives the wizard over stdin and stdout in dry-run mode for both halves, including reruns, a rejected Cloudflare token, `gh` failing or not holding a value, and names with spaces and quotes, and runs the `backup` role SQL against the test Postgres. The fakes are in `scripts/provision/fakes/`.
