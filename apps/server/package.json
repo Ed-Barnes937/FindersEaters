@@ -7,8 +7,9 @@
     ".": "./src/app.ts"
   },
   "scripts": {
-    "dev": "DATABASE_URL=${DATABASE_URL:-postgres://postgres:postgres@localhost:5432/finders_eaters} node --watch src/main.ts",
+    "dev": "node --watch src/main.ts",
     "start": "node src/main.ts",
+    "cli": "node src/cli.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
@@ -16,6 +17,8 @@
   "dependencies": {
     "@fastify/static": "^10.1.6",
     "@finders-eaters/db": "workspace:*",
+    "@trpc/server": "^11.19.0",
+    "better-auth": "^1.7.10",
     "fastify": "^5.12.7"
   },
   "devDependencies": {

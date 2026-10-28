@@ -1,30 +1,55 @@
-// Operator commands: `node apps/server/src/cli.ts <command>`. Fly runs
-// `release` as the release_command; the rest arrive with their tickets
-// (docs/spec/v0.1.md section 4). Exit codes: 0 done, 1 failed, 2 misuse.
+// Operator commands, in the app image next to the server and run against the
+// same environment: `node apps/server/src/cli.ts <command>`.
+//
+//   release   Fly's release_command (docs/spec/operations.md section 3.1):
+//             migrate, load the KB, rebuild projections, report staleness.
+//             Needs only DATABASE_URL_DIRECT.
+//   household / user   the admin CLI (docs/spec/auth.md section 4), e.g.
+//             pnpm --filter @finders-eaters/server cli household create \
+//               --name "The Barneses" --email ed@example.com --user-name Ed
+//
+// Exit codes: 0 done, 1 failed, 2 misuse. Run with no arguments for the usage.
+import { connect } from '@finders-eaters/db'
+
+import { runCli } from './cli/run.ts'
+import { readConfig } from './config.ts'
 import { release } from './release.ts'
 
-const USAGE =
-  'usage: cli.ts <command>\n\ncommands:\n  release   migrate, load the KB, rebuild projections, report staleness\n'
+const args = process.argv.slice(2)
 
-const [command] = process.argv.slice(2)
+if (args[0] === 'release' && args.length === 1) {
+  process.exitCode = await runRelease()
+} else {
+  process.exitCode = await runAdmin(args)
+}
 
-switch (command) {
-  case 'release': {
-    // The direct (unpooled) URL: the migration advisory lock is per session.
-    const url = process.env.DATABASE_URL_DIRECT
-    if (!url) {
-      process.stderr.write('DATABASE_URL_DIRECT is not set\n')
-      process.exit(2)
-    }
-    try {
-      await release(url, (line) => process.stdout.write(`${line}\n`))
-    } catch (error) {
-      process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`)
-      process.exit(1)
-    }
-    break
+async function runRelease(): Promise<number> {
+  // The direct (unpooled) URL: the migration advisory lock is per session.
+  const url = process.env.DATABASE_URL_DIRECT
+  if (!url) {
+    process.stderr.write('DATABASE_URL_DIRECT is not set\n')
+    return 2
   }
-  default:
-    process.stderr.write(USAGE)
-    process.exit(2)
+  try {
+    await release(url, (line) => process.stdout.write(`${line}\n`))
+    return 0
+  } catch (error) {
+    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`)
+    return 1
+  }
+}
+
+async function runAdmin(argv: string[]): Promise<number> {
+  const config = readConfig(process.env)
+  const database = connect(config.databaseUrl, { max: 1 })
+  try {
+    return await runCli(argv, {
+      db: database.db,
+      auth: config.auth,
+      out: (text) => process.stdout.write(`${text}\n`),
+      err: (text) => process.stderr.write(`${text}\n`),
+    })
+  } finally {
+    await database.close()
+  }
 }

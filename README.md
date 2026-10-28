@@ -24,11 +24,12 @@ The server needs Postgres: start it with `docker compose up -d --wait` (see Test
 pnpm install
 pnpm build                                   # builds the web app into apps/web/dist
 export DATABASE_URL=postgres://postgres:postgres@localhost:5432/finders_eaters
+export BETTER_AUTH_SECRET=local-only-secret-at-least-32-characters BETTER_AUTH_URL=http://localhost:8080
 DATABASE_URL_DIRECT=$DATABASE_URL node apps/server/src/cli.ts release   # migrate, as a deploy does
 pnpm --filter @finders-eaters/server start   # serves it on http://localhost:8080
 ```
 
-For development, run `pnpm dev`: Vite serves the web app with hot reload and proxies `/api` and `/health` to the server on port 8080 (which defaults `DATABASE_URL` to the Compose Postgres).
+For development, run `pnpm dev` with the same environment: Vite serves the web app with hot reload and proxies `/api` and `/health` to the server on port 8080.
 
 ## Deploy
 

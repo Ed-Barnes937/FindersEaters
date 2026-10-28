@@ -38,6 +38,9 @@ const householdOwned: Record<string, ScopeCase> = {
 
 const notHouseholdOwned: Record<string, string> = {
   'public.user': 'Identity across households; reached only through household_user.',
+  'public.session': "Better Auth's; a user's signed-in devices, reached only through user.",
+  'public.account': "Better Auth's; a user's credentials, reached only through user.",
+  'public.verification': "Better Auth's; short-lived values keyed by identifier, not by owner.",
 }
 
 describe('household scope', () => {

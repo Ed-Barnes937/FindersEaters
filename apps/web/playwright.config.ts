@@ -8,6 +8,22 @@ const PORT = 4173
 const DATABASE_URL =
   process.env.DATABASE_URL ?? 'postgres://postgres:postgres@localhost:5432/finders_eaters'
 
+/**
+ * The server's environment, shared with tests that run the admin CLI. The
+ * database is the local Compose one (or CI's service container); the auth
+ * secret is a fixed test value.
+ */
+export const serverEnv = {
+  PORT: String(PORT),
+  STATIC_DIR: 'dist',
+  DATABASE_URL,
+  // Locally one URL serves both; deployed, the release step gets Neon's direct
+  // (unpooled) URL.
+  DATABASE_URL_DIRECT: DATABASE_URL,
+  BETTER_AUTH_SECRET: 'e2e-only-secret-that-is-long-enough-for-better-auth',
+  BETTER_AUTH_URL: `http://localhost:${PORT}`,
+}
+
 export default defineConfig({
   testDir: 'e2e',
   forbidOnly: !!process.env.CI,
@@ -34,12 +50,7 @@ export default defineConfig({
   webServer: {
     command: 'node ../server/src/cli.ts release && node ../server/src/main.ts',
     url: `http://localhost:${PORT}/health`,
-    env: {
-      PORT: String(PORT),
-      STATIC_DIR: 'dist',
-      DATABASE_URL,
-      DATABASE_URL_DIRECT: DATABASE_URL,
-    },
+    env: serverEnv,
     reuseExistingServer: false,
   },
 })

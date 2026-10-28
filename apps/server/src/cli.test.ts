@@ -5,7 +5,7 @@ import { execFile } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 
-import { createEmptyDatabase, type EmptyDatabase } from '@finders-eaters/db/testing'
+import { createEmptyDatabase, migrationCount, type EmptyDatabase } from '@finders-eaters/db/testing'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 const cli = fileURLToPath(new URL('./cli.ts', import.meta.url))
@@ -44,7 +44,7 @@ describe('cli.ts release', () => {
 
     expect(result).toMatchObject({ code: 0, stderr: '' })
     expect(result.stdout.trim().split('\n')).toEqual([
-      'release: migrate: 1 migration applied in total',
+      `release: migrate: ${migrationCount()} migrations applied in total`,
       'release: knowledge base: skipped (no KB artifact in this build yet)',
       'release: projections: skipped (no projections in this build yet)',
       'release: staleness: no recipes in this build yet',
@@ -57,7 +57,9 @@ describe('cli.ts release', () => {
     const second = await run(['release'], { DATABASE_URL_DIRECT: database.url })
 
     expect(second.code).toBe(0)
-    expect(second.stdout).toContain('release: migrate: 1 migration applied in total')
+    expect(second.stdout).toContain(
+      `release: migrate: ${migrationCount()} migrations applied in total`,
+    )
   })
 
   it('exits non-zero when a step fails, so Fly aborts the deploy', async () => {
@@ -79,10 +81,14 @@ describe('cli.ts release', () => {
 })
 
 describe('cli.ts', () => {
-  it('rejects an unknown command with usage', async () => {
-    const result = await run(['nope'], {})
+  it('rejects an unknown command with usage that lists release', async () => {
+    const result = await run(['nope'], {
+      DATABASE_URL: 'postgres://postgres:postgres@127.0.0.1:1/none',
+      BETTER_AUTH_SECRET: 'test-only-secret-that-is-long-enough-for-better-auth',
+      BETTER_AUTH_URL: 'http://localhost:4173',
+    })
 
     expect(result.code).toBe(2)
-    expect(result.stderr).toContain('usage: cli.ts <command>')
+    expect(result.stderr).toMatch(/Usage:\n {2}release /)
   })
 })

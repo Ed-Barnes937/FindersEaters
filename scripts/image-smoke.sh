@@ -62,7 +62,10 @@ echo "failed as it should"
 
 step "server /health"
 docker run -d --name "$app" --network "$network" -p "127.0.0.1:$port:8080" \
-  -e DATABASE_URL="$url" "$image" >/dev/null
+  -e DATABASE_URL="$url" \
+  -e BETTER_AUTH_SECRET=image-smoke-only-secret-long-enough-for-better-auth \
+  -e BETTER_AUTH_URL="http://localhost:$port" \
+  "$image" >/dev/null
 body=""
 for _ in $(seq 30); do
   if body="$(curl -fsS --max-time 5 "http://127.0.0.1:$port/health" 2>/dev/null)"; then break; fi

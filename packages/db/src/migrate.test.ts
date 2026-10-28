@@ -6,6 +6,7 @@ import { connect } from './client.ts'
 import { checkDatabase } from './health.ts'
 import { MIGRATION_LOCK_ID, migrateDatabase } from './migrate.ts'
 import { createEmptyDatabase, type EmptyDatabase } from './testing/empty-database.ts'
+import { migrationCount } from './testing/migration-count.ts'
 
 let database: EmptyDatabase
 
@@ -20,10 +21,10 @@ afterEach(async () => {
 describe('migrateDatabase', () => {
   it('applies every migration to an empty database, and a rerun changes nothing', async () => {
     await migrateDatabase(database.url)
-    expect(await migrationsApplied()).toBe(1)
+    expect(await migrationsApplied()).toBe(migrationCount())
 
     await migrateDatabase(database.url)
-    expect(await migrationsApplied()).toBe(1)
+    expect(await migrationsApplied()).toBe(migrationCount())
   })
 
   it('fails on the lock timeout rather than queueing behind another holder of the lock', async () => {
@@ -44,7 +45,7 @@ describe('migrateDatabase', () => {
 
     // Once the holder is gone the same call goes through.
     await migrateDatabase(database.url, { lockTimeoutMs: 200 })
-    expect(await migrationsApplied()).toBe(1)
+    expect(await migrationsApplied()).toBe(migrationCount())
   })
 })
 
