@@ -1,7 +1,7 @@
 // The one Fastify process: the built web SPA, `/health`, Better Auth at
 // `/api/auth/*`, the tRPC API and (later) the versioned import route. Built
 // without listening so tests drive it through `inject()`; `main.ts` listens.
-import type { Db } from '@finders-eaters/db'
+import { checkDatabase, type Db } from '@finders-eaters/db'
 import fastifyStatic from '@fastify/static'
 import { fastifyTRPCPlugin, type FastifyTRPCPluginOptions } from '@trpc/server/adapters/fastify'
 import Fastify, { type FastifyInstance } from 'fastify'
@@ -16,6 +16,7 @@ const API_PREFIXES = ['/api', '/trpc']
 export interface ServerOptions {
   /** Directory holding the built web SPA (`apps/web/dist`). */
   staticDir: string
+  /** The pooled database handle (`DATABASE_URL`). */
   db: Db
   auth: AuthConfig
 }
@@ -26,9 +27,16 @@ export async function buildServer(opts: ServerOptions): Promise<FastifyInstance>
   const app = Fastify({ logger: false, trustProxy: (_address, hop) => hop === 0 })
   const auth = createAuth(opts.db, opts.auth)
 
-  // Shallow liveness for now; becomes a database round-trip later
-  // (docs/spec/operations.md section 3).
-  app.get('/health', () => ({ ok: true }))
+  // A deep database round-trip (docs/spec/operations.md section 3): the deploy
+  // smoke test and Fly's machine check both read it. Clef usage joins the
+  // detail with the spend guard (docs/spec/v0.1.md section 17.6).
+  app.get('/health', async (_req, reply) => {
+    const database = await checkDatabase(opts.db)
+    if (!database.ok) {
+      return reply.status(503).send({ status: 'error', database })
+    }
+    return { status: 'ok', database }
+  })
 
   await app.register(authRoutes, { auth, baseURL: opts.auth.baseURL })
 

@@ -4,6 +4,9 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const PORT = 4173
+// The CI service container, or Docker Compose locally (README "Test").
+const DATABASE_URL =
+  process.env.DATABASE_URL ?? 'postgres://postgres:postgres@localhost:5432/finders_eaters'
 
 /**
  * The server's environment, shared with tests that run the admin CLI. The
@@ -13,8 +16,10 @@ const PORT = 4173
 export const serverEnv = {
   PORT: String(PORT),
   STATIC_DIR: 'dist',
-  DATABASE_URL:
-    process.env.DATABASE_URL ?? 'postgres://postgres:postgres@localhost:5432/finders_eaters',
+  DATABASE_URL,
+  // Locally one URL serves both; deployed, the release step gets Neon's direct
+  // (unpooled) URL.
+  DATABASE_URL_DIRECT: DATABASE_URL,
   BETTER_AUTH_SECRET: 'e2e-only-secret-that-is-long-enough-for-better-auth',
   BETTER_AUTH_URL: `http://localhost:${PORT}`,
 }
@@ -40,9 +45,10 @@ export default defineConfig({
       },
     },
   ],
+  // Started the way a deploy starts it: the release step, then the server.
+  // Ready when `/health` makes its database round-trip.
   webServer: {
-    // Migrations first, as the release step does (docs/spec/operations.md).
-    command: 'node ../../packages/db/src/bin/migrate.ts && node ../server/src/main.ts',
+    command: 'node ../server/src/cli.ts release && node ../server/src/main.ts',
     url: `http://localhost:${PORT}/health`,
     env: serverEnv,
     reuseExistingServer: false,

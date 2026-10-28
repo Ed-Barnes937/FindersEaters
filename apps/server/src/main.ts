@@ -1,6 +1,7 @@
 // Production entrypoint: `node src/main.ts` (Node 24 runs the TypeScript
-// source natively, so the server has no build step). Needs DATABASE_URL,
-// BETTER_AUTH_SECRET and BETTER_AUTH_URL (./config.ts).
+// source natively, so the server has no build step). Needs DATABASE_URL (the
+// pooled URL; the release step uses DATABASE_URL_DIRECT), BETTER_AUTH_SECRET
+// and BETTER_AUTH_URL (./config.ts).
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -15,7 +16,9 @@ const staticDir = process.env.STATIC_DIR
   : fileURLToPath(new URL('../../web/dist', import.meta.url))
 const port = Number(process.env.PORT ?? 8080)
 
-const database = connect(config.databaseUrl)
+// A bounded connect, so `/health` answers 503 instead of hanging when the
+// database cannot be reached (Neon's cold start is well inside this).
+const database = connect(config.databaseUrl, { connectionTimeoutMillis: 10_000 })
 const app = await buildServer({ staticDir, db: database.db, auth: config.auth })
 app.addHook('onClose', () => database.close())
 await app.listen({ port, host: '0.0.0.0' })

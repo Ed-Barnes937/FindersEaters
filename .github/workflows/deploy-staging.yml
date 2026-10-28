@@ -1,0 +1,31 @@
+# Every push to `develop` deploys `finders-eaters-staging`
+# (docs/spec/operations.md section 3). A no-op with a notice until the owner
+# sets DEPLOY_STAGING_ENABLED=true and the FLY_API_TOKEN_STAGING secret
+# (docs/runbooks/deploy.md).
+name: Deploy staging
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+# One staging deploy at a time; a newer push waits rather than cancelling a
+# deploy mid-release.
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  staging:
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: staging
+      app: finders-eaters-staging
+      config: fly.staging.toml
+      branch: develop
+      enabled: ${{ vars.DEPLOY_STAGING_ENABLED == 'true' }}
+    secrets:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_STAGING }}

@@ -1,0 +1,15 @@
+# Keep the build context to what the image needs. Host node_modules hold
+# platform binaries for the wrong OS, so the image always installs its own.
+**/node_modules
+**/dist
+**/.turbo
+**/playwright-report
+**/test-results
+.git
+.github
+.claude
+docs
+*.md
+!packages/db/migrations/**
+compose.yaml
+fly*.toml

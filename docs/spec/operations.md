@@ -18,7 +18,7 @@ Two Fly apps, one image each: `finders-eaters` (production, from `main`) and `fi
 
 - **Staging holds real household data.** That is the point: `develop`'s migrations, KB loads and re-parses are rehearsed on the real library before `main` gets them. It is acceptable for one household whose owner is the operator. Before any second household exists this needs revisiting (anonymised refresh or synthetic data).
 - **Fly secrets** per app: `DATABASE_URL` (pooled), `DATABASE_URL_DIRECT` (migrations, KB load, batch commands), `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` (a token scoped to Workers AI, for hosted Clef per `docs/adr/0002-clef-on-workers-ai.md`), `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`. Staging gets its own auth secret; the Cloudflare account and token may be shared.
-- **GitHub secrets**: one app-scoped Fly deploy token per app (`fly tokens create deploy -a <app>`), not an org token. `BACKUP_DATABASE_URL` (production, direct, a dedicated read-only `backup` role with `pg_read_all_data`), `STAGING_DATABASE_URL_DIRECT`, Tigris keys scoped to the backup bucket, and `CLOUDFLARE_ACCOUNT_ID` plus `CLOUDFLARE_API_TOKEN` for the Clef canary and the manual live golden-set workflow.
+- **GitHub secrets**: one app-scoped Fly deploy token per app (`fly tokens create deploy -a <app>`), not an org token: `FLY_API_TOKEN_STAGING` and `FLY_API_TOKEN_PRODUCTION`. `BACKUP_DATABASE_URL` (production, direct, a dedicated read-only `backup` role with `pg_read_all_data`), `STAGING_DATABASE_URL_DIRECT`, Tigris keys scoped to the backup bucket, and `CLOUDFLARE_ACCOUNT_ID` plus `CLOUDFLARE_API_TOKEN` for the Clef canary and the manual live golden-set workflow.
 
 ## 3. The deploy pipeline
 
@@ -31,6 +31,10 @@ All in GitHub Actions, with one concurrency group per environment so two deploys
 **On push to `develop`**: build the KB artifact (below), `fly deploy` to staging, then `GET /health` (a deep database round-trip) as a smoke test.
 
 **On push to `main`**: the same, to production.
+
+**Every PR also builds the image** and runs its release step against a fresh `pgvector/pgvector:pg17` container (from empty, then again to prove it is idempotent), checks that a failing release exits non-zero, and calls `/health` on the running image (`scripts/image-smoke.sh`).
+
+**Deploys are inert until the owner switches them on.** Each deploy workflow stops at a gate, with a notice and a passing run, unless the repository variable `DEPLOY_STAGING_ENABLED` (or `DEPLOY_PRODUCTION_ENABLED`) is `true` and that environment's Fly token secret is set. Real infrastructure is only ever created or changed by the owner (`docs/runbooks/deploy.md`).
 
 **The Clef canary** (`docs/adr/0002-clef-on-workers-ai.md`, engine spec section 4): a scheduled workflow, once a day, sends the dev golden requests to hosted Clef and compares the answer fingerprint (choices and probabilities) with the one in engine configuration. The same job runs before every production deploy, and a mismatch blocks that deploy. A daily mismatch fails the job and opens an issue with per-stage scores and the changed answers; production keeps running. About $0.04 a run.
 
@@ -49,9 +53,11 @@ All in GitHub Actions, with one concurrency group per environment so two deploys
 
 KB tables' DDL lives in the Drizzle migrations like every other schema, so there is one schema history; the KB load writes rows only.
 
+**`/health`** counts the rows of the Drizzle migration journal over the pooled connection: one query that needs a live database and a migrated schema. It answers `200 {"status":"ok","database":{"ok":true,"latencyMs":..,"migrationsApplied":..}}`, or `503` with `"database":{"ok":false,"error":"<code>"}`, where the code is a Postgres SQLSTATE or Node errno, never the driver's message, because the route is public. The day's Clef usage joins the detail with the spend guard (`docs/spec/v0.1.md` section 17.6). Fly's machine check and the deploy smoke test both call it.
+
 ### 3.2 Rollback
 
-- **Code**: redeploy the previous release's image (`fly releases -a <app> --image`, then `fly deploy --image <ref>`). The release step on the old image finds nothing to migrate. This always works because of the expand-only rule.
+- **Code**: redeploy the previous release's image (`fly releases -a <app> --image`, then `fly deploy --image <ref>`). The release step on the old image finds nothing to migrate. This always works because of the expand-only rule. Step by step: `docs/runbooks/deploy.md`.
 - **Data**: section 5's restore window. There are no down migrations.
 
 ## 4. Migration rules

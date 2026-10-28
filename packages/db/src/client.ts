@@ -14,7 +14,19 @@ export interface Database {
   close: () => Promise<void>
 }
 
-export function connect(url: string, options: { max?: number } = {}): Database {
-  const pool = new pg.Pool({ connectionString: url, max: options.max ?? 10, allowExitOnIdle: true })
+export interface ConnectOptions {
+  /** Pool size; default 10. */
+  max?: number
+  /** Give up on a new connection after this long; default no limit. */
+  connectionTimeoutMillis?: number
+}
+
+export function connect(url: string, options: ConnectOptions = {}): Database {
+  const pool = new pg.Pool({
+    connectionString: url,
+    max: options.max ?? 10,
+    connectionTimeoutMillis: options.connectionTimeoutMillis,
+    allowExitOnIdle: true,
+  })
   return { db: drizzle(pool, { schema }), close: () => pool.end() }
 }

@@ -19,6 +19,13 @@ test('the production build serves the app shell on a phone', async ({ page }) =>
   expect(errors).toEqual([])
 })
 
+test('/health reports the database round-trip after the release step', async ({ request }) => {
+  const res = await request.get('/health')
+
+  expect(res.status()).toBe(200)
+  expect(await res.json()).toMatchObject({ status: 'ok', database: { ok: true } })
+})
+
 test('a deep link loads the app shell instead of a server 404', async ({ page }) => {
   const res = await page.goto('/recipes')
 
