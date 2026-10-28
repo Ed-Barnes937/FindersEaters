@@ -36,6 +36,10 @@ on:
         description: Run the Clef canary before deploying (production)
         type: boolean
         default: false
+      require_staging_refresh:
+        description: Refuse to deploy unless a staging refresh succeeded on this tree (production)
+        type: boolean
+        default: false
     secrets:
       FLY_API_TOKEN:
         description: App-scoped deploy token (`fly tokens create deploy -a <app>`)
@@ -43,6 +47,8 @@ on:
 
 permissions:
   contents: read
+  # The staging refresh precondition reads that workflow's runs.
+  actions: read
 
 jobs:
   gate:
@@ -98,6 +104,19 @@ jobs:
       - name: Clef canary
         if: inputs.canary
         run: echo "::notice::The Clef canary is not built yet (#66); production deploys proceed without it until then."
+
+      # The staging refresh is a precondition of every production release
+      # (docs/spec/operations.md section 6): a run of staging-refresh.yml on
+      # develop, at a commit with exactly this commit's tree, whose restore
+      # and redeploy jobs both succeeded, so the code being released was
+      # deployed onto a restore of the latest production backup first. A run
+      # that was switched off or skipped the redeploy does not count.
+      # Otherwise nothing deploys.
+      - name: Staging refreshed
+        if: inputs.require_staging_refresh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/backup/staging-refreshed.sh
 
       - uses: superfly/flyctl-actions/setup-flyctl@1.6
 

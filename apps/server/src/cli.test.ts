@@ -10,6 +10,12 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 const cli = fileURLToPath(new URL('./cli.ts', import.meta.url))
 
+// Each test starts a Node process that loads the server from TypeScript
+// source, most then run the release step against Postgres, one twice. On a
+// 2-core CI runner with other test files in parallel that can pass Vitest's
+// 5 s default.
+const subprocess = { timeout: 30_000 }
+
 interface Run {
   code: number
   stdout: string
@@ -38,7 +44,7 @@ afterEach(async () => {
   await database.drop()
 })
 
-describe('cli.ts release', () => {
+describe('cli.ts release', subprocess, () => {
   it('migrates an empty database, runs the KB and projection hooks, then reports staleness', async () => {
     const result = await run(['release'], { DATABASE_URL_DIRECT: database.url })
 
@@ -80,7 +86,7 @@ describe('cli.ts release', () => {
   })
 })
 
-describe('cli.ts', () => {
+describe('cli.ts', subprocess, () => {
   it('rejects an unknown command with usage that lists release', async () => {
     const result = await run(['nope'], {
       DATABASE_URL: 'postgres://postgres:postgres@127.0.0.1:1/none',

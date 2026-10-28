@@ -17,6 +17,8 @@ concurrency:
 
 permissions:
   contents: read
+  # deploy.yml reads workflow runs for the staging refresh precondition.
+  actions: read
 
 jobs:
   staging:

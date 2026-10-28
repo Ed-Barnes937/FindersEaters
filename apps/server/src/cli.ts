@@ -4,6 +4,9 @@
 //   release   Fly's release_command (docs/spec/operations.md section 3.1):
 //             migrate, load the KB, rebuild projections, report staleness.
 //             Needs only DATABASE_URL_DIRECT.
+//   backup    the nightly backup's restore-verify and the staging refresh's
+//             freshness check (docs/spec/operations.md sections 5.2 and 6),
+//             called by scripts/backup/*.sh. See ./backup/cli.ts.
 //   household / user   the admin CLI (docs/spec/auth.md section 4), e.g.
 //             pnpm --filter @finders-eaters/server cli household create \
 //               --name "The Barneses" --email ed@example.com --user-name Ed
@@ -11,6 +14,7 @@
 // Exit codes: 0 done, 1 failed, 2 misuse. Run with no arguments for the usage.
 import { connect } from '@finders-eaters/db'
 
+import { runBackupCli } from './backup/cli.ts'
 import { runCli } from './cli/run.ts'
 import { readConfig } from './config.ts'
 import { release } from './release.ts'
@@ -19,6 +23,12 @@ const args = process.argv.slice(2)
 
 if (args[0] === 'release' && args.length === 1) {
   process.exitCode = await runRelease()
+} else if (args[0] === 'backup') {
+  process.exitCode = await runBackupCli(args.slice(1), {
+    env: process.env,
+    out: (line) => process.stdout.write(`${line}\n`),
+    err: (line) => process.stderr.write(`${line}\n`),
+  })
 } else {
   process.exitCode = await runAdmin(args)
 }
