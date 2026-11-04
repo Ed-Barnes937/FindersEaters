@@ -13,7 +13,10 @@ const staging: Reply[] = [
 ]
 
 const production = (canaryLanded: boolean): Reply[] => [
-  { prompt: /Is the Clef canary \(#66\) on main\?/, reply: canaryLanded ? 'y' : 'n' },
+  {
+    prompt: /Is the Clef canary \(#66\) on main and has the staging refresh passed\?/,
+    reply: canaryLanded ? 'y' : 'n',
+  },
   { prompt: /access key ID/, reply: 'tid_fake_key' },
   { prompt: /AWS_SECRET_ACCESS_KEY/, reply: 'tsec_fake_secret' },
   { prompt: /Household name/, reply: 'The Barneses' },
@@ -55,19 +58,25 @@ describe('provision.sh production --dry-run', () => {
       ['daily/', 35],
       ['monthly/', 400],
     ])
-    expect(fake(state, 'gh/variables/BACKUP_S3_BUCKET')).toBe('finders-eaters-backups')
-    expect(fake(state, 'gh/variables/BACKUP_S3_ENDPOINT')).toBe('https://fly.storage.tigris.dev')
 
     expect(fakeNames(state, 'gh/secrets')).toEqual([
       'BACKUP_DATABASE_URL',
-      'BACKUP_S3_ACCESS_KEY_ID',
-      'BACKUP_S3_SECRET_ACCESS_KEY',
       'CLOUDFLARE_ACCOUNT_ID',
       'CLOUDFLARE_API_TOKEN',
       'FLY_API_TOKEN_PRODUCTION',
       'FLY_API_TOKEN_STAGING',
       'STAGING_DATABASE_URL_DIRECT',
+      'TIGRIS_BACKUP_ACCESS_KEY_ID',
+      'TIGRIS_BACKUP_SECRET_ACCESS_KEY',
     ])
+    // The backup and the staging refresh stay off: the owner switches them on
+    // in the order docs/runbooks/backup-and-restore.md gives.
+    expect(fakeNames(state, 'gh/variables')).toEqual([
+      'DEPLOY_PRODUCTION_ENABLED',
+      'DEPLOY_STAGING_ENABLED',
+    ])
+    expect(run.output).toContain('nightly backup is off')
+    expect(run.output).toContain('staging refresh is off')
     expect(fake(state, 'fly/secrets/finders-eaters/BETTER_AUTH_URL')).toBe(
       'https://food.homeofed.com',
     )

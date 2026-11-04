@@ -35,7 +35,7 @@ step "fresh Postgres"
 docker network create "$network" >/dev/null
 docker run -d --name "$db" --network "$network" \
   -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=finders_eaters \
-  --health-cmd 'pg_isready -U postgres -d finders_eaters' --health-interval 1s --health-retries 60 \
+  --health-cmd 'pg_isready -h 127.0.0.1 -U postgres -d finders_eaters' --health-interval 1s --health-retries 60 \
   pgvector/pgvector:pg17 >/dev/null
 for _ in $(seq 60); do
   [ "$(docker inspect -f '{{.State.Health.Status}}' "$db")" = healthy ] && break

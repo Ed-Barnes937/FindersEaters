@@ -234,7 +234,10 @@ fi
 NEON_PROJECT_NAME=finders-eaters
 NEON_REGION=aws-eu-west-2 # AWS London
 RESTORE_WINDOW_SECONDS=604800 # 7 days
+# The bucket, endpoint and lifecycle rules the backup workflows use
+# (scripts/backup/lib.sh, .github/workflows/backup.yml).
 BACKUP_BUCKET=finders-eaters-backups
+TIGRIS_ENDPOINT=https://fly.storage.tigris.dev
 
 # ── helpers ───────────────────────────────────────────────────────────────
 
@@ -467,16 +470,14 @@ if [[ "$ENVIRONMENT" == production ]]; then
   stage "Tigris bucket for backups"
   say "Nightly dumps go to the private bucket $BACKUP_BUCKET, with a key that"
   say "can reach only that bucket."
-  BACKUP_S3_ENDPOINT="$(remembered BACKUP_S3_ENDPOINT)"
-  BACKUP_S3_ENDPOINT="${BACKUP_S3_ENDPOINT:-https://fly.storage.tigris.dev}"
-  BACKUP_S3_ACCESS_KEY_ID="$(remembered BACKUP_S3_ACCESS_KEY_ID)"
-  BACKUP_S3_SECRET_ACCESS_KEY="$(remembered BACKUP_S3_SECRET_ACCESS_KEY)"
+  TIGRIS_BACKUP_ACCESS_KEY_ID="$(remembered TIGRIS_BACKUP_ACCESS_KEY_ID)"
+  TIGRIS_BACKUP_SECRET_ACCESS_KEY="$(remembered TIGRIS_BACKUP_SECRET_ACCESS_KEY)"
   tigris() {
-    AWS_ACCESS_KEY_ID="$BACKUP_S3_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$BACKUP_S3_SECRET_ACCESS_KEY" \
-      AWS_REGION=auto aws "$@" --endpoint-url "$BACKUP_S3_ENDPOINT"
+    AWS_ACCESS_KEY_ID="$TIGRIS_BACKUP_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$TIGRIS_BACKUP_SECRET_ACCESS_KEY" \
+      AWS_REGION=auto aws "$@" --endpoint-url "$TIGRIS_ENDPOINT"
   }
   bucket_ok() { tigris s3api head-bucket --bucket "$BACKUP_BUCKET" >/dev/null 2>&1; }
-  if [[ -z "$BACKUP_S3_ACCESS_KEY_ID" ]] || ! bucket_ok; then
+  if [[ -z "$TIGRIS_BACKUP_ACCESS_KEY_ID" ]] || ! bucket_ok; then
     say "If the bucket does not exist yet, the wizard creates it with"
     say "'fly storage create', which prints a key scoped to that bucket once."
     if confirm "Create the Tigris bucket $BACKUP_BUCKET now? (No if it already exists)"; then
@@ -489,15 +490,14 @@ if [[ "$ENVIRONMENT" == production ]]; then
       open_url "https://console.tigris.dev"
       step "Create an access key with Editor access to $BACKUP_BUCKET only."
     fi
-    ask_secret_required BACKUP_S3_ACCESS_KEY_ID "Paste the access key ID (AWS_ACCESS_KEY_ID, hidden):"
-    ask_secret_required BACKUP_S3_SECRET_ACCESS_KEY "Paste the secret (AWS_SECRET_ACCESS_KEY, hidden):"
+    ask_secret_required TIGRIS_BACKUP_ACCESS_KEY_ID "Paste the access key ID (AWS_ACCESS_KEY_ID, hidden):"
+    ask_secret_required TIGRIS_BACKUP_SECRET_ACCESS_KEY "Paste the secret (AWS_SECRET_ACCESS_KEY, hidden):"
   fi
   until_ok "The key reaches bucket $BACKUP_BUCKET" bucket_ok
-  write_env BACKUP_S3_ENDPOINT "$BACKUP_S3_ENDPOINT"
-  write_env BACKUP_S3_ACCESS_KEY_ID "$BACKUP_S3_ACCESS_KEY_ID"
-  write_env BACKUP_S3_SECRET_ACCESS_KEY "$BACKUP_S3_SECRET_ACCESS_KEY"
+  write_env TIGRIS_BACKUP_ACCESS_KEY_ID "$TIGRIS_BACKUP_ACCESS_KEY_ID"
+  write_env TIGRIS_BACKUP_SECRET_ACCESS_KEY "$TIGRIS_BACKUP_SECRET_ACCESS_KEY"
   tigris s3api put-bucket-lifecycle-configuration --bucket "$BACKUP_BUCKET" \
-    --lifecycle-configuration "file://$assets/tigris-lifecycle.json" || die "Setting the lifecycle rules failed."
+    --lifecycle-configuration "file://$here/backup/lifecycle.json" || die "Setting the lifecycle rules failed."
   lifecycle_ok() {
     tigris s3api get-bucket-lifecycle-configuration --bucket "$BACKUP_BUCKET" | jq -e '
       [.Rules[] | select(.Status == "Enabled") | {p: .Filter.Prefix, d: .Expiration.Days}]
@@ -511,10 +511,8 @@ if [[ "$ENVIRONMENT" == production ]]; then
       tigris s3 rm "s3://$BACKUP_BUCKET/$probe" >/dev/null
   }
   until_ok "The key can write, read and delete in the bucket" write_read_ok
-  set_secret BACKUP_S3_ACCESS_KEY_ID "$BACKUP_S3_ACCESS_KEY_ID"
-  set_secret BACKUP_S3_SECRET_ACCESS_KEY "$BACKUP_S3_SECRET_ACCESS_KEY"
-  set_var BACKUP_S3_ENDPOINT "$BACKUP_S3_ENDPOINT"
-  set_var BACKUP_S3_BUCKET "$BACKUP_BUCKET"
+  set_secret TIGRIS_BACKUP_ACCESS_KEY_ID "$TIGRIS_BACKUP_ACCESS_KEY_ID"
+  set_secret TIGRIS_BACKUP_SECRET_ACCESS_KEY "$TIGRIS_BACKUP_SECRET_ACCESS_KEY"
 fi
 
 stage "Cloudflare Workers AI (hosted Clef)"
@@ -598,8 +596,10 @@ if [[ "$ENVIRONMENT" == staging ]]; then
   fi
 else
   say "Production deploys fail closed until the Clef canary (#66) replaces the"
-  say "placeholder step, so only switch them on once #66 is on main."
-  if confirm "Is the Clef canary (#66) on main? Turn production deploys on and deploy main now?"; then
+  say "placeholder step, so only switch them on once #66 is on main. They also"
+  say "stop unless a staging refresh on develop passed at the same tree as main"
+  say "(docs/spec/operations.md section 6), which needs the backup switched on."
+  if confirm "Is the Clef canary (#66) on main and has the staging refresh passed? Turn production deploys on and deploy main now?"; then
     set_var DEPLOY_PRODUCTION_ENABLED true
     deploy_now
     deployed=true
@@ -684,6 +684,16 @@ if [[ "$ENVIRONMENT" == production ]]; then
     fi
     ok "Second user $(remembered SECOND_USER_EMAIL)"
   fi
+fi
+
+if [[ "$ENVIRONMENT" == production ]]; then
+  # The backup and the staging refresh are switched on by hand, in the order
+  # docs/runbooks/backup-and-restore.md gives: the backup once main holds its
+  # code, then the refresh once staging deploys are on and a backup verified.
+  gh_var_is BACKUP_ENABLED true ||
+    SKIPPED+=("nightly backup is off: once main holds the backup code, set the repository variable BACKUP_ENABLED=true and run Nightly backup by hand (docs/runbooks/backup-and-restore.md)")
+  gh_var_is STAGING_REFRESH_ENABLED true ||
+    SKIPPED+=("staging refresh is off: once staging deploys are on and a backup has verified, set the repository variable STAGING_REFRESH_ENABLED=true and run Staging refresh on develop (docs/runbooks/backup-and-restore.md)")
 fi
 
 finish
