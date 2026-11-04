@@ -93,11 +93,15 @@ jobs:
 
       # Before every production deploy the Clef canary sends the dev golden
       # requests to hosted Clef, and a fingerprint mismatch fails here, so
-      # `fly deploy` never runs (docs/adr/0002-clef-on-workers-ai.md). #66
-      # replaces this step's body with the canary job.
+      # `fly deploy` never runs (docs/adr/0002-clef-on-workers-ai.md). Until
+      # #66 builds the canary, this placeholder fails closed: a production
+      # deploy with no canary would skip the check, so it stops here instead.
+      # #66 replaces this step's body with the canary job.
       - name: Clef canary
         if: inputs.canary
-        run: echo "::notice::The Clef canary is not built yet (#66); production deploys proceed without it until then."
+        run: |
+          echo "::error::Production deploy blocked: the Clef canary is not built yet (#66). Production deploys fail closed at this step until #66 replaces it (docs/spec/operations.md section 3)."
+          exit 1
 
       - uses: superfly/flyctl-actions/setup-flyctl@1.6
 
