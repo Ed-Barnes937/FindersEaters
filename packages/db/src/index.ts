@@ -21,3 +21,12 @@ export {
   type Household,
   type User,
 } from './access/household.ts'
+export {
+  BACKUP_TABLES,
+  migrationHistory,
+  rowCounts,
+  shippedMigrations,
+  type AppliedMigration,
+  type BackupTable,
+  type RowCounts,
+} from './backup.ts'

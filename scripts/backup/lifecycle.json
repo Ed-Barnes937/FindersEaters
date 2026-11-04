@@ -1,0 +1,16 @@
+{
+  "Rules": [
+    {
+      "ID": "daily-35-days",
+      "Status": "Enabled",
+      "Filter": { "Prefix": "daily/" },
+      "Expiration": { "Days": 35 }
+    },
+    {
+      "ID": "monthly-400-days",
+      "Status": "Enabled",
+      "Filter": { "Prefix": "monthly/" },
+      "Expiration": { "Days": 400 }
+    }
+  ]
+}
