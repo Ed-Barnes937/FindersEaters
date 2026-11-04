@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Fake Neon CLI for provision.sh --dry-run (see _fake.sh). A new project gets
+# Neon's one-day restore window; the fake browser (xdg-open) sets it to seven
+# days when the wizard opens the project's settings, as the owner would.
+# shellcheck source=_fake.sh
+. "$(dirname "$0")/_fake.sh"
+
+project="$(opt --project-id "$@" || true)"
+
+case "${1:-} ${2:-}" in
+  'me --output') jq -n '{email: "owner@example.com"}' ;;
+  'projects list')
+    if has neon/project; then
+      jq -n --arg id "$(get neon/project)" '{projects: [{id: $id, name: "finders-eaters"}]}'
+    else
+      jq -n '{projects: []}'
+    fi
+    ;;
+  'projects create')
+    has neon/project && die 'a project already exists'
+    put neon/project 'fake-project-123'
+    put neon/region "$(opt --region-id "$@")"
+    put neon/pg "$(opt --pg-version "$@")"
+    put neon/retention 86400
+    put neon/branches/main 'root'
+    jq -n '{project: {id: "fake-project-123", name: "finders-eaters"}}'
+    ;;
+  'projects get')
+    [[ "$3" == "$(get neon/project)" ]] || die "no project $3"
+    jq -n --arg id "$3" --arg region "$(get neon/region)" \
+      --argjson pg "$(get neon/pg)" --argjson retention "$(get neon/retention)" \
+      '{project: {id: $id, region_id: $region, pg_version: $pg, history_retention_seconds: $retention}}'
+    ;;
+  'branches list')
+    [[ "$project" == "$(get neon/project)" ]] || die "no project $project"
+    names neon/branches | jq '{branches: .}'
+    ;;
+  'branches create')
+    name="$(opt --name "$@")"
+    has "neon/branches/$name" && die "branch $name exists"
+    put "neon/branches/$name" "$(opt --parent "$@")"
+    jq -n --arg name "$name" '{branch: {name: $name}}'
+    ;;
+  connection-string\ *)
+    has "neon/branches/$2" || die "no branch $2"
+    host="ep-fake-$2"
+    [[ " $* " == *' --pooled '* ]] && host="$host-pooler"
+    echo "postgresql://neondb_owner:fakepw-$2@$host.eu-west-2.aws.neon.tech/neondb?sslmode=require"
+    ;;
+  *) die "unexpected: $*" ;;
+esac

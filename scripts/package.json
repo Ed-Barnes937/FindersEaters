@@ -1,0 +1,21 @@
+{
+  "name": "@finders-eaters/scripts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint . && node test/shellcheck.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@finders-eaters/config": "workspace:*",
+    "@finders-eaters/db": "workspace:*",
+    "@types/node": "^24.19.2",
+    "@types/pg": "^8.23.1",
+    "eslint": "^10.13.0",
+    "pg": "^8.23.1",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.5"
+  }
+}

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Fake browser for provision.sh --dry-run (see _fake.sh). Opening a page
+# stands in for the owner doing what the wizard asked there.
+# shellcheck source=_fake.sh
+. "$(dirname "$0")/_fake.sh"
+
+case "$1" in
+  https://console.neon.tech/app/projects/*/settings*) put neon/retention 604800 ;;
+esac

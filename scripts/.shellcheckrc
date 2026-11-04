@@ -1,0 +1,3 @@
+# `source=` directives resolve next to the sourcing script.
+source-path=SCRIPTDIR
+external-sources=true

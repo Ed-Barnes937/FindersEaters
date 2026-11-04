@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# Fake flyctl for provision.sh --dry-run (see _fake.sh).
+# shellcheck source=_fake.sh
+. "$(dirname "$0")/_fake.sh"
+
+app="$(opt -a "$@" || true)"
+
+# words TEXT: sets WORDS to TEXT split the way fly ssh console -C splits its
+# command: on whitespace, with '...' and "..." quoting. No shell runs, so a
+# backslash, $ or glob stays as it is.
+words() {
+  local text="$1" word="" quote="" c i inword=false
+  WORDS=()
+  for ((i = 0; i < ${#text}; i++)); do
+    c="${text:i:1}"
+    if [[ -n "$quote" ]]; then
+      if [[ "$c" == "$quote" ]]; then quote=""; else word+="$c"; fi
+    elif [[ "$c" == "'" || "$c" == '"' ]]; then
+      quote="$c" inword=true
+    elif [[ "$c" == [[:space:]] ]]; then
+      if $inword; then WORDS+=("$word"); fi
+      word="" inword=false
+    else
+      word+="$c" inword=true
+    fi
+  done
+  [[ -z "$quote" ]] || die "unterminated quote in: $text"
+  if $inword; then WORDS+=("$word"); fi
+}
+
+# flags NAMES... -- ARGS...: for each "--some-flag value" pair in ARGS, sets
+# F_some_flag. Every NAME is required and anything else is refused, as the
+# admin CLI would.
+flags() {
+  local names=() name var
+  while [[ "$1" != -- ]]; do
+    names+=("$1")
+    shift
+  done
+  shift
+  while (($#)); do
+    [[ " ${names[*]} " == *" $1 "* && $# -ge 2 ]] || die "admin CLI: unexpected argument '$1'"
+    var="${1#--}"
+    printf -v "F_${var//-/_}" '%s' "$2"
+    shift 2
+  done
+  for name in "${names[@]}"; do
+    var="${name#--}"
+    var="F_${var//-/_}"
+    [[ -n "${!var+set}" ]] || die "admin CLI: missing $name"
+  done
+}
+
+case "${1:-} ${2:-}" in
+  'auth whoami') echo 'owner@example.com' ;;
+  'apps list') names fly/apps | jq '[.[] | {Name: .name}]' ;;
+  'apps create')
+    has "fly/apps/$3" && die "app $3 already exists"
+    put "fly/apps/$3" "$(opt --org "$@")"
+    echo "New app created: $3"
+    ;;
+  'secrets import')
+    has "fly/apps/$app" || die "no app $app"
+    while IFS= read -r line; do
+      [[ -n "$line" ]] && put "fly/secrets/$app/${line%%=*}" "${line#*=}"
+    done
+    echo "Secrets are staged for the first deployment"
+    ;;
+  'secrets list') names "fly/secrets/$app" ;;
+  'tokens create')
+    has "fly/apps/$app" || die "no app $app"
+    echo "FlyV1 fm2_fake-deploy-token-for-$app"
+    ;;
+  'certs show') has "fly/certs/$app/$3" || die "certificate not found" ;;
+  'certs add')
+    has "fly/apps/$app" || die "no app $app"
+    put "fly/certs/$app/$3" 'added'
+    echo "Your certificate for $3 is being issued."
+    ;;
+  'storage create')
+    bucket="$(opt --name "$@")"
+    has "tigris/buckets/$bucket" && die "bucket $bucket already exists"
+    put "tigris/buckets/$bucket/created" 'yes'
+    printf 'Your Tigris project (%s) is ready.\n\n' "$bucket"
+    printf 'AWS_ACCESS_KEY_ID: tid_fake_key\nAWS_SECRET_ACCESS_KEY: tsec_fake_secret\n'
+    printf 'AWS_ENDPOINT_URL_S3: https://fly.storage.tigris.dev\nBUCKET_NAME: %s\n' "$bucket"
+    ;;
+  'ssh console')
+    has "fly/deployed/$app" || die "app $app has no running machines"
+    cmd="$(opt -C "$@")"
+    words "$cmd"
+    [[ "${WORDS[0]:-} ${WORDS[1]:-}" == 'node apps/server/src/cli.ts' ]] || die "unexpected command: $cmd"
+    # shellcheck disable=SC2154 # flags sets the F_* variables
+    case "${WORDS[2]:-} ${WORDS[3]:-}" in
+      'household create')
+        flags --name --email --user-name -- "${WORDS[@]:4}"
+        has "household/users/$F_email" && die "A user with email $F_email already exists."
+        put "household/users/$F_email" "owner $F_user_name"
+        put household/name "$F_name"
+        put household/id 'hh_fake_01'
+        echo "Created household \"$F_name\" (id hh_fake_01, timezone Europe/London)."
+        echo "Created user $F_email (id u_fake_01)."
+        echo 'First password (shown once): fake-first-password-1'
+        ;;
+      'user add')
+        flags --household --email --name -- "${WORDS[@]:4}"
+        if has "household/users/$F_email"; then
+          echo "A user with email $F_email already exists." >&2
+          exit 1
+        fi
+        put "household/users/$F_email" "member $F_name"
+        echo "Created user $F_email (id u_fake_02) in household $F_household."
+        echo 'First password (shown once): fake-first-password-2'
+        ;;
+      *) die "unexpected command: $cmd" ;;
+    esac
+    ;;
+  *) die "unexpected: $*" ;;
+esac

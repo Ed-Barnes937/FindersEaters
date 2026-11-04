@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Fake AWS CLI (pointed at Tigris) for provision.sh --dry-run (see _fake.sh).
+# Only the keys `fly storage create` printed for a bucket can use it.
+# shellcheck source=_fake.sh
+. "$(dirname "$0")/_fake.sh"
+
+key_ok() {
+  [[ "${AWS_ACCESS_KEY_ID:-}" == tid_fake_key && "${AWS_SECRET_ACCESS_KEY:-}" == tsec_fake_secret ]] ||
+    die 'An error occurred (403) when calling the operation: Forbidden'
+}
+[[ "$(opt --endpoint-url "$@")" == https://fly.storage.tigris.dev ]] || die 'wrong endpoint'
+
+case "${1:-} ${2:-}" in
+  's3api head-bucket')
+    bucket="$(opt --bucket "$@")"
+    has "tigris/buckets/$bucket" || die 'An error occurred (404) when calling the HeadBucket operation: Not Found'
+    key_ok
+    ;;
+  's3api put-bucket-lifecycle-configuration')
+    key_ok
+    file="$(opt --lifecycle-configuration "$@")"
+    put "tigris/buckets/$(opt --bucket "$@")/lifecycle.json" "$(cat "${file#file://}")"
+    ;;
+  's3api get-bucket-lifecycle-configuration')
+    key_ok
+    get "tigris/buckets/$(opt --bucket "$@")/lifecycle.json"
+    ;;
+  's3 cp')
+    key_ok
+    if [[ "$3" == - ]]; then
+      object="${4#s3://}"
+      put "tigris/objects/${object//\//_}" "$(cat)"
+    else
+      object="${3#s3://}"
+      get "tigris/objects/${object//\//_}"
+    fi
+    ;;
+  's3 rm')
+    key_ok
+    object="${3#s3://}"
+    rm -f "$F/tigris/objects/${object//\//_}"
+    ;;
+  *) die "unexpected: $*" ;;
+esac

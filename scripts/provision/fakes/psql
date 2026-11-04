@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Fake psql for provision.sh --dry-run (see _fake.sh). Answers the wizard's
+# connection check and backup-role check for URLs the fake Neon handed out.
+# The real SQL is tested against Postgres in scripts/test/backup-role.test.ts.
+# shellcheck source=_fake.sh
+. "$(dirname "$0")/_fake.sh"
+
+url="$1"
+branch="$(sed -E 's#.*@ep-fake-([a-z]+)(-pooler)?\..*#\1#' <<<"$url")"
+has "neon/branches/$branch" || die "could not connect to server"
+user="$(sed -E 's#^postgresql://([^:]+):.*#\1#' <<<"$url")"
+password="$(sed -E 's#^postgresql://[^:]+:([^@]+)@.*#\1#' <<<"$url")"
+
+if [[ "$user" == backup ]]; then
+  [[ "$(get neon/roles/backup 2>/dev/null)" == "$password" ]] ||
+    die 'password authentication failed for user "backup"'
+fi
+
+sql="$(opt -c "$@" || cat)"
+case "$sql" in
+  'select 1') echo 1 ;;
+  *'create role backup'*)
+    [[ "$user" == neondb_owner ]] || die 'permission denied to create role'
+    put neon/roles/backup "$(sed -nE "s/.*password '([^']+)'.*/\1/p" <<<"$sql" | head -n1)"
+    ;;
+  *pg_read_all_data*) [[ "$user" == backup ]] && echo t || echo f ;;
+  *) die "unexpected SQL: $sql" ;;
+esac

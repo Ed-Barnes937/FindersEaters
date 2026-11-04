@@ -49,6 +49,8 @@ Both workflows run, but their `gate` job stops with a notice (the run passes) un
 
 ### Owner checklist (real infrastructure, costs money)
 
+`scripts/provision.sh staging` then `scripts/provision.sh production` do steps 1 to 4 and verify each (`docs/runbooks/provisioning.md`). Steps 5 and 6 stay by hand; the wizard lists them at the end until they are done.
+
 1. **Neon `backup` role.** In the Neon console create a role `backup` on the production branch, then as the owner role: `grant pg_read_all_data to backup;`. Check it can read but not write: `psql "<backup direct URL>" -c 'select count(*) from household'` works and `-c 'create table x(i int)'` fails.
 2. **Tigris bucket.** `fly storage create --name finders-eaters-backups` (private). Make an access key scoped to this bucket only (Tigris console, Access Keys, Editor on this bucket).
 3. **Lifecycle rules.** With that key in the environment: `aws s3api put-bucket-lifecycle-configuration --endpoint-url https://fly.storage.tigris.dev --bucket finders-eaters-backups --lifecycle-configuration file://scripts/backup/lifecycle.json`, then `get-bucket-lifecycle-configuration` to check.
