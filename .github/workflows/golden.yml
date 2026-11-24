@@ -1,0 +1,55 @@
+# The golden-set report (docs/spec/v0.1.md section 17.2, Engine regression
+# row; docs/research/golden-set.md): runs the engine over the dev and held-out
+# golden lines on every PR touching the engine, the knowledge base or the
+# golden set, and writes per-stage, per-field scores for each set separately
+# to the job summary, with the engine version, model id and confidence formula.
+#
+# It reports; the pass rule that fails a PR on these numbers comes with #44.
+# Until the cassette client lands (#41), Clef-dependent decisions are unknown,
+# so the numbers are what pins and rules settle. Nothing here calls Clef or any
+# other paid API. Retries are 0, as everywhere in CI.
+name: Golden set
+
+on:
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - packages/engine/**
+      - packages/kb/**
+      - docs/ideation/research/jev-spike/golden.json
+      - .github/workflows/golden.yml
+
+concurrency:
+  group: golden-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    name: golden-set report
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6 # version comes from package.json packageManager
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Golden set, dev and held-out
+        run: pnpm --silent --filter @finders-eaters/engine golden --set all --json "$RUNNER_TEMP/golden.json" | tee -a "$GITHUB_STEP_SUMMARY"
+        shell: bash
+
+      - name: Upload the report
+        uses: actions/upload-artifact@v7
+        with:
+          name: golden-report
+          path: ${{ runner.temp }}/golden.json
+          retention-days: 30

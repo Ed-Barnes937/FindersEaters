@@ -58,6 +58,12 @@ Before the first `pnpm e2e`, install the browser once: `pnpm --filter @finders-e
 
 CI (`.github/workflows/ci.yml`) runs all of these on every PR to `develop` and `main`. Retries are 0: a flaky test is a bug to fix, never to re-run.
 
+The golden-set report scores the engine per stage and per field, dev and held-out separately (`--set dev` sends nothing but dev lines, which the Clef canary reuses). `.github/workflows/golden.yml` runs it on PRs touching the engine, the knowledge base or the golden set. Tune on dev only: held-out misses are counted, never listed.
+
+```sh
+pnpm --filter @finders-eaters/engine golden [--set dev|heldout|all] [--json <file>]
+```
+
 ## Branch
 
 Gitflow. `develop` is the default branch and the target for every code PR.
