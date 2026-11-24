@@ -1,0 +1,13 @@
+# Own-layer ingredients: foods the OFF taxonomy lacks (docs/spec/food-knowledge-base.md section 5).
+# `key` is the immutable identity (ids derive from it); `slug` may change if the old one is kept in slug_aliases.
+- key: plain-flour
+  slug: plain-flour
+  name: Plain flour
+  parents: [wheat-flour]
+- key: self-raising-flour
+  slug: self-raising-flour
+  name: Self-raising flour
+  parents: [wheat-flour]
+- key: bicarbonate-of-soda
+  slug: bicarbonate-of-soda
+  name: Bicarbonate of soda

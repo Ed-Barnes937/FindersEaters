@@ -4,6 +4,6 @@ export default defineConfig({
   test: {
     include: ['src/**/*.test.ts'],
     environment: 'node',
-    globalSetup: ['@finders-eaters/db/testing/global-setup'],
+    globalSetup: ['@finders-eaters/db/testing/global-setup', './src/kb-test-setup.ts'],
   },
 })

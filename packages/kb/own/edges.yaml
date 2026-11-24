@@ -1,0 +1,5 @@
+# Edge overrides. Chicken stock sits under chicken in OFF but is made from it.
+- child: chicken-broth
+  parent: chicken
+  op: reclassify
+  kind: made_from

@@ -1,0 +1,30 @@
+# Builds the KB artifact (packages/kb/dist/kb.json.gz) that the Dockerfile
+# copies into the image, so a release never downloads from Open Food Facts,
+# Intake24 or USDA (docs/spec/operations.md section 3). The raw source
+# downloads are cached by the hash of packages/kb/sources.json; the build
+# verifies every checksum whether it downloads or reads the cache. Run after
+# checkout and before `docker build`.
+name: Build the KB artifact
+description: Downloads the pinned KB sources (cached by sources.json hash), builds and validates the artifact.
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v6 # version comes from package.json packageManager
+
+    - uses: actions/setup-node@v7
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+
+    - run: pnpm install --frozen-lockfile --filter '@finders-eaters/kb...'
+      shell: bash
+
+    - name: Pinned source downloads
+      uses: actions/cache@v6
+      with:
+        path: packages/kb/.cache
+        key: kb-sources-${{ hashFiles('packages/kb/sources.json') }}
+
+    - name: kb build
+      run: pnpm --filter @finders-eaters/kb kb build
+      shell: bash

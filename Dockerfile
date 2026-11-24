@@ -9,8 +9,9 @@
 #   docker run --rm -e DATABASE_URL_DIRECT=... finders-eaters node apps/server/src/cli.ts release
 #   docker run --rm -p 8080:8080 -e DATABASE_URL=... finders-eaters
 #
-# The KB artifact joins this image with the knowledge base ticket: CI builds it
-# before `docker build` and a COPY here fails the build when it is missing.
+# The KB artifact is built by `kb build` before `docker build` (CI's build-kb
+# action) and the COPY below fails the build when it is missing, so the release
+# step never downloads a source.
 
 FROM node:24-slim AS base
 ENV PNPM_HOME=/pnpm
@@ -46,6 +47,10 @@ COPY apps/server/src ./apps/server/src
 COPY packages/db/package.json ./packages/db/
 COPY packages/db/src ./packages/db/src
 COPY packages/db/migrations ./packages/db/migrations
+COPY --from=prod-deps /app/packages/kb/node_modules ./packages/kb/node_modules
+COPY packages/kb/package.json ./packages/kb/
+COPY packages/kb/src ./packages/kb/src
+COPY packages/kb/dist/kb.json.gz ./packages/kb/dist/kb.json.gz
 COPY --from=build /app/apps/web/dist ./apps/web/dist
 USER node
 EXPOSE 8080

@@ -1,7 +1,9 @@
 // The release step (docs/spec/operations.md section 3.1): what Fly runs before
 // a new Machine starts. Each step is transactional and idempotent, so a rerun
 // is always safe; the first failure stops the rest and fails the deploy.
+import { readFile } from 'node:fs/promises'
 import { checkDatabase, connect, migrateDatabase } from '@finders-eaters/db'
+import { decodeArtifact, kbPaths, loadKnowledgeBase } from '@finders-eaters/kb'
 
 interface ReleaseStep {
   name: string
@@ -25,15 +27,43 @@ const migrate: ReleaseStep = {
   },
 }
 
-// The next three are placeholders with their final positions fixed, so the
-// tickets that bring the KB artifact, the projections and the recipe table
-// replace a body here rather than reorder the release.
+/**
+ * Where the release finds the KB artifact: `KB_ARTIFACT`, else the path the
+ * image build copies it to. A missing artifact fails the release.
+ */
+function kbArtifactPath(): string {
+  return process.env.KB_ARTIFACT ?? kbPaths.artifact
+}
 
 /** Loads the KB artifact when its version differs from `ops.meta`'s. */
-const loadKnowledgeBase: ReleaseStep = {
+const loadKnowledgeBaseStep: ReleaseStep = {
   name: 'knowledge base',
-  run: () => Promise.resolve('skipped (no KB artifact in this build yet)'),
+  async run(databaseUrl) {
+    const path = kbArtifactPath()
+    let bytes: Buffer
+    try {
+      bytes = await readFile(path)
+    } catch (cause) {
+      throw new Error(`no KB artifact at ${path}: the image build must run \`kb build\` first`, {
+        cause,
+      })
+    }
+    const artifact = decodeArtifact(bytes)
+    const { db, close } = connect(databaseUrl, { max: 1 })
+    try {
+      const result = await loadKnowledgeBase(db, artifact)
+      if (!result.loaded) return `${result.version} already loaded`
+      const retired = result.vanished > 0 ? `, ${result.vanished} retired as vanished` : ''
+      return `loaded ${result.version} (${result.ingredients} ingredients${retired}); recipes are KB-stale until re-resolved`
+    } finally {
+      await close()
+    }
+  },
 }
+
+// The next two are placeholders with their final positions fixed, so the
+// tickets that bring the projections and the recipe table replace a body here
+// rather than reorder the release.
 
 /** Rebuilds `recipe_tag`, `recipe_line` and `needs_review` on a projection version change. */
 const rebuildProjections: ReleaseStep = {
@@ -49,7 +79,7 @@ const reportStaleness: ReleaseStep = {
 
 const steps: readonly ReleaseStep[] = [
   migrate,
-  loadKnowledgeBase,
+  loadKnowledgeBaseStep,
   rebuildProjections,
   reportStaleness,
 ]

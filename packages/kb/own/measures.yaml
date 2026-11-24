@@ -1,0 +1,6 @@
+- ingredient: onion
+  canonical:
+    dimension: count
+    item_name: onion
+    default_size: medium
+    set_by: agent

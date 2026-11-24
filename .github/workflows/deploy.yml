@@ -97,6 +97,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - uses: ./.github/actions/build-kb
+
       # Before every production deploy the Clef canary sends the dev golden
       # requests to hosted Clef, and a fingerprint mismatch fails here, so
       # `fly deploy` never runs (docs/adr/0002-clef-on-workers-ai.md). Until

@@ -11,5 +11,7 @@
 docs
 *.md
 !packages/db/migrations/**
+# The built KB artifact (a COPY fails without it).
+!packages/kb/dist/kb.json.gz
 compose.yaml
 fly*.toml

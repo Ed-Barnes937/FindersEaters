@@ -8,7 +8,7 @@ How the two Fly apps are deployed, how the owner turns deploys on, and how to ro
 | --- | --- |
 | `Dockerfile` | The one image both apps run: server and `db` sources, SQL migrations, production dependencies, the built SPA. |
 | `fly.toml`, `fly.staging.toml` | `finders-eaters` (production) and `finders-eaters-staging`: `lhr`, `shared-cpu-1x` 512 MB, scale to zero, `/health` check, release step with a 10 minute timeout. Identical apart from `app`; `scripts/check-fly-configs.py` enforces that in CI. |
-| `apps/server/src/cli.ts release` | The release step: migrate under the advisory lock (`lock_timeout` 5s, `statement_timeout` 60s), then the KB load, projection rebuild and staleness report (placeholders until those tickets land). Exit 0 done, 1 failed, 2 misconfigured. |
+| `apps/server/src/cli.ts release` | The release step: migrate under the advisory lock (`lock_timeout` 5s, `statement_timeout` 60s), then the KB load (the artifact baked into the image, loaded only when its version differs from `ops.meta`'s, upsert and retire in one transaction; a missing artifact fails the release), then the projection rebuild and staleness report (placeholders until those tickets land). Exit 0 done, 1 failed, 2 misconfigured. |
 | `/health` | Deep database round-trip: `200 {"status":"ok","database":{"ok":true,"latencyMs":..,"migrationsApplied":..}}`, or `503` with a short error code. |
 | `.github/workflows/deploy-staging.yml` | Push to `develop` deploys staging. |
 | `.github/workflows/deploy-production.yml` | Push to `main` deploys production, with the Clef canary step first, then the staging refresh precondition (`docs/runbooks/backup-and-restore.md`). Until #66 lands the canary step is a placeholder that fails, so an enabled production deploy stops before `fly deploy`. |
@@ -72,3 +72,11 @@ docker build -t finders-eaters:local .
 scripts/image-smoke.sh finders-eaters:local   # fresh Postgres container, release twice, a failing release, /health
 python3 scripts/check-fly-configs.py          # parses both Fly configs offline
 ```
+
+## The KB artifact
+
+`kb build` (`packages/kb`) turns the pinned sources in `packages/kb/sources.json` plus the own layer in `packages/kb/own/` into `packages/kb/dist/kb.json.gz`, which carries its KB version. CI's `.github/actions/build-kb` runs it before every `docker build` (raw downloads cached by the hash of `sources.json`, every checksum verified) and the Dockerfile copies the artifact into the image. The release step loads it.
+
+- Locally: `pnpm --filter @finders-eaters/kb kb build`, then `kb validate`. Pass `--previous <old artifact>` to fail on an ingredient that would vanish without a `replaced_by` and to print the diff report; `kb diff <old> <new>` prints the report alone.
+- Bumping a source: change its `commit`, `url` and `sha256` in `sources.json` in a pull request and review the diff report.
+- **Owner checklist for a first load on staging or production.** Nothing to run by hand: the deploy's release step loads the KB. After the first deploy, check the log for `release: knowledge base: loaded <version> (N ingredients)`, and on a later deploy with no KB change for `<version> already loaded`. To load without a deploy (an emergency), run `node packages/kb/src/cli.ts load` in the app image with `DATABASE_URL_DIRECT` set. Loading is idempotent and never truncates `kb.ingredient`.

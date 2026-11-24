@@ -1,0 +1,21 @@
+{
+  "off": {
+    "repo": "openfoodfacts/openfoodfacts-server",
+    "commit": "9dbfed4c15049073ec2fe878b7a41f69a80a5370",
+    "path": "taxonomies/food/ingredients.txt",
+    "url": "https://raw.githubusercontent.com/openfoodfacts/openfoodfacts-server/9dbfed4c15049073ec2fe878b7a41f69a80a5370/taxonomies/food/ingredients.txt",
+    "sha256": "028988b26a691a215c66a79cc3f5ee9699be08489f7e497a233cca161fd466ba"
+  },
+  "intake24": {
+    "repo": "intake24-legacy/xml-data",
+    "commit": "ecf56c8ded150d8828a5b01294188b5e3a1e5440",
+    "path": "foods.xml",
+    "url": "https://raw.githubusercontent.com/intake24-legacy/xml-data/ecf56c8ded150d8828a5b01294188b5e3a1e5440/foods.xml",
+    "sha256": "b3755afd7d016b43f6a6616c2f3108f1daf8d4ffe4e84652feaedea79c2bfb30"
+  },
+  "usda": {
+    "release": "FoodData Central SR Legacy 2018-04 (CSV)",
+    "url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_csv_2018-04.zip",
+    "sha256": "b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0"
+  }
+}

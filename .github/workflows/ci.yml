@@ -44,6 +44,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # The Dockerfile copies the KB artifact into the image and fails without it.
+      - uses: ./.github/actions/build-kb
+
       - uses: pnpm/action-setup@v6 # version comes from package.json packageManager
 
       - uses: actions/setup-node@v7

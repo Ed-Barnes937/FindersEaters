@@ -1,0 +1,5 @@
+# Provisional values: the aisle table belongs to the own-layer seed ticket (#39).
+- ingredient: vegetable
+  aisle: fruit-and-veg
+- ingredient: chicken-broth
+  aisle: cupboard
