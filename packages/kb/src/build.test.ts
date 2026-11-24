@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { buildArtifact, KbBuildError } from './build.ts'
+import { computeKbVersion } from './artifact.ts'
 import { offIngredientId, ownIngredientId } from './ids.ts'
 import { fixtureInputs, ownFiles } from './testing/fixtures.ts'
 import type { Artifact } from './artifact.ts'
@@ -54,6 +55,21 @@ describe('ingredients and identity', () => {
     const inputs = fixtureInputs()
     inputs.pins = { ...inputs.pins, usda: { ...inputs.pins.usda, sha256: 'f'.repeat(64) } }
     expect(buildArtifact(inputs).kbVersion).not.toBe(a.kbVersion)
+  })
+
+  it('changes the version when the build output changes under the same pins and own layer', () => {
+    // What a rule change does: same inputs by pin, different derived output.
+    const inputs = fixtureInputs()
+    for (const food of inputs.usda.values()) food.itemWeights = []
+    const changed = buildArtifact(inputs)
+    expect(changed).not.toEqual({ ...a, kbVersion: changed.kbVersion })
+    expect(changed.kbVersion).not.toBe(a.kbVersion)
+  })
+
+  it('derives the version from the artifact body, leaving the version field out', () => {
+    const { kbVersion, ...body } = a
+    expect(computeKbVersion(body)).toBe(kbVersion)
+    expect(computeKbVersion({ ...body, aisles: [] })).not.toBe(kbVersion)
   })
 
   it('keeps an own slug change as an alias of the old one', () => {

@@ -445,9 +445,8 @@ export function buildArtifact(inputs: BuildInputs): Artifact {
   if (problems.length > 0) throw new KbBuildError(problems)
 
   const ingredients = [...live.values(), ...retiredRows].sort((a, b) => cmp(a.slug, b.slug))
-  return {
+  const body: Omit<Artifact, 'kbVersion'> = {
     format: ARTIFACT_FORMAT,
-    kbVersion: computeKbVersion(pins, own),
     sources: pins,
     ingredients,
     names: [...nameRows.values()].sort(
@@ -483,4 +482,5 @@ export function buildArtifact(inputs: BuildInputs): Artifact {
       ),
     },
   }
+  return { ...body, kbVersion: computeKbVersion(body) }
 }

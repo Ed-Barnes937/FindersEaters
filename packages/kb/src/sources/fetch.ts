@@ -15,6 +15,30 @@ export interface SourceTexts {
   usda: UsdaFiles
 }
 
+const ATTEMPTS = 3
+const BACKOFF_MS = 500
+const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
+
+/** Retries a network error or a 5xx, with doubling backoff; any other response returns at once. */
+async function get(
+  url: string,
+  download: typeof fetch,
+  sleep: (ms: number) => Promise<void>,
+): Promise<Response> {
+  for (let attempt = 1; ; attempt++) {
+    let failure: Error
+    try {
+      const response = await download(url)
+      if (response.status < 500) return response
+      failure = new Error(`GET ${url} returned ${response.status}`)
+    } catch (cause) {
+      failure = new Error(`GET ${url} failed: ${String(cause)}`, { cause })
+    }
+    if (attempt === ATTEMPTS) throw failure
+    await sleep(BACKOFF_MS * 2 ** (attempt - 1))
+  }
+}
+
 const sha256 = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex')
 
 async function pinnedBytes(
@@ -22,6 +46,7 @@ async function pinnedBytes(
   pin: { url: string; sha256: string },
   cacheDir: string,
   download: typeof fetch,
+  sleep: (ms: number) => Promise<void>,
 ): Promise<Uint8Array> {
   const cached = join(cacheDir, pin.sha256)
   try {
@@ -32,7 +57,7 @@ async function pinnedBytes(
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
   }
 
-  const response = await download(pin.url)
+  const response = await get(pin.url, download, sleep)
   if (!response.ok) throw new Error(`${name}: GET ${pin.url} returned ${response.status}`)
   const bytes = new Uint8Array(await response.arrayBuffer())
   const actual = sha256(bytes)
@@ -52,12 +77,13 @@ export async function fetchSources(
   pins: SourcePins,
   cacheDir: string,
   download: typeof fetch = fetch,
+  sleep: (ms: number) => Promise<void> = wait,
 ): Promise<SourceTexts> {
   const text = (bytes: Uint8Array) => new TextDecoder('utf-8', { fatal: true }).decode(bytes)
   // One at a time: a failure leaves no other download running behind it.
-  const off = await pinnedBytes('Open Food Facts', pins.off, cacheDir, download)
-  const intake24 = await pinnedBytes('Intake24', pins.intake24, cacheDir, download)
-  const usdaZip = await pinnedBytes('USDA SR Legacy', pins.usda, cacheDir, download)
+  const off = await pinnedBytes('Open Food Facts', pins.off, cacheDir, download, sleep)
+  const intake24 = await pinnedBytes('Intake24', pins.intake24, cacheDir, download, sleep)
+  const usdaZip = await pinnedBytes('USDA SR Legacy', pins.usda, cacheDir, download, sleep)
   const wanted = {
     'food.csv': 'food',
     'food_portion.csv': 'portion',

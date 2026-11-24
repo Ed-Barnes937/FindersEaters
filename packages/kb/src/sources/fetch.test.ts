@@ -16,6 +16,8 @@ let server: Server
 let base: string
 let cache: string
 let hits: Record<string, number>
+let failures: Record<string, number>
+const noWait = () => Promise.resolve()
 const zip = zipSync({
   'FoodData_Central_sr_legacy_food_csv_2018-04/food.csv': enc(usdaFiles.food),
   'FoodData_Central_sr_legacy_food_csv_2018-04/food_portion.csv': enc(usdaFiles.portion),
@@ -29,9 +31,14 @@ const bodies: Record<string, Uint8Array> = {
 
 beforeEach(async () => {
   hits = {}
+  failures = {}
   server = createServer((req, res) => {
     const body = bodies[req.url ?? '']
     hits[req.url ?? ''] = (hits[req.url ?? ''] ?? 0) + 1
+    if ((failures[req.url ?? ''] ?? 0) > 0) {
+      failures[req.url ?? '']!--
+      return void res.writeHead(503).end()
+    }
     if (!body) return void res.writeHead(404).end()
     res.writeHead(200).end(body)
   })
@@ -78,6 +85,46 @@ describe('fetchSources', () => {
   it('fails on a checksum mismatch and caches nothing for it', async () => {
     await expect(fetchSources(pinsFor({ off: '0'.repeat(64) }), cache)).rejects.toThrow(/checksum/i)
     expect(await readdir(cache)).not.toContain('0'.repeat(64))
+  })
+
+  it('retries a 5xx and then succeeds', async () => {
+    failures['/foods.xml'] = 1
+    const texts = await fetchSources(pinsFor(), cache, fetch, noWait)
+    expect(texts.intake24).toBe(intake24Xml)
+    expect(hits['/foods.xml']).toBe(2)
+  })
+
+  it('retries a network error and then succeeds', async () => {
+    let first = true
+    const flaky: typeof fetch = (input, init) => {
+      if (first) {
+        first = false
+        return Promise.reject(new TypeError('fetch failed'))
+      }
+      return fetch(input, init)
+    }
+    const texts = await fetchSources(pinsFor(), cache, flaky, noWait)
+    expect(texts.off).toBe(offText)
+  })
+
+  it('gives up after three attempts', async () => {
+    failures['/foods.xml'] = 99
+    await expect(fetchSources(pinsFor(), cache, fetch, noWait)).rejects.toThrow(/503/)
+    expect(hits['/foods.xml']).toBe(3)
+  })
+
+  it('does not retry a 404', async () => {
+    const pins = pinsFor()
+    pins.intake24.url = `${base}/missing.xml`
+    await expect(fetchSources(pins, cache, fetch, noWait)).rejects.toThrow(/404/)
+    expect(hits['/missing.xml']).toBe(1)
+  })
+
+  it('does not retry a checksum mismatch', async () => {
+    await expect(
+      fetchSources(pinsFor({ off: '0'.repeat(64) }), cache, fetch, noWait),
+    ).rejects.toThrow(/checksum/i)
+    expect(hits['/ingredients.txt']).toBe(1)
   })
 
   it('re-downloads a cached file that no longer matches its checksum', async () => {

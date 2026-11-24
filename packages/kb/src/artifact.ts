@@ -4,11 +4,8 @@
 import { createHash } from 'node:crypto'
 import { gunzipSync, gzipSync } from 'node:zlib'
 import { z } from 'zod'
-import type { OwnLayer } from './own.ts'
-import { sourcePinsSchema, type SourcePins } from './sources/pins.ts'
+import { sourcePinsSchema } from './sources/pins.ts'
 
-/** Bump when the build's rules change what the same inputs produce. */
-export const BUILD_RULES_VERSION = 1
 export const ARTIFACT_FORMAT = 1
 
 const id = z.uuid()
@@ -118,12 +115,13 @@ export function canonicalJson(value: unknown): string {
   )
 }
 
-/** A hash of the source pins and the own-layer content (food-knowledge-base.md section 8). */
-export function computeKbVersion(pins: SourcePins, own: OwnLayer): string {
-  return createHash('sha256')
-    .update(canonicalJson({ rules: BUILD_RULES_VERSION, pins, own }))
-    .digest('hex')
-    .slice(0, 16)
+/**
+ * A hash of the artifact body without its version field. Whatever the build
+ * emits changes the version, so a rule change cannot leave a stale KB loaded
+ * (food-knowledge-base.md section 8).
+ */
+export function computeKbVersion(body: Omit<Artifact, 'kbVersion'>): string {
+  return createHash('sha256').update(canonicalJson(body)).digest('hex').slice(0, 16)
 }
 
 /** Gzip carries no timestamp from Node, so equal artifacts are equal bytes. */
