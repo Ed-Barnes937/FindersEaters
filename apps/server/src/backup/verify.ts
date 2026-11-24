@@ -18,6 +18,7 @@ import {
   checkDatabase,
   connect,
   migrationHistory,
+  sql,
   rowCounts,
   shippedMigrations,
   type AppliedMigration,
@@ -25,6 +26,7 @@ import {
   type RowCounts,
 } from '@finders-eaters/db'
 
+import { loadedKbVersion } from '@finders-eaters/kb'
 import { release } from '../release.ts'
 
 /** `manifest/latest.json`: the last verified backup. */
@@ -40,7 +42,7 @@ export interface BackupManifest {
   rowCounts: RowCounts
   /** The dump's migration history: how many, and the last one's hash. */
   migrations: { applied: number; head: string | null }
-  /** The loaded knowledge base version (`ops.meta`); null until the KB load lands. */
+  /** The knowledge base version the dump carries (`ops.meta`); null before the first KB load. */
   kbVersion: string | null
 }
 
@@ -72,6 +74,7 @@ export async function verifyRestore(input: VerifyRestoreInput): Promise<BackupMa
   const restoredState = await withDb(restoredUrl, async (db) => ({
     counts: await rowCounts(db),
     history: await migrationHistory(db),
+    kbVersion: await restoredKbVersion(db),
   }))
   const sourceHistory = await withDb(sourceUrl, migrationHistory)
   log(`verify: restored ${describeCounts(restoredState.counts)}`)
@@ -113,8 +116,19 @@ export async function verifyRestore(input: VerifyRestoreInput): Promise<BackupMa
       applied: restoredState.history.length,
       head: restoredState.history.at(-1)?.hash ?? null,
     },
-    kbVersion: null,
+    kbVersion: restoredState.kbVersion,
   }
+}
+
+/**
+ * The KB version the dump carries. A dump from before the KB tables existed has
+ * no `ops.meta`, so it reports null rather than failing the verify.
+ */
+async function restoredKbVersion(db: Db): Promise<string | null> {
+  const found = await db.execute<{ present: boolean }>(
+    sql`select to_regclass('ops.meta') is not null as present`,
+  )
+  return found.rows[0]?.present ? loadedKbVersion(db) : null
 }
 
 function checkCounts(counts: RowCounts, previous: BackupManifest | null): string[] {

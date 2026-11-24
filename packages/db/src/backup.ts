@@ -28,6 +28,21 @@ export const BACKUP_TABLES = {
   'public.account': 'counted',
   'public.session': 'not-durable',
   'public.verification': 'not-durable',
+  // The KB is a build artifact, rebuilt by the release step (food-knowledge-base.md
+  // section 1); its tables are dumped with the rest but never counted.
+  'kb.ingredient': 'not-durable',
+  'kb.ingredient_slug_alias': 'not-durable',
+  'kb.ingredient_name': 'not-durable',
+  'kb.ingredient_edge': 'not-durable',
+  'kb.ancestor': 'not-durable',
+  'kb.ingredient_property': 'not-durable',
+  'kb.item_weight': 'not-durable',
+  'kb.density': 'not-durable',
+  'kb.pack': 'not-durable',
+  'kb.aisle': 'not-durable',
+  'kb.protein_branch': 'not-durable',
+  // The loaded KB version and the like; reported in the manifest as `kbVersion`, not counted.
+  'ops.meta': 'not-durable',
 } as const satisfies Record<string, 'never-shrinks' | 'counted' | 'not-durable'>
 
 export type BackupTable = keyof typeof BACKUP_TABLES

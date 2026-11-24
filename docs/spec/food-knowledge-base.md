@@ -61,7 +61,7 @@ ODbL handling in V0.1:
 - **is a** edges form the **ingredient hierarchy**. `ing:` queries, protein gating, aisle inheritance and the ancestor closure follow only these. `ing:chicken` must not match a recipe that only uses chicken stock.
 - **made from** edges are followed only by dietary derivation, so chicken stock stays non-vegetarian without hand-setting it.
 
-The classification is a rule plus own-layer overrides: an edge is "is a" by default, and the build flags candidates for "made from" (the child's name contains broth, stock, sauce, paste, extract, oil of, flavouring, juice or powder of the parent's name, or the child sits in a different food group). An agent reviews the flagged list, and the result is recorded as own-layer edge reclassifications.
+The classification is a rule plus own-layer overrides: an edge is "is a" by default, and the build flags candidates for "made from" (the child's name contains broth, stock, sauce, paste, extract, oil of, flavouring, juice or powder of the parent's name, or the child sits in a different food group, a rule deferred: the V0.1 build does not apply the food-group part). An agent reviews the flagged list, and the result is recorded as own-layer edge reclassifications.
 
 **Own-layer children inside the OFF tree.** UK flour types (plain, self-raising, strong, cake) go under wheat flour. Ground and whole forms go under each spice. Missing entries (chilli flakes, oyster sauce, choy sum, saffron, bicarbonate of soda, beef cuts, UK prepared products such as stock cubes, naan and curry pastes) are own-layer ingredients with an OFF parent where one fits.
 
@@ -129,7 +129,7 @@ There are **no household-created ingredients** in V0.1. A user fixes a wrong or 
 
 ## 8. Updates and re-resolution
 
-- **Building.** `kb build` downloads the pinned sources (checksums verified), applies the own layer, runs validation, and produces the `kb` tables plus a **KB version** (a hash of the source pins and the own-layer content).
+- **Building.** `kb build` downloads the pinned sources (checksums verified), applies the own layer, runs validation, and produces the `kb` tables plus a **KB version** (a hash of the artifact's content, so any change to the sources, the own layer or the build's rules changes it).
 - **Validation** fails the build when: a slug is duplicated; an own-layer row references a missing OFF id; the "is a" graph has a cycle; a referenced ingredient would vanish without a `replaced_by`; or a golden-set resolution expectation breaks, including one check for each known UK clash (tomato purée is concentrate, not passata; cornflour is corn starch, not maize flour).
 - **Upgrading a source** means bumping its pin in a pull request. The build prints a diff report (added, retired, renamed, reparented, property and measure changes) for owner review.
 - **Loading.** On deploy, the release command loads the knowledge base when the KB version has changed, in the same transaction pattern as migrations. Loading is idempotent.

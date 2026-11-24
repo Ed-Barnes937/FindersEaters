@@ -1,0 +1,10 @@
+# UK names ahead of OFF's. These are the two known UK clashes (seed-coverage.md):
+# OFF's "tomato purée" is passata and its "cornflour" is maize flour.
+- ingredient: tomato-concentrate
+  lang: en-gb
+  display_name: Tomato purée
+  names: [tomato puree, tomato purée]
+- ingredient: corn-starch
+  lang: en-gb
+  display_name: Cornflour
+  names: [cornflour]

@@ -1,0 +1,13 @@
+# Direct values, set on high branches; they inherit down "is a" and "made from" at read time.
+- ingredient: meat
+  properties:
+    contains_meat_poultry: 'yes'
+- ingredient: wheat-flour
+  properties:
+    contains_gluten: 'yes'
+- ingredient: milk
+  properties:
+    contains_milk: 'yes'
+- ingredient: egg
+  properties:
+    contains_egg: 'yes'

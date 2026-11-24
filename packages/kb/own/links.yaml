@@ -1,0 +1,4 @@
+# Intake24 food code and USDA FDC id per ingredient slug; unlinked ingredients get no source measures.
+- ingredient: onion
+  intake24: ONNS
+  usda: '170000'

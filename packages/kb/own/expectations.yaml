@@ -1,0 +1,7 @@
+# Known UK clashes: validation fails the build if these stop resolving as written.
+- name: tomato purée
+  slug: tomato-concentrate
+- name: tomato puree
+  slug: tomato-concentrate
+- name: cornflour
+  slug: corn-starch

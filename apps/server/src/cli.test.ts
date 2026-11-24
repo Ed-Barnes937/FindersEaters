@@ -5,6 +5,12 @@ import { execFile } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { connect, eq, KB_VERSION_KEY, meta } from '@finders-eaters/db'
+import { buildArtifact, decodeArtifact, encodeArtifact } from '@finders-eaters/kb'
+import { fixtureInputs, ownFiles } from '@finders-eaters/kb/testing'
 import { createEmptyDatabase, migrationCount, type EmptyDatabase } from '@finders-eaters/db/testing'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
@@ -25,7 +31,8 @@ interface Run {
 async function run(args: string[], env: Record<string, string>): Promise<Run> {
   try {
     const { stdout, stderr } = await promisify(execFile)('node', [cli, ...args], {
-      env: { PATH: process.env.PATH, ...env },
+      // KB_ARTIFACT is the fixture artifact built by ./kb-test-setup.ts.
+      env: { PATH: process.env.PATH, KB_ARTIFACT: process.env.KB_ARTIFACT, ...env },
     })
     return { code: 0, stdout, stderr }
   } catch (error) {
@@ -45,13 +52,13 @@ afterEach(async () => {
 })
 
 describe('cli.ts release', { timeout: childProcessTimeout }, () => {
-  it('migrates an empty database, runs the KB and projection hooks, then reports staleness', async () => {
+  it('migrates an empty database, loads the KB, runs the projection hook, then reports staleness', async () => {
     const result = await run(['release'], { DATABASE_URL_DIRECT: database.url })
 
     expect(result).toMatchObject({ code: 0, stderr: '' })
     expect(result.stdout.trim().split('\n')).toEqual([
       `release: migrate: ${migrationCount()} migrations applied in total`,
-      'release: knowledge base: skipped (no KB artifact in this build yet)',
+      expect.stringMatching(/^release: knowledge base: loaded [0-9a-f]{16} \(\d+ ingredients\)/),
       'release: projections: skipped (no projections in this build yet)',
       'release: staleness: no recipes in this build yet',
       'release: done',
@@ -65,6 +72,45 @@ describe('cli.ts release', { timeout: childProcessTimeout }, () => {
     expect(second.code).toBe(0)
     expect(second.stdout).toContain(
       `release: migrate: ${migrationCount()} migrations applied in total`,
+    )
+    expect(second.stdout).toMatch(/release: knowledge base: [0-9a-f]{16} already loaded/)
+  })
+
+  it('loads the KB only on a version change, and records it in ops.meta', async () => {
+    await run(['release'], { DATABASE_URL_DIRECT: database.url })
+    const { db, close } = connect(database.url, { max: 1 })
+    try {
+      const [row] = await db.select().from(meta).where(eq(meta.key, KB_VERSION_KEY))
+      expect(row?.value).toBe(decodeArtifact(await readFile(process.env.KB_ARTIFACT!)).kbVersion)
+
+      // A new artifact version is loaded; the old rows are replaced, not truncated.
+      const changed = buildArtifact(
+        fixtureInputs({ ...ownFiles, 'aisles.yaml': '- ingredient: vegetable\n  aisle: produce' }),
+      )
+      const path = join(await mkdtemp(join(tmpdir(), 'fe-kb-v2-')), 'kb.json.gz')
+      await writeFile(path, encodeArtifact(changed))
+      const second = await run(['release'], {
+        DATABASE_URL_DIRECT: database.url,
+        KB_ARTIFACT: path,
+      })
+
+      expect(second.stdout).toContain(`knowledge base: loaded ${changed.kbVersion}`)
+      const [after] = await db.select().from(meta).where(eq(meta.key, KB_VERSION_KEY))
+      expect(after?.value).toBe(changed.kbVersion)
+    } finally {
+      await close()
+    }
+  })
+
+  it('fails the release when the KB artifact is missing, so the deploy aborts', async () => {
+    const result = await run(['release'], {
+      DATABASE_URL_DIRECT: database.url,
+      KB_ARTIFACT: '/nonexistent/kb.json.gz',
+    })
+
+    expect(result.code).toBe(1)
+    expect(result.stderr).toContain(
+      'release failed at knowledge base: no KB artifact at /nonexistent/kb.json.gz',
     )
   })
 

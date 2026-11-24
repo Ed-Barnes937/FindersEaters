@@ -44,6 +44,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # The e2e web server runs the release step, which loads the KB artifact.
+      - uses: ./.github/actions/build-kb
+
       - uses: pnpm/action-setup@v6 # version comes from package.json packageManager
 
       - uses: actions/setup-node@v7
@@ -110,6 +113,9 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
+
+      # The Dockerfile copies the KB artifact into the image and fails without it.
+      - uses: ./.github/actions/build-kb
 
       - name: Fly configs agree with the spec and each other
         run: python3 scripts/check-fly-configs.py

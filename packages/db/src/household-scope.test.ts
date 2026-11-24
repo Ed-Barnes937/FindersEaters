@@ -41,6 +41,18 @@ const notHouseholdOwned: Record<string, string> = {
   'public.session': "Better Auth's; a user's signed-in devices, reached only through user.",
   'public.account': "Better Auth's; a user's credentials, reached only through user.",
   'public.verification': "Better Auth's; short-lived values keyed by identifier, not by owner.",
+  'kb.aisle': 'The shared food knowledge base; no household owner.',
+  'kb.ancestor': 'The shared food knowledge base; no household owner.',
+  'kb.density': 'The shared food knowledge base; no household owner.',
+  'kb.ingredient': 'The shared food knowledge base; no household owner.',
+  'kb.ingredient_edge': 'The shared food knowledge base; no household owner.',
+  'kb.ingredient_name': 'The shared food knowledge base; no household owner.',
+  'kb.ingredient_property': 'The shared food knowledge base; no household owner.',
+  'kb.ingredient_slug_alias': 'The shared food knowledge base; no household owner.',
+  'kb.item_weight': 'The shared food knowledge base; no household owner.',
+  'kb.pack': 'The shared food knowledge base; no household owner.',
+  'kb.protein_branch': 'The shared food knowledge base; no household owner.',
+  'ops.meta': 'Deployment state, such as the loaded KB version.',
 }
 
 describe('household scope', () => {

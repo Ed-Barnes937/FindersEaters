@@ -2,7 +2,7 @@
 // (docs/spec/data-model.md). Test helpers live in `@finders-eaters/db/testing`.
 export * from './schema/index.ts'
 // The query operators callers need, from the one drizzle-orm this package pins.
-export { and, eq, sql } from 'drizzle-orm'
+export { and, eq, inArray, sql } from 'drizzle-orm'
 export { createdAt, id, instant, newId } from './schema/columns.ts'
 export { connect, type Database, type Db } from './client.ts'
 export {

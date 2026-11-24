@@ -35,7 +35,8 @@ interface Run {
 async function run(args: string[], env: Record<string, string> = {}): Promise<Run> {
   try {
     const { stdout, stderr } = await promisify(execFile)('node', [cli, ...args], {
-      env: { PATH: process.env.PATH, ...env },
+      // KB_ARTIFACT is the fixture artifact built by ./kb-test-setup.ts.
+      env: { PATH: process.env.PATH, KB_ARTIFACT: process.env.KB_ARTIFACT, ...env },
     })
     return { code: 0, stdout, stderr }
   } catch (error) {
