@@ -43,6 +43,10 @@ describe('segment: structure by rule', () => {
     expect((await lineOf(text)).split).toEqual({ source: null, value: null })
   })
 
+  it('does not see a fraction as a split point', async () => {
+    expect((await lineOf('1½ tsp ground cumin')).split).toEqual({ source: 'rule', value: 'single' })
+  })
+
   it('does not see a split word inside another word', async () => {
     expect((await lineOf('1 tbsp brandy')).split).toEqual({ source: 'rule', value: 'single' })
   })

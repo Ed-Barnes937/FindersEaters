@@ -31,7 +31,12 @@ export function splitPoints(text: string, rules: SegmentRules): [number, number]
   }
   for (const mark of rules.splitMarks) {
     for (const match of lower.matchAll(new RegExp(escape(mark), 'g'))) {
-      points.push([match.index, match.index + mark.length])
+      // Normalise writes fractions as n/d: a slash between digits is a number, not a split.
+      const isFraction =
+        mark === '/' &&
+        /\d/.test(lower[match.index - 1] ?? '') &&
+        /\d/.test(lower[match.index + 1] ?? '')
+      if (!isFraction) points.push([match.index, match.index + mark.length])
     }
   }
   return points.sort((a, b) => a[0] - b[0])
