@@ -58,6 +58,18 @@ Before the first `pnpm e2e`, install the browser once: `pnpm --filter @finders-e
 
 CI (`.github/workflows/ci.yml`) runs all of these on every PR to `develop` and `main`. Retries are 0: a flaky test is a bug to fix, never to re-run.
 
+## PWA and offline
+
+The web app is an installable PWA (`apps/web/manifest.ts`, service worker in `apps/web/src/sw/sw.ts`, queue in `apps/web/src/offline/`). The service worker only runs in the production build. Placeholder icons live in `apps/web/public/icons/` (replace before go-live).
+
+**Manual check: a new service worker waits and activates on next launch, never mid-session** (no automated test: it needs two builds served in turn). The build never calls `skipWaiting()` or `clients.claim()` (`apps/web/e2e/offline.spec.ts` guards that in `sw.js`).
+
+1. `pnpm build`, serve it (see Run), open the app in Chrome and reload once so a worker controls the page. DevTools > Application > Service Workers shows it "activated and is running".
+2. Change something in `apps/web/src`, `pnpm build` again, and reload the tab. DevTools shows a second worker "waiting to activate"; the page still runs the old build.
+3. Reload as often as you like: it keeps waiting. Close every tab of the app (or, installed, swipe it away) and open it again: the new worker is now active and the new build runs.
+
+Lighthouse installability (DevTools > Lighthouse > PWA, on the production build over `http://localhost` or the staging URL) is a manual check too.
+
 ## Branch
 
 Gitflow. `develop` is the default branch and the target for every code PR.

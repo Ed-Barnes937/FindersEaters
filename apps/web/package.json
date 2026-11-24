@@ -7,15 +7,20 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "e2e": "playwright test"
+    "typecheck": "tsc --noEmit && tsc -p src/sw --noEmit",
+    "e2e": "playwright test",
+    "test": "vitest run"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "@tanstack/react-query": "^5.104.4",
+    "@tanstack/react-query-persist-client": "^5.104.4",
     "@tanstack/react-router": "^1.170.45",
+    "idb-keyval": "^6.3.0",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "workbox-precaching": "^7.4.1",
+    "workbox-routing": "^7.4.1"
   },
   "devDependencies": {
     "@finders-eaters/config": "workspace:*",
@@ -27,8 +32,13 @@
     "@vitejs/plugin-react": "^6.1.2",
     "eslint": "^10.13.0",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "fake-indexeddb": "^6.2.8",
+    "jsdom": "^31.0.1",
     "sass-embedded": "^1.105.2",
     "typescript": "~6.0.3",
-    "vite": "^8.3.4"
+    "vite": "^8.3.4",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.0.5",
+    "workbox-build": "^7.4.1"
   }
 }
