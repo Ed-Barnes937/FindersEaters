@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { defaultConfig, originalSpan, run, type ClefClient, type Line } from './index.ts'
+import { defaultConfig, originalSpan, run, type ClefClient, type Line } from '../index.ts'
 
 const unavailableClef: ClefClient = { ask: () => Promise.reject(new Error('Clef unavailable')) }
 

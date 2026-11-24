@@ -19,4 +19,4 @@ export {
 } from './clef.ts'
 export * from './output.ts'
 export { SourceDocument, SourceLine } from './source.ts'
-export { originalSpan } from './normalise.ts'
+export { originalSpan } from './stages/normalise.ts'
