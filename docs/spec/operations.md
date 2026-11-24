@@ -147,7 +147,7 @@ This is the restore drill on the real provider: if a production backup cannot be
 
 **The refresh is a precondition of the production deploy**, enforced, not only a checklist item: the production deploy job stops unless a run of the staging refresh workflow on `develop`, at a commit with the same git tree as the `main` commit being deployed, both restored the backup and redeployed staging (a run that was switched off or skipped the redeploy does not count). Docs committed straight to `main` must be merged into `develop` before the refresh, or no `develop` commit has the release's tree. The workflow is inert until the owner sets `STAGING_REFRESH_ENABLED=true` (and staging deploys are on).
 
-**Release checklist** (in the release PR template): CI green; staging refreshed and deployed; the staging batch re-parse report (section 7) reviewed if the release changes the engine or KB version; then the owner merges.
+**Release checklist** (in the release PR template, `.github/PULL_REQUEST_TEMPLATE/release.md`, opened with `?template=release.md`): CI green; staging refreshed and deployed; the staging batch re-parse report (section 7) reviewed if the release changes the engine or KB version; then the owner merges.
 
 ## 7. Batch re-parse runbook
 
