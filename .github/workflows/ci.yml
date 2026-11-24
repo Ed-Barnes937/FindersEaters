@@ -44,6 +44,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # The e2e web server runs the release step, which loads the KB artifact.
+      - uses: ./.github/actions/build-kb
+
       - uses: pnpm/action-setup@v6 # version comes from package.json packageManager
 
       - uses: actions/setup-node@v7
