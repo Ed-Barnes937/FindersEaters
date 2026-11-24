@@ -19,4 +19,5 @@ export {
 } from './clef.ts'
 export * from './output.ts'
 export { SourceDocument, SourceLine } from './source.ts'
+export { lineHash, Pin } from './pins.ts'
 export { originalSpan } from './stages/normalise.ts'

@@ -18,6 +18,7 @@ import {
   type Line,
   type Part,
 } from './output.ts'
+import { indexPins, type LinePins, type Pin } from './pins.ts'
 import type { SourceDocument } from './source.ts'
 import { kindByRule } from './stages/classify.ts'
 import { normalise, type Normalised } from './stages/normalise.ts'
@@ -63,11 +64,14 @@ type LineAnswers = Partial<{
  */
 export async function run(
   input: SourceDocument,
-  _pins: unknown[],
+  pins: Pin[],
   deps: EngineDeps,
 ): Promise<EngineOutput> {
   const { config } = deps
-  const drafts = input.ingredientLines.map((line, index) => draftLine(line, index, config))
+  const pinned = indexPins(input, pins)
+  const drafts = input.ingredientLines.map((line, index) =>
+    draftLine(line, index, pinned.lines[index]!, config),
+  )
   const answers = await askClef(drafts, deps.clef, config)
   const flags: Flag[] = []
   const lines = drafts.map((draft) => {
@@ -75,6 +79,8 @@ export async function run(
     if (answers) flags.push(...decided.flags)
     return decided.line
   })
+  // A partial run raises no line flags: the recipe shows "still being read" instead.
+  if (answers) flags.push(...pinned.orphaned)
   return {
     engineVersion: engineVersion(config),
     kbVersion: deps.kb.version,
@@ -130,18 +136,23 @@ export async function run(
 function draftLine(
   line: SourceDocument['ingredientLines'][number],
   index: number,
+  pins: LinePins,
   config: EngineConfig,
 ): Draft {
   const { rules } = config
   const normalised = normalise(line.text)
-  const settle = <T>(value: T | null): Settled<T> | null =>
-    value === null ? null : { source: 'rule', value }
+  // Pin, then rule: a rung runs only if the one above left the value open.
+  const settle = <T>(pin: T | undefined, rule: () => T | null): Settled<T> | null => {
+    if (pin !== undefined) return { source: 'correction', value: pin }
+    const value = rule()
+    return value === null ? null : { source: 'rule', value }
+  }
 
-  const role = settle(roleByRule(line, normalised.text, rules.segment))
-  const split = settle<Split>(
+  const role = settle(pins.role, () => roleByRule(line, normalised.text, rules.segment))
+  const split = settle<Split>(pins.split, () =>
     splitPoints(normalised.text, rules.segment).length === 0 ? 'single' : null,
   )
-  const kind = settle(kindByRule(normalised.text, rules.classify))
+  const kind = settle(pins.kind.get(0), () => kindByRule(normalised.text, rules.classify))
 
   const mayBeIngredientLine = role === null || role.value === 'ingredient'
   const ask: LineQuestion[] = []
