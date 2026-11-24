@@ -17,6 +17,8 @@ export interface OfflineClientOptions {
   dbName: string
   /** Persistable mutations by name. */
   mutations: Record<string, MutationFn>
+  /** Backoff before retry `attempt` (0-based); tests shrink it. */
+  retryDelay?: (attempt: number) => number
 }
 
 export interface OfflineClient {
@@ -26,6 +28,17 @@ export interface OfflineClient {
 
 /** Persisted state older than this is dropped on restore, queue included. */
 export const PERSIST_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
+
+const MAX_RETRIES = 3
+
+/** Network errors and 5xx are worth another try; a 4xx will not change. */
+function shouldRetry(failureCount: number, error: unknown): boolean {
+  if (failureCount >= MAX_RETRIES) return false
+  const status = (error as { status?: unknown } | null)?.status
+  return !(typeof status === 'number' && status >= 400 && status < 500)
+}
+
+const defaultRetryDelay = (attempt: number) => Math.min(1000 * 2 ** attempt, 30_000)
 
 const RECORD_KEY = 'client'
 
@@ -38,7 +51,11 @@ function idbPersister(dbName: string): Persister {
   }
 }
 
-export function createOfflineClient({ dbName, mutations }: OfflineClientOptions): OfflineClient {
+export function createOfflineClient({
+  dbName,
+  mutations,
+  retryDelay = defaultRetryDelay,
+}: OfflineClientOptions): OfflineClient {
   // TanStack assumes online until the first online/offline event, so an app
   // launched offline would retry its restored queue into a dead network and
   // drop it. Start from what the browser says.
@@ -46,7 +63,12 @@ export function createOfflineClient({ dbName, mutations }: OfflineClientOptions)
   const queryClient = new QueryClient({
     // gcTime must outlive the persisted max age or restored entries are
     // collected straight away.
-    defaultOptions: { queries: { gcTime: PERSIST_MAX_AGE_MS } },
+    // Mutations keep networkMode 'online': a retry that finds the network gone
+    // pauses again instead of failing, so the queued change is not dropped.
+    defaultOptions: {
+      queries: { gcTime: PERSIST_MAX_AGE_MS },
+      mutations: { retry: shouldRetry, retryDelay },
+    },
   })
   for (const [name, mutationFn] of Object.entries(mutations)) {
     queryClient.setMutationDefaults([name], { mutationFn })

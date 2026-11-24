@@ -14,24 +14,32 @@ async function visitUnderServiceWorker(page: Page, path = '/') {
 
 /** The persisted queue as the next page load would find it. */
 function persistedMutations(page: Page) {
-  return page.evaluate(
-    () =>
-      new Promise<number>((resolve, reject) => {
-        const open = indexedDB.open('finders-eaters')
-        open.onerror = () => reject(new Error('indexedDB open failed'))
-        open.onsuccess = () => {
-          const db = open.result
-          if (!db.objectStoreNames.contains('query-cache')) return resolve(0)
-          const req = db.transaction('query-cache').objectStore('query-cache').get('client')
-          req.onerror = () => reject(new Error('indexedDB read failed'))
-          req.onsuccess = () => {
-            db.close()
-            const record = req.result as { clientState?: { mutations?: unknown[] } } | undefined
-            resolve(record?.clientState?.mutations?.length ?? 0)
-          }
+  return page.evaluate(async () => {
+    // Do not create the database by looking for it.
+    const databases = await indexedDB.databases()
+    if (!databases.some((d) => d.name === 'finders-eaters')) return 0
+    return new Promise<number>((resolve, reject) => {
+      const open = indexedDB.open('finders-eaters')
+      open.onerror = () => reject(new Error('indexedDB open failed'))
+      open.onsuccess = () => {
+        const db = open.result
+        if (!db.objectStoreNames.contains('query-cache')) {
+          db.close()
+          return resolve(0)
         }
-      }),
-  )
+        const req = db.transaction('query-cache').objectStore('query-cache').get('client')
+        req.onerror = () => {
+          db.close()
+          reject(new Error('indexedDB read failed'))
+        }
+        req.onsuccess = () => {
+          db.close()
+          const record = req.result as { clientState?: { mutations?: unknown[] } } | undefined
+          resolve(record?.clientState?.mutations?.length ?? 0)
+        }
+      }
+    })
+  })
 }
 
 test('the manifest makes the app installable and standalone', async ({ page, request }) => {

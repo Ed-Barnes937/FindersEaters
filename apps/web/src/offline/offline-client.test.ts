@@ -19,14 +19,17 @@ beforeEach(() => {
 })
 
 /** The app as main.tsx wires it: restore, then persist every change. */
-async function app(name: string) {
+async function app(name: string, probe?: (vars: unknown) => Promise<unknown>) {
   const client = createOfflineClient({
     dbName: name,
+    retryDelay: () => 1, // a tiny backoff so the retry test is quick
     mutations: {
-      probe: (vars) => {
-        sent.push(vars)
-        return Promise.resolve()
-      },
+      probe:
+        probe ??
+        ((vars) => {
+          sent.push(vars)
+          return Promise.resolve()
+        }),
     },
   })
   const [stopPersisting, restored] = persistQueryClient({ ...client, maxAge: PERSIST_MAX_AGE_MS })
@@ -70,6 +73,40 @@ describe('offline mutation queue', () => {
     await second.queryClient.resumePausedMutations()
 
     expect(sent).toEqual([{ n: 2 }])
+  })
+})
+
+describe('replay failures', () => {
+  it('keeps a queued mutation when the first replay hits a network error, and sends it once on retry', async () => {
+    let attempts = 0
+    const { queryClient, persister } = await app('e', (vars) => {
+      attempts++
+      if (attempts === 1) return Promise.reject(new TypeError('Failed to fetch'))
+      sent.push(vars)
+      return Promise.resolve()
+    })
+
+    void queryClient.getMutationCache().build(queryClient, { mutationKey: KEY }).execute({ n: 3 })
+
+    await vi.waitFor(() => expect(sent).toEqual([{ n: 3 }]))
+    expect(attempts).toBe(2)
+    await vi.waitFor(async () =>
+      expect((await persister.restoreClient())?.clientState.mutations ?? []).toHaveLength(0),
+    )
+  })
+
+  it('does not retry a 4xx', async () => {
+    let attempts = 0
+    const { queryClient } = await app('f', () => {
+      attempts++
+      return Promise.reject(Object.assign(new Error('Bad Request'), { status: 400 }))
+    })
+    await queryClient
+      .getMutationCache()
+      .build(queryClient, { mutationKey: KEY })
+      .execute({})
+      .catch(() => undefined)
+    expect(attempts).toBe(1)
   })
 })
 

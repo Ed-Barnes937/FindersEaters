@@ -16,7 +16,8 @@ if (!root) throw new Error('missing #root element')
 
 const offline = createOfflineClient({ dbName: 'finders-eaters', mutations })
 
-// The end-to-end test drives the offline queue through this handle (no screen
+// TEST SEAM: remove this together with offline-probe once a real screen has
+// a mutation. The end-to-end test drives the offline queue through this handle (no screen
 // has a mutation yet); it grants nothing the page's own script does not have.
 ;(window as unknown as { __fe: unknown }).__fe = { queryClient: offline.queryClient }
 
