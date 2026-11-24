@@ -26,7 +26,7 @@ export function choiceQuestion(template: ChoiceTemplate): ClefQuestion {
   return { type: 'choice', instructions: template.instructions, criteria: { ...template.criteria } }
 }
 
-/** Thrown when an answer is not one the engine can use; the run then goes partial. */
+/** Clef failed or gave an answer the engine cannot use; the run then goes partial. */
 export class UnusableAnswer extends Error {}
 
 /**

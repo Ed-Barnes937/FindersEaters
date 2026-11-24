@@ -5,6 +5,7 @@ import {
   modelDecision,
   reviewFlag,
   unknownDecision,
+  UnusableAnswer,
   type Decided,
   type ModelDecision,
   type Settled,
@@ -182,7 +183,9 @@ async function askClef(
         for (const id of draft.ask) questions[id] = choiceQuestion(framing.questions[id])
         // The v2 framing's state is the line as captured (the spike sent the raw line).
         const request: ClefRequest = { state: { line: draft.original }, questions }
-        const raw = await clef.ask(request)
+        const raw = await clef.ask(request).catch((error: unknown) => {
+          throw new UnusableAnswer('Clef is unavailable', { cause: error })
+        })
         const answers: LineAnswers = {}
         for (const id of draft.ask) {
           // Each id is typed by its own options; the switch keeps that link.
@@ -201,8 +204,10 @@ async function askClef(
         return answers
       }),
     )
-  } catch {
-    return null
+  } catch (error) {
+    // Clef down or an answer the engine cannot use: partial. Anything else is a bug.
+    if (error instanceof UnusableAnswer) return null
+    throw error
   }
 }
 
